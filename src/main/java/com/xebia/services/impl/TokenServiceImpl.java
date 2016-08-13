@@ -28,9 +28,12 @@ public class TokenServiceImpl implements ITokenService {
     @Override
     public void validateToken(String token, String userName, String ipAddr) throws AuthenticationException {
         User user = userDAO.getUserByUNameTkn(userName, token);
+        if(user == null){
+            throw new AuthenticationException("UserNotFound!");
+        }
         String password = decodeToken(userName+ipAddr, token);
         if (!password.equals(user.getPassword())) {
-            throw new AuthenticationException("Malfunctioned Token Recieved !");
+            throw new AuthenticationException("MalfunctionedTokenRecieved !");
         }
     }
 

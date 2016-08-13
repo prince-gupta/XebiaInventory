@@ -38,6 +38,10 @@ public class AssetDto {
 
     private BigInteger hardwareConfiguration;
 
+    private String employeeName;
+
+    private String userName;
+
     public BigInteger getAssetId() {
         return assetId;
     }
@@ -157,4 +161,21 @@ public class AssetDto {
     public void setHardwareConfiguration(BigInteger hardwareConfiguration) {
         this.hardwareConfiguration = hardwareConfiguration;
     }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 }
+

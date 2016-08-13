@@ -1,11 +1,15 @@
 package com.xebia.services;
 
 import com.xebia.dto.AssetDto;
+import com.xebia.dto.AssetHistoryDTO;
 import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.*;
+import com.xebia.exception.ApplicationException;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Pgupta on 24-07-2016.
@@ -14,7 +18,7 @@ public interface IAssetService {
 
     public String createAssetType(AssetType assetType);
 
-    public List<AssetTypeDto> getAllAssetType();
+    public Map<String,List<AssetTypeDto>> getAllAssetType();
 
     public String deleteAssetType(String id);
 
@@ -42,7 +46,7 @@ public interface IAssetService {
 
     public List<AssetManufacturer> getAllAssetManufacturer();
 
-    public String deleteAssetManufacturer(String id);
+    public void deleteAssetManufacturer(String id) throws ApplicationException;
 
     public String updateAssetManufacturer(AssetManufacturer assetManufacturer);
 
@@ -52,5 +56,11 @@ public interface IAssetService {
 
     public String updateHardwareConfig(HardwareConfiguration hardwareConfiguration);
 
-    public List<AssetHistory> getAssetsHistory (BigInteger employeeId);
+    public void deleteHardwareConfig(String id) throws ApplicationException;
+
+    public List<AssetHistoryDTO> getAssetsHistory (BigInteger employeeId);
+
+    public List<AssetDto> getExpirationReportForDashboard();
+
+    public File getEmployeeAssetsFileParam(BigInteger employeeId, String userName);
 }

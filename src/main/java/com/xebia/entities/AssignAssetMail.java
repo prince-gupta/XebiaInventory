@@ -46,8 +46,14 @@ public class AssignAssetMail implements Serializable {
     @Transient
     private Date dateTillValid;
 
+    @Transient
+    private Date dateofReturned;
+
     @Column(name="asset_status")
     private String assetStatus;
+
+    @Column(name="updated_on")
+    private Date updatedDate;
 
 	public AssignAssetMail() {
 	}
@@ -114,5 +120,21 @@ public class AssignAssetMail implements Serializable {
 
     public void setAssetStatus(String assetStatus) {
         this.assetStatus = assetStatus;
+    }
+
+    public Date getDateofReturned() {
+        return dateofReturned;
+    }
+
+    public void setDateofReturned(Date dateofReturned) {
+        this.dateofReturned = dateofReturned;
+    }
+
+    public Date getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(Date updatedDate) {
+        this.updatedDate = updatedDate;
     }
 }

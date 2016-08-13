@@ -53,17 +53,35 @@ public class JMSMailServiceImpl implements JMSMailService {
                         e.getAssetStatus().equals(AssetStatus.ISSUED.getValue()))
                 .collect(Collectors.toList());
 
-        List<AssignAssetMail> unsentExpireAssetMails = unsentMails
+        List<AssignAssetMail> unsentExpiringAssetMails = unsentMails
+                .stream()
+                .filter(e ->
+                        e.getAssetStatus().equals(AssetStatus.EXPIRING.getValue()))
+                .collect(Collectors.toList());
+
+        List<AssignAssetMail> unsentExpiredAssetMails = unsentMails
                 .stream()
                 .filter(e ->
                         e.getAssetStatus().equals(AssetStatus.EXPIRED.getValue()))
                 .collect(Collectors.toList());
 
+        List<AssignAssetMail> unsentReturnedAssetMails = unsentMails
+                .stream()
+                .filter(e ->
+                        e.getAssetStatus().equals(AssetStatus.RETURNED.getValue()))
+                .collect(Collectors.toList());
+
         if (unsentAssignAssetMails.size() > 0)
             template.convertAndSend("assignAssetMailQueue", unsentAssignAssetMails);
 
-        if (unsentExpireAssetMails.size() > 0)
-            template.convertAndSend("expiredAssetMailQueue", unsentExpireAssetMails);
+        if (unsentExpiringAssetMails.size() > 0)
+            template.convertAndSend("expiringAssetMailQueue", unsentExpiringAssetMails);
+
+        if(unsentExpiredAssetMails.size() > 0)
+            template.convertAndSend("expiredAssetMailQueue", unsentExpiredAssetMails);
+
+        if(unsentReturnedAssetMails.size() > 0)
+            template.convertAndSend("returnedAssetMailQueue", unsentReturnedAssetMails);
     }
 
 
@@ -81,17 +99,17 @@ public class JMSMailServiceImpl implements JMSMailService {
                 LocalDate todayDateTemp = input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate expiryDateTemp = todayDateTemp.plus(dayToExpire, ChronoUnit.DAYS);
                 Date expiryDate = Date.from(expiryDateTemp.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
                 List<AssetHistory> goingToExpireHistory = assetHistoryDAO.getGoingToExpireAssetHistory(expiryDate);
                 for (AssetHistory history : goingToExpireHistory) {
                     AssignAssetMail mailDto = new AssignAssetMail();
-                    mailDto.setAssetStatus(AssetStatus.EXPIRED.getValue());
+                    mailDto.setAssetStatus(AssetStatus.EXPIRING.getValue());
                     mailDto.setAsset(history.getAsset());
                     mailDto.setEmployee(history.getEmployee2());
                     mailDto.setApprover(history.getEmployee1());
                     mailDto.setDateTillValid(history.getValidTill());
                     mailDto.setDateOfIssue(history.getIssueDate());
                     mailDto.setStatus(MailStatus.NOT_SENT.getValue());
+                    mailDto.setUpdatedDate(new Date());
                     mailDtos.add(mailDto);
                 }
                 dayToExpire--;
@@ -99,13 +117,51 @@ public class JMSMailServiceImpl implements JMSMailService {
             template.convertAndSend("registerAssetExpiryMailQueue", mailDtos);
 
 
-        }, new CronTrigger("20 * * * * *"));
+        }, new CronTrigger("00 30 09 * * *"));
+
+    }
+
+    @PostConstruct
+    @Override
+    public void registerExpiredAssetMail() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.afterPropertiesSet();
+        scheduler.schedule(() -> {
+            Date input = new Date();
+            List<AssignAssetMail> mailDtos = new ArrayList<>();
+            LocalDate todayDateTemp = input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            Date expiryDate = Date.from(todayDateTemp.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            List<AssetHistory> expiredHistory = assetHistoryDAO.getExpiredAssetHistory(expiryDate);
+            for (AssetHistory history : expiredHistory) {
+                AssignAssetMail mailDto = new AssignAssetMail();
+                mailDto.setAssetStatus(AssetStatus.EXPIRED.getValue());
+                mailDto.setAsset(history.getAsset());
+                mailDto.setEmployee(history.getEmployee2());
+                mailDto.setApprover(history.getEmployee1());
+                mailDto.setDateTillValid(history.getValidTill());
+                mailDto.setDateOfIssue(history.getIssueDate());
+                mailDto.setStatus(MailStatus.NOT_SENT.getValue());
+                mailDtos.add(mailDto);
+                history.setStatus(AssetStatus.EXPIRED.getValue());
+                mailDto.setUpdatedDate(new Date());
+                assetHistoryDAO.update(history);
+            }
+            template.convertAndSend("registerAssetExpiredMailQueue", mailDtos);
+
+
+        }, new CronTrigger("00 30 09 * * *"));
 
     }
 
     @Override
-    public void registerMail(AssignAssetMail assignAssetMail) {
+    public void registerAssignAssetMail(AssignAssetMail assignAssetMail) {
         template.convertAndSend("registerAssignAssetMailQueue", assignAssetMail);
+    }
+
+    @Override
+    public void registerReturnedAssetMail(AssignAssetMail assignAssetMail){
+        template.convertAndSend("registerReturnedAssetMailQueue", assignAssetMail);
     }
 
 }

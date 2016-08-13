@@ -15,4 +15,8 @@ public interface IMailingService {
     public boolean sendRegisterMail(AssignAssetMail dto) throws MailException;
 
     public boolean sendAssetExpiryMail(List<AssignAssetMail> dto) throws MailException;
+
+    public boolean sendAssetExpiredMail(List<AssignAssetMail> dto) throws MailException;
+
+    public boolean sendAssetReturnedMail(AssignAssetMail dto) throws MailException;
 }

@@ -1,0 +1,362 @@
+<div ng-controller="assetController" class="container">
+<div><h1>Assets</h1></div>
+<div class="alert alert-danger fade in" ng-show=showDangerMessage>
+    <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+    <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+</div>
+<div class="alert alert-warning fade in" ng-show=showWarningMessage>
+    <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+    <strong>Oh Snap!</strong> <span>{{warningMessage}}</span>
+</div>
+<div class="alert alert-success fade in" ng-show=showSuccessMessage>
+    <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+    <strong>Success!</strong> <span>{{successMessage}}</span>
+</div>
+<script type="text/ng-template" id="typeDeleteConfirmation.html">
+    <div>Do you really want to delete ?</div>
+    <div>
+        <span class="btn btn-danger" ng-click="deleteAssetType(typeDeletePopover.id)">Yes</span>
+        <span class="btn btn-success" ng-click="hideAssetTypePopup(typeDeletePopover.id)">No</span>
+    </div>
+</script>
+<script type="text/ng-template" id="myAssetModalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Enter Asset Details</h3>
+    </div>
+    <div class="modal-body">
+        <form role="form">
+            <div class="form-group">
+                <!--<select class="form-control" id="sel1" ng-model="asset.assetType">
+                    <option ng-repeat="type in assetTypeDisplayList"  value="{{type.id}}">{{type.type}}</option>
+                </select>-->
+                <select class="form-control" ng-model="asset.assetType"
+                        ng-options="type.id as type.type for type in assetTypeDisplayList">
+                </select>
+            </div>
+            <div class="form-group">
+                <!--<select class="form-control" id="manu" ng-model="asset.assetManufacturer">
+                    <option ng-repeat="manu in manufacturerDisplayList"  value="{{manu.id}}">{{manu.name}}</option>
+                </select>-->
+                <select class="form-control" ng-model="asset.assetManufacturer"
+                        ng-options="manu.id as manu.name for manu in manufacturerDisplayList">
+                </select>
+            </div>
+            <div class="form-group">
+                <!--<select class="form-control" id="manu" ng-model="asset.assetManufacturer">
+                    <option ng-repeat="manu in manufacturerDisplayList"  value="{{manu.id}}">{{manu.name}}</option>
+                </select>-->
+                <select class="form-control" ng-model="asset.hardwareConfiguration"
+                        ng-options="hw.id as hw.label for hw in hwConfigDisplayList">
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" ng-model="asset.name">
+            </div>
+            <div class="form-group">
+                <label for="sno">Serial Number</label>
+                <input type="text" class="form-control" id="sno" ng-model="asset.serialNumber">
+            </div>
+            <label class="control-label" for="dop">Date Of Purchase</label>
+
+            <div id="dop">
+                <div>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                               ng-model="asset.dateOfPurchase" is-open="popup5.opened" datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                               placeholder="Date Of Issue"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open5()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                              </span>
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">Save</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+<script type="text/ng-template" id="ManufacturerModalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Enter Manufacturer Details</h3>
+    </div>
+    <div class="modal-body">
+        <form role="form">
+            <div class="form-group">
+                <label for="m_name">Name</label>
+                <input type="text" class="form-control" id="m_name" ng-model="newManu.name">
+            </div>
+            <div class="form-group">
+                <label for="m_add">Address</label>
+                <input type="text" class="form-control" id="m_add" ng-model="newManu.address">
+            </div>
+            <div class="form-group">
+                <label for="m_mob">Mobile</label>
+                <input type="text" class="form-control" id="m_mob" ng-model="newManu.mobile">
+            </div>
+            <div class="form-group">
+                <label for="m_email">Email</label>
+                <input type="text" class="form-control" id="m_email" ng-model="newManu.email">
+            </div>
+
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">Save</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+<script type="text/ng-template" id="HWConfigModalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Enter Hardware Details</h3>
+    </div>
+    <div class="modal-body">
+        <form role="form">
+            <div class="form-group">
+                <label for="hw_name">Name</label>
+                <input type="text" class="form-control" id="hw_name" ng-model="newHW.name">
+            </div>
+            <div class="form-group">
+                <label for="hw_cpu">CPU</label>
+                <input type="text" class="form-control" id="hw_cpu" ng-model="newHW.cpu">
+            </div>
+            <div class="form-group">
+                <label for="hw_hdd">HDD</label>
+                <input type="text" class="form-control" id="hw_hdd" ng-model="newHW.hdd">
+            </div>
+            <div class="form-group">
+                <label for="hw_ram">RAM</label>
+                <input type="text" class="form-control" id="hw_ram" ng-model="newHW.ram">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" type="button" ng-click="ok()">Save</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+<script type="text/ng-template" id="popoverInfoTemplate.html">
+    <ul class="list-group">
+        <li class="list-group-item"><i class="glyphicon glyphicon-dashboard"></i><span class="assetPopOverText"
+                >{{infoPopover.cpu}}</span></li>
+        <li class="list-group-item"><i class="glyphicon glyphicon-hdd"></i><span class="assetPopOverText"
+                >{{infoPopover.hdd}}</span></li>
+        <li class="list-group-item"><i class="glyphicon glyphicon-tasks"></i><span class="assetPopOverText"
+                >{{infoPopover.ram}}</span></li>
+    </ul>
+</script>
+<uib-tabset active="activeJustified" justified="true">
+<uib-tab index="0" heading="Assets" ng-click="fetchAllAsset()">
+    <table class="table table-hover" id="toExportTable">
+        <thead>
+        <tr>
+            <th>Asset ID</th>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Manufacturer</th>
+            <th>Serial Number</th>
+            <th>Date Of Purchase</th>
+            <th>Issued To</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="asset in assetList">
+            <td>{{asset.assetId}}</td>
+            <td>{{asset.assetType.type}}</td>
+            <td>{{asset.name}}</td>
+            <td>{{asset.assetManufacturer.name}}</td>
+            <td>{{asset.serialNumber}}</td>
+            <td>{{asset.dateOfPurchase}}</td>
+            <td>{{asset.employee.firstName}}&nbsp;{{asset.employee.lastName}}</td>
+            <td>
+                <a uib-popover-template="infoPopover.templateUrl" style="cursor: pointer"
+                   popover-title="{{infoPopover.title}}" ng-click="populateHwConfig(asset.assetId)"
+                   popover-placement="right-top">
+                    <span class="glyphicon glyphicon-info-sign"></span></a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a class="btn btn-info btn-sm" ng-click="openAddAssetWindow('lg')">
+        Add An Asset<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="exportToExcel('toExportTable','Assets','AssetsReport')">
+        Export To Excel<span class="glyphicon glyphicon-export" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="fetchAllAsset()">
+        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+    </a>
+</uib-tab>
+<uib-tab index="1" heading="Type" ng-click="fetchAllAssetType()">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Number of Assets</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="type in assetTypeList">
+            <td>{{type.id}}</td>
+            <td>
+                <div id="labelType{{$index}}">{{type.type}}</div>
+                <input style="display: none" type="text" id="editType{{$index}}" ng-model="updateAssetType.type"
+                       placeholder="{{type.type}}"></td>
+            <td>{{type.numberOfAsset}}</td>
+            <td>
+                    <span class="glyphicon glyphicon-pencil" style="cursor: pointer" ng-click="edit($index)"
+                          id="pencilType{{$index}}"></span>
+                    <span class="glyphicon glyphicon-floppy-disk" style="cursor: pointer;display: none"
+                          ng-click="done($index, type.id)" id="floppyType{{$index}}"></span>
+                    <span class="glyphicon glyphicon-minus-sign" style="cursor: pointer; display: none"
+                          ng-click="doneWithNoActio($index)" id="cancleType{{$index}}"></span>
+            </td>
+            <td>
+                <a id="assetType{{$index}}" ng-class="{disabled: (type.numberOfAsset > 0)}">
+                        <span class="glyphicon glyphicon-trash"
+                              ng-click="deleteAssetType(type.id,type.numberOfAsset)"></span></a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a class="btn btn-info btn-sm col-sm-2" ng-click="openAddTypeWindow()">
+        Add A Type<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="fetchAllAssetType()" style="margin-left: 8px;">
+        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+    </a>
+
+    <div ng-show="showTypeInput" style="margin-top: 10px;">
+        <input type="text" class="form-control " id="type" placeholder="Enter Type"
+               ng-model="assetType.type" style="
+    width: 17% !important;">
+                    <span style="display: inline-block; margin-top: 5px;">
+                        <span class="glyphicon glyphicon-floppy-disk" ng-click="saveType()"
+                              style="cursor: pointer"></span>
+                        <span class="glyphicon glyphicon-remove-sign" ng-click="closeTypeInput()"
+                              style="cursor: pointer"></span>
+                    </span>
+    </div>
+</uib-tab>
+<uib-tab index="2" heading="Manufacturers" ng-click="fetchAllManufacturer()">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr ng-repeat="manu in manufacturerList">
+            <td>{{manu.id}}</td>
+            <td>
+                <div id="labelManuName{{$index}}">{{manu.name}}</div>
+                <input style="display: none" type="text" id="editManuName{{$index}}" ng-model="updateManu.name"
+                       placeholder="{{manu.name}}"></td>
+            <td>
+                <div id="labelManuAdd{{$index}}">{{manu.address}}</div>
+                <input style="display: none" type="text" id="editManuAdd{{$index}}" ng-model="updateManu.address"
+                       placeholder="{{manu.address}}"></td>
+            <td>
+                <div id="labelManuMobile{{$index}}">{{manu.mobile}}</div>
+                <input style="display: none" type="text" id="editManuMobile{{$index}}" ng-model="updateManu.mobile"
+                       placeholder="{{manu.mobile}}"></td>
+            <td>
+                <div id="labelManuEmail{{$index}}">{{manu.email}}</div>
+                <input style="display: none" type="text" id="editManuEmail{{$index}}" ng-model="updateManu.email"
+                       placeholder="{{manu.email}}"></td>
+            <td>
+                    <span class="glyphicon glyphicon-pencil" style="cursor: pointer" ng-click="editManu($index)"
+                          id="pencilManu{{$index}}"></span>
+                    <span class="glyphicon glyphicon-floppy-disk" style="cursor: pointer; display: none"
+                          ng-click="doneManu($index, manu.id)" id="floppyManu{{$index}}"></span>
+                    <span class="glyphicon glyphicon-minus-sign" style="cursor: pointer; display: none"
+                          ng-click="doneWithNoActionManu($index)" id="cancleManu{{$index}}"></span>
+            </td>
+            <td>
+                <a id="manu{{$index}}" uib-popover-template="manuDeletePopover.templateUrl"
+                   popover-title="{{manuDeletePopover.title}}">
+                        <span class="glyphicon glyphicon-trash" style="cursor: pointer"
+                              ng-click="deleteManu(type.id)"></span></a>
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <a class="btn btn-info btn-sm" ng-click="openAddManufacturerWindow('lg')">
+        Add A Manufacturer<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="fetchAllManufacturer()">
+        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+    </a>
+</uib-tab>
+<uib-tab index="3" heading="Hardware Configurations" ng-click="fetchAllHWConfig()">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>CPU</th>
+            <th>Hardisk</th>
+            <th>RAM</th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr ng-repeat="hw in hwConfigList">
+            <td>{{hw.id}}</td>
+            <td>
+                <div id="labelHWName{{$index}}">{{hw.name}}</div>
+                <input style="display: none" type="text" id="editHWName{{$index}}" ng-model="updateHW.name"
+                       placeholder="{{hw.name}}"></td>
+            <td>
+                <div id="labelHWCPU{{$index}}">{{hw.cpu}}</div>
+                <input style="display: none" type="text" id="editHWCPU{{$index}}" ng-model="updateHW.cpu"
+                       placeholder="{{hw.cpu}}"></td>
+            <td>
+                <div id="labelHWHDD{{$index}}">{{hw.hdd}}</div>
+                <input style="display: none" type="text" id="editHWHDD{{$index}}" ng-model="updateHW.hdd"
+                       placeholder="{{hw.hdd}}"></td>
+            <td>
+                <div id="labelHWRAM{{$index}}">{{hw.ram}}</div>
+                <input style="display: none" type="text" id="editHWRAM{{$index}}" ng-model="updateHW.ram"
+                       placeholder="{{hw.ram}}"></td>
+            <td>
+                    <span class="glyphicon glyphicon-pencil" style="cursor: pointer" ng-click="editHW($index)"
+                          id="pencilHW{{$index}}"></span>
+                    <span class="glyphicon glyphicon-floppy-disk" style="cursor: pointer; display: none"
+                          ng-click="doneHW($index, hw.id)" id="floppyHW{{$index}}"></span>
+                    <span class="glyphicon glyphicon-minus-sign" style="cursor: pointer; display: none"
+                          ng-click="doneWithNoActionHW($index)" id="cancleHW{{$index}}"></span>
+            </td>
+            <td>
+                <a id="hw{{$index}}" uib-popover-template="hwDeletePopover.templateUrl"
+                   popover-title="{{hwDeletePopover.title}}">
+                        <span class="glyphicon glyphicon-trash" style="cursor: pointer"
+                              ng-click="deleteHWConfig(hw.id)"></span></a>
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <a class="btn btn-info btn-sm" ng-click="openAddHWConfigWindow('lg')">
+        Add A Harware Configuration<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="fetchAllHWConfig()">
+        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+    </a>
+</uib-tab>
+</uib-tabset>
+</div>

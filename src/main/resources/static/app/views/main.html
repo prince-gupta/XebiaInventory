@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="app" ng-controller="mainController">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Xebia Inventory Tool</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/sideBar.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.3.3/ui-bootstrap-tpls.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-cookies.js"></script>
+    <!--<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-sanitize.min.js"></script>-->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-animate.min.js"></script>
+    <!--<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular-cookies.min.js"></script>-->
+    <script src='../scripts/bower_components/bootstrap/js/modal.js'></script>
+    <script src='../scripts/main.js'></script>
+    <script src='../scripts/waitingDialog.js'></script>
+    <script src='../scripts/controllers/registerController.js'></script>
+    <script src='../scripts/controllers/assetsController.js'></script>
+    <script src='../scripts/controllers/loginController.js'></script>
+    <script src='../scripts/controllers/userController.js'></script>
+    <script src='../scripts/controllers/changePasswordController.js'></script>
+    <script src='../scripts/controllers/dashboardController.js'></script>
+    <script src="../scripts/multiselect.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../styles/google-code-prettify/prettify.css" />
+    <link rel="stylesheet" href="../styles/underConstruction.css" />
+    <link rel="stylesheet" href="../styles/cards.css" />
+
+</head>
+<body>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#undo_redo').multiselect();
+       /* $(window).click(function() {
+            closeSideBar();
+        });
+
+        $('#sidebar-wrapper').click(function(event){
+            event.stopPropagation();
+        });
+
+        $('#menu-toggle').click(function(event){
+            event.stopPropagation();
+        });*/
+    });
+
+</script>
+<header>
+    <nav class="navbar navbar-default" style="height: 78px;">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#dashboard" style="margin-left: -163px;"><img src="../images/logo.svg" class="navBar-image"></a>
+                <h5 ng-show="showPingErrMessage" style="margin-left: 160px"><small  style="color: red">{{pingErrMessage}}</small><img src="../images/radio.svg" class="waitingimg"></h5>
+                <h5 ng-show="showPingMessage" style="margin-left: 160px"><small  style="color: #009926">{{pingMessage}}</small><span class="glyphicon glyphicon-thumbs-up" style="color: green"></span></h5>
+            </div>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item"><a href="#register"><i></i>Employee Management</a></li>
+                <li class="nav-item"><a href="#assets"><i></i>Assets Management</a></li>
+                <li class="nav-item"><a href="#approvals"><i></i>Approvals<span class="badge">5</span></a></li>
+            </ul>
+            <span id="menu-toggle" onclick="openSideBar()" class="btn btn-lg toggle" style="color: #777"><i class="glyphicon glyphicon-list"></i></span>
+            <div id="sidebar-wrapper">
+                <ul class="sidebar-nav">
+                    <span id="menu-close" class="btn btn-lg pull-right toggle" onclick="closeSideBar()" style="color: white;"><i class="glyphicon glyphicon-remove"></i></span>
+                    <li class="sidebar-brand">
+                        <span>Tools</span>
+                    </li>
+                    <li>
+                        <a href="#user">User Management</a>
+                    </li>
+                    <li>
+                        <a href="#about">About</a>
+                    </li>
+                    <li>
+                        <a href="#contact">Contact</a>
+                    </li>
+                    <li>
+                        <a href="#/">Log out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<div ng-view>
+</div>
+</body>
+</html>

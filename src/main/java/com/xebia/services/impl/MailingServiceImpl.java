@@ -40,7 +40,7 @@ public class MailingServiceImpl implements IMailingService {
             MimeMessagePreparator preparator = mimeMessage -> {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setTo(dto.getEmployee().getEmail());
-                message.setSubject(environment.getProperty(Constants.MAIL_REGISTRATION_SUBJECT));
+                message.setSubject(environment.getProperty(Constants.MAIL_ASSET_ASSIGNMENT_SUBJECT));
 
                 Map model = new HashMap<>();
                 model.put("dto", dto);
@@ -79,7 +79,7 @@ public class MailingServiceImpl implements IMailingService {
             MimeMessagePreparator preparator = mimeMessage -> {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setTo(dtos.get(0).getEmployee().getEmail());
-                message.setSubject(environment.getProperty(Constants.MAIL_REGISTRATION_SUBJECT));
+                message.setSubject(environment.getProperty(Constants.MAIL_ASSET_EXPIRING_SUBJECT));
 
                 Map model = new HashMap<>();
                 model.put("dtos", dtos);
@@ -87,6 +87,51 @@ public class MailingServiceImpl implements IMailingService {
 
                 message.setText(VelocityEngineUtils.mergeTemplateIntoString(velocityEngine
                         , "asset-expiry.vm", CHARSET_UTF8, model), true);
+            };
+            this.javaMailSender.send(preparator);
+
+            return true;
+        } catch (MailException e) {
+            throw new com.xebia.exception.MailException(e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean sendAssetExpiredMail(List<AssignAssetMail> dtos) throws MailException {
+        try {
+            MimeMessagePreparator preparator = mimeMessage -> {
+                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+                message.setTo(dtos.get(0).getEmployee().getEmail());
+                message.setSubject(environment.getProperty(Constants.MAIL_ASSET_EXPIRED_SUBJECT));
+
+                Map model = new HashMap<>();
+                model.put("dtos", dtos);
+                model.put("employee", dtos.get(0).getEmployee());
+
+                message.setText(VelocityEngineUtils.mergeTemplateIntoString(velocityEngine
+                        , "asset-expired.vm", CHARSET_UTF8, model), true);
+            };
+            this.javaMailSender.send(preparator);
+
+            return true;
+        } catch (MailException e) {
+            throw new com.xebia.exception.MailException(e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean sendAssetReturnedMail(AssignAssetMail dto) throws MailException{
+        try {
+            MimeMessagePreparator preparator = mimeMessage -> {
+                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+                message.setTo(dto.getEmployee().getEmail());
+                message.setSubject(environment.getProperty(Constants.MAIL_ASSET_RETURNED_SUBJECT));
+
+                Map model = new HashMap<>();
+                model.put("dto", dto);
+
+                message.setText(VelocityEngineUtils.mergeTemplateIntoString(velocityEngine
+                        , "returned-confirmation.vm", CHARSET_UTF8, model), true);
             };
             this.javaMailSender.send(preparator);
 

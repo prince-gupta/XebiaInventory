@@ -20,5 +20,9 @@ public interface IAuthenticationService {
      */
     public void authenticateToken(final String token, final String publicKey, String ipAddr) throws AuthenticationException;
 
-    public User createUser(String userName);
+    public User createUser(User user);
+
+    public boolean changePassword(User user);
+
+    public void logout(User user);
 }

@@ -1,0 +1,94 @@
+<div ng-controller="userController" class="container">
+    <div><h1>User Management</h1></div>
+    <h5>
+        <small class="text-info">Only Profile tab is enabled by default. Other tabs will get enabled when you select only one user.
+        </small>
+    </h5>
+    <div class="alert alert-danger fade in" ng-show=showDangerMessage>
+        <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+    </div>
+    <div class="alert alert-warning fade in" ng-show=showWarningMessage>
+        <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{warningMessage}}</span>
+    </div>
+    <div class="alert alert-success fade in" ng-show=showSuccessMessage>
+        <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+        <strong>Success!</strong> <span>{{successMessage}}</span>
+    </div>
+    <uib-tabset active="activeJustified" justified="true">
+        <uib-tab index="0" heading="Profile">
+            <form class="form-horizontal" role="form" style="margin-top: 5px;">
+                <div class="form-group">
+                    <div class="col-sm-4 has-feedback">
+                        <input type="text" class="form-control" id="userName" placeholder="Enter User Name"
+                               ng-required="true" ng-model="user.userName">
+                    </div>
+                    <div class="col-sm-4 has-feedback">
+                        <input type="text" class="form-control" id="ecode" placeholder="Enter ECode Of Employee"
+                               ng-required="true" ng-model="user.ecode">
+                    </div>
+                    <button class="btn btn-primary" type="button" ng-click="createUser()">Register</button>
+                </div>
+            </form>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>ECode</th>
+                    <th>Name</th>
+                    <th>Roles</th>
+                    <th>Active</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="user in userList">
+                    <td>{{user.userName}}</td>
+                    <td>{{user.ecode}}</td>
+                    <td>{{user.fullName}}</td>
+                    <td>{{user.roles}}</td>
+                    <td>{{user.active}}</td>
+                    <td><button class="btn-xs btn-primary" type="button" ng-click="resetPassword(user.userName)">Reset Password</button></td>
+                    <td><input type="checkbox" ng-click="selectUser(user.id,$index)" id="selectedUser{{$index}}">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </uib-tab>
+        <uib-tab index="1" heading="Roles" ng-click="initialize()" disable="roleTabDisabled">
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-xs-5">
+                    <select name="from" id="undo_redo" class="form-control" size="13" multiple="multiple">
+                        <option value="1">C++</option>
+                        <option value="2">C#</option>
+                        <option value="3">Haskell</option>
+                        <option value="4">Java</option>
+                        <option value="5">JavaScript</option>
+                        <option value="6">Lisp</option>
+                        <option value="7">Lua</option>
+                        <option value="8">MATLAB</option>
+                        <option value="9">NewLISP</option>
+                        <option value="10">PHP</option>
+                        <option value="11">Perl</option>
+                        <option value="12">SQL</option>
+                        <option value="13">Unix shell</option>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                    <button type="button" id="undo_redo_undo" class="btn btn-primary btn-block">undo</button>
+                    <button type="button" id="undo_redo_rightAll" class="btn btn-default btn-block"><i class="glyphicon glyphicon-forward"></i></button>
+                    <button type="button" id="undo_redo_rightSelected" class="btn btn-default btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                    <button type="button" id="undo_redo_leftSelected" class="btn btn-default  btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                    <button type="button" id="undo_redo_leftAll" class="btn btn-default btn-block"><i class="glyphicon glyphicon-backward"></i></button>
+                    <button type="button" id="undo_redo_redo" class="btn btn-warning btn-block">redo</button>
+                </div>
+                <div class="col-xs-5">
+                    <select name="to" id="undo_redo_to" class="form-control" size="13" multiple="multiple">
+                    </select>
+                </div>
+            </div>
+        </uib-tab>
+    </uib-tabset>
+</div>

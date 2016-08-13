@@ -1,19 +1,30 @@
 package com.xebia.resources;
 
 import com.xebia.Secured;
+import com.xebia.common.Constants;
 import com.xebia.dao.AssetDAO;
+import com.xebia.dto.ActionResult;
 import com.xebia.dto.AssetDto;
+import com.xebia.dto.AssetHistoryDTO;
 import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.*;
+import com.xebia.exception.ApplicationException;
 import com.xebia.services.IAssetService;
+import com.xebia.services.excel.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.File;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Pgupta on 23-07-2016.
@@ -25,6 +36,13 @@ public class AssetResource {
 
     @Autowired
     IAssetService assetService;
+
+    @Context
+    HttpServletRequest httpServletRequest;
+
+
+    @Autowired
+    ExcelService excelService;
     
     @CrossOrigin(origins = "http://localhost:3000")
     @POST
@@ -39,8 +57,13 @@ public class AssetResource {
     @GET
     @Path("fetchAllAssetType")
     @Produces("application/json")
-    public List<AssetTypeDto> getAllAssetType(){
-        return assetService.getAllAssetType();
+    public ActionResult getAllAssetType(){
+        ActionResult result = new ActionResult();
+        Map resultMap = assetService.getAllAssetType();
+        result.setStatus(ActionResult.Status.SUCCESS);
+        result.addData("Type", resultMap.get("AssetDTOResult"));
+        result.addData("ManuMap", resultMap.get("ManufactureMap"));
+        return result;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -153,9 +176,22 @@ public class AssetResource {
     @CrossOrigin(origins = "http://localhost:3000")
     @POST
     @Path("deleteAssetManufacturer")
-    @Produces("application/text")
-    public String deleteAssetManufacturer(@RequestBody String id){
-        return assetService.deleteAssetManufacturer(id);
+    @Produces("application/json")
+    public ActionResult deleteAssetManufacturer(@RequestBody String id){
+        ActionResult result = new ActionResult();
+        try{
+            assetService.deleteAssetManufacturer(id);
+            result.setStatus(ActionResult.Status.SUCCESS);
+            return result;
+
+        }
+        catch (Exception  e){
+            result.setStatus(ActionResult.Status.FAILURE);
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("eMessage", e.getMessage());
+            result.setError(errorMap);
+        }
+        return result;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -194,9 +230,60 @@ public class AssetResource {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @POST
+    @Path("deleteHardwareConfiguration")
+    @Produces("application/json")
+    public ActionResult deleteHardwareConfiguration(@RequestBody String id){
+        ActionResult result = new ActionResult();
+        try {
+            result.setStatus(ActionResult.Status.SUCCESS);
+            assetService.deleteHardwareConfig(id);
+        }
+        catch(ApplicationException e){
+            result.setStatus(ActionResult.Status.FAILURE);
+        }
+        return result;
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @POST
     @Path("getAssetsHistory")
     @Produces("application/json")
-    public List<AssetHistory> getAssetHistory(@RequestBody BigInteger employeeId){
+    public List<AssetHistoryDTO> getAssetHistory(@RequestBody BigInteger employeeId){
         return assetService.getAssetsHistory(employeeId);
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GET
+    @Path("getAssetExpirationReport")
+    @Produces("application/json")
+    public List<AssetDto> getAssetExpirationReport(){
+        return assetService.getExpirationReportForDashboard();
+    }
+
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GET
+    @Path("generateAssetReport")
+    @Produces("application/vnd.ms-excel")
+    public Response generateAssetReport(){
+
+        File file = excelService.exportToExcel();
+
+        Response.ResponseBuilder response = Response.ok((Object) file);
+        response.header("Content-Disposition",
+                "attachment; filename=new-excel-file.xls");
+        return response.build();
+    }
+
+    @POST
+    @Path("getEmployeeAssetsFileParam")
+    @Produces("application/pdf")
+    public Response getEmployeeAssetsFileParam(@RequestBody BigInteger employeeId){
+        File file = assetService.getEmployeeAssetsFileParam(employeeId,httpServletRequest.getHeader("Username"));
+
+        Response.ResponseBuilder response = Response.ok((Object) file);
+        response.header("Content-Disposition",
+                "attachment; filename=new-pdf-file.pdf");
+        return response.build();
     }
 }

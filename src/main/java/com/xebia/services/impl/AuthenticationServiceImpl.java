@@ -29,9 +29,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
             token = tokenService.generateToken(encodedPass, userName + ipAddr);
             user.setToken(token);
             userDAO.update(user);
-            return new AuthenticationResponse(userName, token, "SUCCESS");
+            return new AuthenticationResponse(userName, token, "SUCCESS",user.getChangePassword().equals("Y"));
         } else {
-            return new AuthenticationResponse(userName, "UN-AUTHENTICATED", "FAILED");
+            return new AuthenticationResponse(userName, "UN-AUTHENTICATED", "FAILED",false);
         }
     }
 
@@ -41,9 +41,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     }
 
     @Override
-    public User createUser(String userName) {
-        User user = new User();
-        user.setUsername(userName);
+    public User createUser(User user) {
         String enCodedPass = Utility.encode("Xebia123");
         user.setPassword(enCodedPass);
         user.setActive("Y");
@@ -51,5 +49,24 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         return user;
     }
 
+    @Override
+    public boolean changePassword(User user){
+        User dbUser = userDAO.getUserByUName(user.getUsername());
+        dbUser.setPassword(Utility.encode(user.getPassword()));
+        dbUser.setChangePassword("N");
+        dbUser.setToken(null);
+        userDAO.update(dbUser);
+        return true;
+    }
 
+    public void logout(User user) throws AuthenticationException{
+        try {
+            User dbUser = userDAO.getUserByUName(user.getUsername());
+            dbUser.setToken(null);
+            userDAO.update(dbUser);
+        }
+        catch (Exception e){
+            new AuthenticationException(e.getMessage());
+        }
+    }
 }

@@ -45,6 +45,11 @@ public class AssetHistory implements Serializable {
 	@JoinColumn(name="issued_to")
 	private Employee employee2;
 
+    //uni-directional many-to-one association to Employee
+    @ManyToOne
+    @JoinColumn(name="updated_by")
+    private User updatedBy;
+
     @Temporal(TemporalType.DATE)
     @Column(name="returned_date")
     private Date returnedDate;
@@ -114,5 +119,13 @@ public class AssetHistory implements Serializable {
 
     public void setReturnedDate(Date returnedDate) {
         this.returnedDate = returnedDate;
+    }
+
+    public User getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(User updatedBy) {
+        this.updatedBy = updatedBy;
     }
 }

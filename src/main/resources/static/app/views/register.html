@@ -1,0 +1,341 @@
+<div class="container" ng-controller="registerController">
+
+<div>
+<h1>Employee</h1>
+<h5 ng-show="assetTabDisable || assetHistoryTabDisable">
+    <small class="text-info">Only Profile tab is enabled by default. Other tabs will get enabled if search result
+        contains only 1 employee.
+    </small>
+</h5>
+
+<div class="alert alert-danger fade in" ng-show=showDangerMessage>
+    <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+    <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+</div>
+<div class="alert alert-warning fade in" ng-show=showWarningMessage>
+    <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+    <strong>Oh Snap!</strong> <span>{{warningMessage}}</span>
+</div>
+<div class="alert alert-success fade in" ng-show=showSuccessMessage>
+    <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+    <strong>Success!</strong> <span>{{successMessage}}</span>
+</div>
+<!--<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>-->
+<div>
+<script type="text/ng-template" id="myModalContent.html">
+    <div class="modal-header">
+        <h3 class="modal-title">Enter Asset Details To Assign</h3>
+    </div>
+    <div class="modal-body" ng-show="!showPrint">
+        <form role="form">
+            <div class="form-group">
+                <select class="form-control" ng-model="selectedAssetType"
+                        ng-options="type.id as type.type for type in assetTypeDisplayList">
+                </select>
+                <button class="btn btn-primary" type="button" ng-click="fetchAvailableAssetsByType()"
+                        style="margin-top: 5px;">Fetch Assets
+                </button>
+            </div>
+
+            <div class="form-group" ng-show="assetFetched">
+                <select class="form-control" ng-model="assignAsset.assetId"
+                        ng-options="asset.assetId as asset.name for asset in assetDisplayList">
+                </select>
+            </div>
+
+            <label class="control-label" for="doi">Date Of Issue</label>
+
+            <div id="doi">
+                <div>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                               ng-model="assignAsset.dateOfIssue" is-open="popup3.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                               placeholder="Date Of Issue"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open3()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                              </span>
+                    </p>
+                </div>
+            </div>
+            <label class="control-label" for="dov">Date Of Till Validity</label>
+
+            <div id="dov">
+                <div>
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                               ng-model="assignAsset.dateTillValid" is-open="popup4.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                               placeholder="Date Of Till Validity"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open4()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                              </span>
+                    </p>
+                </div>
+            </div>
+            <div class="form-group">
+                <select class="form-control" ng-model="assignAsset.approvedBy"
+                        ng-options="person.id as person.firstName for person in approversDisplayList">
+                </select>
+            </div>
+        </form>
+    </div>
+    <div class="modal-body" ng-show="showPrint">
+        <p>
+            Want to Print the statement ?
+        </p>
+    </div>
+    <div class="modal-footer">
+        <h4 ng-show="showMessage" style="float:left">
+            <small id="assignAssetModalMessage">{{message}}</small>
+        </h4>
+        <button class="btn btn-primary" type="button" ng-click="ok()" ng-show="!showPrint">Save</button>
+        <button class="btn btn-primary" type="button" ng-click="print()" ng-show="showPrint">Print</button>
+        <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+<uib-tabset active="activeJustified" justified="true">
+<uib-tab index="0" heading="Profile">
+    <form class="form-horizontal" role="form" style="margin-top: 5px;">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="firstName">First Name:</label>
+
+            <div class="col-sm-4 has-feedback">
+                <input type="text" class="form-control" id="firstName" placeholder="Enter First Name"
+                       ng-required="true" ng-model="search.firstName">
+                <span class="glyphicon glyphicon-warning-sign form-control-feedback" ng-show="firstNameError"
+                      style="color: darkred"></span>
+            </div>
+            <label class="control-label col-sm-2" for="lastName">Last Name:</label>
+
+            <div class="col-sm-4 has-feedback">
+                <input type="text" class="form-control" id="lastName" placeholder="Enter Last Name"
+                       ng-required="true" ng-model="search.lastName">
+                <span class="glyphicon glyphicon-warning-sign form-control-feedback" ng-show="lastNameError"
+                      style="color: darkred"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="eCode">Employee Code:</label>
+
+            <div class="col-sm-4 has-feedback">
+                <input type="text" class="form-control" id="ecode" placeholder="Enter Employee Code"
+                       ng-required="true" ng-model="search.ecode">
+                <span class="glyphicon glyphicon-warning-sign form-control-feedback" ng-show="ecodeError"
+                      style="color: darkred"></span>
+            </div>
+            <label class="control-label col-sm-2" for="doj">Date Of Joining:</label>
+
+            <div class="row" id="doj">
+                <div class="col-sm-4">
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                               ng-model="search.dateOfJoining" is-open="popup1.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                               placeholder="Date Of Joining"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open1()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                              </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="email">Email:</label>
+
+            <div class="col-sm-4 has-feedback">
+                <input type="text" class="form-control" id="email" placeholder="Enter Email"
+                       ng-required="true" ng-model="search.email">
+                <span class="glyphicon glyphicon-warning-sign form-control-feedback" ng-show="emailError"
+                      style="color: darkred"></span>
+            </div>
+            <label class="control-label col-sm-2" for="mobile">Mobile Number:</label>
+
+            <div class="col-sm-4">
+                <input type="text" class="form-control" id="mobile" placeholder="Enter Mobile Number"
+                       ng-required="true" ng-model="search.mobile">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Approvals Required:</label>
+
+            <div class="col-sm-4">
+                <select class="form-control" ng-model="search.approvalsRequired">
+                    <option value="NA">Both</option>
+                    <option value="Y">Yes</option>
+                    <option value="N">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-offset-2 col-sm-3">
+                    <button type="button" class="btn btn-success" ng-click="save()">Save&nbsp;<i
+                            class="glyphicon glyphicon-floppy-disk"></i></button>
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-default" ng-click="fetch()">Search&nbsp;<i
+                            class="glyphicon glyphicon-search"></i></button>
+                </div>
+                <div class="col-sm-4">
+                    <button type="button" class="btn btn-danger" ng-click="clearForm()">Reset&nbsp;<i
+                            class="glyphicon glyphicon-floppy-remove"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="custom-modal">
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped active" role="progressbar"
+                     aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%">
+                </div>
+            </div>
+        </div>
+    </form>
+    <table class="table table-hover" ng-show="isResultOK">
+        <thead>
+        <tr>
+            <th>ECode</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Mobile Number</th>
+            <th>Date Of Joining</th>
+            <th>Email</th>
+            <th>Approval Required</th>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="employee in employeeList">
+            <td>
+                <div id="ecodeTxt{{$index}}">{{employee.ecode}}</div>
+                <input style="display: none;width: 70px;" type="text" id="ecodeType{{$index}}"
+                       ng-model="updateEmp.ecode"
+                       placeholder="{{employee.ecode}}"></td>
+            </td>
+            <td>
+                <div id="firstNameTxt{{$index}}">{{employee.firstName}}</div>
+                <input style="display: none" type="text" id="firstNameType{{$index}}" ng-model="updateEmp.firstName"
+                       placeholder="{{employee.firstName}}"></td>
+            <td>
+                <div id="lastNameTxt{{$index}}">{{employee.lastName}}</div>
+                <input style="display: none" type="text" id="lastNameType{{$index}}" ng-model="updateEmp.lastName"
+                       placeholder="{{employee.lastName}}"></td>
+            <td>
+                <div id="mobileTxt{{$index}}">{{employee.mobile}}</div>
+                <input style="display: none;width: 83px;" type="text" id="mobileType{{$index}}"
+                       ng-model="updateEmp.mobile"
+                       placeholder="{{employee.mobile}}" maxlength="10"></td>
+            <td>{{employee.dateOfJoining}}</td>
+            <td>
+                <div id="emailTxt{{$index}}">{{employee.email}}</div>
+                <input style="display: none" type="text" id="emailType{{$index}}" ng-model="updateEmp.email"
+                       placeholder="{{employee.email}}"></td>
+            <td>
+                <div id="approvalReq{{$index}}">{{(employee.approvalsRequired == 'Y') ? 'Yes' : 'No'}}</div>
+                <div id="approvalReqEdit{{$index}}" style="display: none"><label class="radio-inline"><input
+                        type="radio" name="approvalReq" value="N" ng-model="updateEmp.approvalsRequired">No
+                </label>
+                    <label class="radio-inline"><input type="radio" name="approvalReq" value="Y"
+                                                       ng-model="updateEmp.approvalsRequired">Yes</label></div>
+            </td>
+            <td>
+                <span class="glyphicon glyphicon-pencil" ng-click="editEmp($index)" id="pencilEmp{{$index}}"
+                      style="cursor: pointer"></span>
+                <span class="glyphicon glyphicon-floppy-disk" ng-click="updateEmployee($index,employee.id)"
+                      id="saveEmp{{$index}}" style="display: none; cursor: pointer"></span>
+            </td>
+            <td>
+                <span class="glyphicon glyphicon-trash" ng-click="deleteEmp(employee.ecode)" id="trashEmp{{$index}}"
+                      style="cursor: pointer"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</uib-tab>
+<uib-tab index="1" heading="Assets" disable="assetTabDisable" ng-click="refreshAssets()">
+    <table class="table table-hover" ng-show="showAssetTable">
+        <thead>
+        <tr>
+            <th>Asset ID</th>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Serial Number</th>
+            <th>Date Of Issue</th>
+            <th>Date Of Till Validity</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="asset in assets" ng-class="asset.status == 'EXPIRED' ? 'danger':'default'">
+            <td>{{asset.assetId}}</td>
+            <td>{{asset.name}}</td>
+            <td>{{asset.assetTypeName}}</td>
+            <td>{{asset.serialNumber}}</td>
+            <td>{{asset.dateOfIssue}}</td>
+            <td>{{asset.dateTillValid}}</td>
+            <td>
+                    <span class="glyphicon glyphicon-log-out" ng-click="returnAsset(asset.assetId)"
+                          style="cursor: pointer"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a class="btn btn-info btn-sm" ng-click="openAssetWindow('lg')" style="margin-top: 10px;">
+        Add An Asset<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="refreshAssets()" style="margin-top: 10px;">
+        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="printEmployeeAssets()" style="margin-top: 10px;">
+        Print Asset Report<span class="glyphicon glyphicon-print" style="margin-left: 8px;"></span>
+    </a>
+</uib-tab>
+<uib-tab index="2" heading="Assets History" disable="assetHistoryTabDisable" ng-click="fetchHistory()">
+    <table class="table table-hover" ng-show="showHistoryTable">
+        <thead>
+        <tr>
+            <th>Asset</th>
+            <th>Approved By</th>
+            <th>Issued/Returned By</th>
+            <th>Date Of Issue</th>
+            <th>Valid Till Date</th>
+            <th>Returned Date</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="history in assetsHistory"
+            ng-class="history.status == 'EXPIRED' ? 'danger' : history.status == 'ISSUED' ? 'success' : 'default'">
+            <td>{{history.assetName}}<br>
+                <small>{{history.serialNumber}}</small>
+            </td>
+            <td>{{history.approverFirstName}}&nbsp;{{history.approverLastName}}</td>
+            <td>{{history.updaterFirstName}}&nbsp;{{history.updaterLastName}}</td>
+            <td>{{history.dateOfIssue}}</td>
+            <td>{{history.dateTillValid}}</td>
+            <td>{{history.returnedDate}}</td>
+            <td>{{history.status}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <a class="btn btn-info btn-sm" ng-click="printEmployeeAssets()" style="margin-top: 10px;">
+        Print History<span class="glyphicon glyphicon-print" style="margin-left: 8px;"></span>
+    </a>
+    <a class="btn btn-info btn-sm" ng-click="fetchHistory()" style="margin-top: 10px;">
+        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+    </a>
+</uib-tab>
+</uib-tabset>
+
+
+</div>
+
+</div>
+</div>

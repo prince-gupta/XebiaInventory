@@ -12,5 +12,9 @@ public interface JMSMailService {
 
     public void registerGettingExpiredAssetMail();
 
-    public void registerMail(AssignAssetMail assignAssetMail);
+    public void registerExpiredAssetMail();
+
+    public void registerAssignAssetMail(AssignAssetMail assignAssetMail);
+
+    public void registerReturnedAssetMail(AssignAssetMail assignAssetMail);
 }

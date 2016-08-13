@@ -71,9 +71,21 @@ public class AssetDAO {
                 .getResultList();
     }
 
+    public List<Asset> getAllByAssetType(BigInteger id){
+        return entityManager.createQuery("from Asset where type = :typeId")
+                .setParameter("typeId",id)
+                .getResultList();
+    }
+
 
     public void update(Asset asset) {
         entityManager.merge(asset);
         return;
+    }
+
+    public List getGroupByManufacturer(BigInteger id){
+        List l = entityManager.createQuery("select s.manufacturer, count(*) from (select * from assets where type = :typeId) as s group by s.manufacturer")
+                .setParameter("typeId", id).getResultList();
+        return l;
     }
 }

@@ -16,5 +16,23 @@ public class Constants {
     public static String MAIL_SUPPORT_PASSWORD = "mail.support.password";
 
     public static String MAIL_REGISTRATION_SUBJECT = "mail.registration.subject";
+
+    public static String MAIL_ASSET_EXPIRED_SUBJECT = "mail.asset.expired.subject";
+
+    public static String MAIL_ASSET_EXPIRING_SUBJECT = "mail.asset.expiring.subject";
+
+    public static String MAIL_ASSET_ASSIGNMENT_SUBJECT = "mail.asset.assignment.subject";
+
+    public static String MAIL_ASSET_RETURNED_SUBJECT = "mail.asset.returned.subject";
+
+    public static String TEMP_PATH = "app.temp.file.path";
+
+    public static String FWD_SLASH = "/";
+
+    public static String HTML = "temp.html";
+
+    public static String PDF = "temp.pdf";
+
 }
+
 

@@ -59,6 +59,13 @@ public class AssetHistoryDAO {
                 .getResultList();
     }
 
+    public List<AssetHistory> getExpiredAssetHistory(Date expiryDate){
+        String query = "FROM AssetHistory WHERE valid_till < :expiryDate and status ='ISSUED' or status ='EXPIRED'";
+        return entityManager.createQuery(query)
+                .setParameter("expiryDate",expiryDate)
+                .getResultList();
+    }
+
     public void update(AssetHistory assetHistory) {
         entityManager.merge(assetHistory);
         return;

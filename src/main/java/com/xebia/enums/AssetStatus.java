@@ -7,7 +7,8 @@ public enum AssetStatus {
     ISSUED("ISSUED"),
     RETURNED("RETURNED"),
     NOT_ISSUED("NOT_ISSUED"),
-    EXPIRED("EXPIRED");
+    EXPIRED("EXPIRED"),
+    EXPIRING("EXPIRING");
 
     private String value;
 

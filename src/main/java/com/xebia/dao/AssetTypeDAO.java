@@ -1,6 +1,7 @@
 package com.xebia.dao;
 
 import com.xebia.dto.AssetTypeDto;
+import com.xebia.entities.Asset;
 import com.xebia.entities.AssetType;
 import com.xebia.entities.Employee;
 import org.springframework.stereotype.Repository;
@@ -30,22 +31,8 @@ public class AssetTypeDAO {
         return;
     }
 
-    /**
-     * Return all the Asset stored in the database.
-     */
-    public List<AssetTypeDto> getAll() {
-        List<AssetTypeDto> resutList = new ArrayList<>();
-        List<AssetType> assetTypes = entityManager.createQuery("from AssetType").getResultList();
-        for(AssetType assetType : assetTypes){
-            int count = entityManager.createQuery("from Asset where type = :assetType")
-                    .setParameter("assetType",assetType.getType()).getResultList().size();
-            AssetTypeDto assetTypeDto = new AssetTypeDto();
-            assetTypeDto.setNumberOfAsset(count);
-            assetTypeDto.setType(assetType.getType());
-            assetTypeDto.setId(assetType.getId());
-            resutList.add(assetTypeDto);
-        }
-    return resutList;
+    public List<AssetType> getAll() {
+        return entityManager.createQuery("from AssetType").getResultList();
     }
 
     /**
@@ -67,7 +54,6 @@ public class AssetTypeDAO {
         entityManager.merge(assetType);
         return;
     }
-
 
 
 }
