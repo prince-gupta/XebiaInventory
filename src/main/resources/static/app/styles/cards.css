@@ -33,3 +33,21 @@ h3 {
     margin-bottom: 10px;
     border-bottom: 4px solid rgba(0,0,0,.125);
 }
+
+.monitor-card{
+    max-height: 300px;
+    margin-bottom: 10px;
+    border-bottom: 4px solid rgba(0,0,0,.125);
+    padding-left: 50px;
+}
+.legend-element{
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 12px;
+}
+
+.gauge {
+    width: 320;
+    height: 240px;
+}

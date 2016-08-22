@@ -1,0 +1,38 @@
+<div class="container">
+    <div><h1>Define Excel Mapping</h1></div>
+
+    <div class="alert alert-danger fade in" ng-show=showDangerMessage>
+        <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+    </div>
+    <div class="alert alert-warning fade in" ng-show=showWarningMessage>
+        <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{warningMessage}}</span>
+    </div>
+    <div class="alert alert-success fade in" ng-show=showSuccessMessage>
+        <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+        <strong>Success!</strong> <span>{{successMessage}}</span>
+    </div>
+    <uib-tabset active="activeJustified" justified="true">
+        <uib-tab index="0" heading="Mappings">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Application Column Name</th>
+                    <th>Corresponding Excel Column Name</th>
+                    <th>Data Type</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat = "mapping in mappings">
+                    <td>{{mapping.appColumnName}}</td>
+                    <td><input type="text" ng-model = "mapping.excelColumnName" ng-value="mapping.excelColumnName" style="width: 60%; border: 0px;"></td>
+                    <td>{{mapping.datatype}}</td>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <a class="btn btn-info" ng-click="save()">Save</a>
+        </uib-tab>
+    </uib-tabset>
+</div>

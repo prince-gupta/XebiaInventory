@@ -37,6 +37,11 @@ public class AssignAssetMail implements Serializable {
 	@JoinColumn(name="employee")
 	private Employee employee;
 
+    @ManyToOne
+    @JoinColumn(name="issued_by")
+    private User issuedBy;
+
+
     @Column(name="status")
     private String status;
 
@@ -136,5 +141,13 @@ public class AssignAssetMail implements Serializable {
 
     public void setUpdatedDate(Date updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public User getIssuedBy() {
+        return issuedBy;
+    }
+
+    public void setIssuedBy(User issuedBy) {
+        this.issuedBy = issuedBy;
     }
 }

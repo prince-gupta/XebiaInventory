@@ -15,14 +15,7 @@ angular.module('app')
             id: 1
         };
 
-        init();
-
-        function init() {
-            fetchAllAsset();
-        }
-
-
-
+        $scope.exportToExcelTooltip = "Export To Excel";
         $scope.animationsEnabled = true;
         $scope.showTypeInput = false;
         $scope.assetTypeList = [];
@@ -33,7 +26,7 @@ angular.module('app')
         $scope.isEditManu = true;
         $scope.isDoneManu = false;
         $scope.updateAssetType = {};
-        $scope.updateAsset={};
+        $scope.updateAsset = {};
         $scope.manufacturerList = [];
         $scope.updateManu = {};
         $scope.updateHW = {};
@@ -41,7 +34,72 @@ angular.module('app')
         $scope.newHW = {};
         $scope.assetHWConfig = [];
 
-        $scope.closeTypeInput = function(){
+        $scope.assetTypeList1 = [];
+        $scope.assetTypeDisplayList = [];
+        $scope.manufacturerList = [];
+        $scope.manufacturerDisplayList = [];
+        $scope.search = {};
+        $scope.dummyAssetType = {
+            type: 'Select Type of Asset',
+            id: -1
+        };
+        $scope.dummyManufacturer = {
+            name: 'Select Manufacturer of Asset',
+            id: -1
+        };
+
+        init();
+
+        function init() {
+            fetchAllAsset();
+
+
+            AssetFactory.getAssetTypeList().success(function (data) {
+                $scope.assetTypeList1 = angular.copy(data.data.Type);
+                $scope.assetTypeDisplayList[0] = ($scope.dummyAssetType);
+                $scope.search.assetType = ($scope.dummyAssetType.id);
+                for (var index = 0; index < $scope.assetTypeList1.length; index++) {
+                    $scope.assetTypeDisplayList.push($scope.assetTypeList1[index]);
+                }
+            });
+            AssetFactory.getManufacturerList().success(function (data) {
+                $scope.manufacturerList = angular.copy(data);
+                $scope.manufacturerDisplayList[0] = ($scope.dummyManufacturer);
+                $scope.search.assetManufacturer = $scope.dummyManufacturer.id;
+                for (var index = 0; index < $scope.manufacturerList.length; index++) {
+                    $scope.manufacturerDisplayList.push($scope.manufacturerList[index]);
+                }
+            });
+        }
+
+        $scope.clearForm = function () {
+            $scope.search = {};
+            init();
+        }
+
+        $scope.performSearch = function () {
+            AssetFactory.searchAsset($scope.search).success(function (data) {
+                $scope.assetList = angular.copy(data);
+                for (var index = 0; index < $scope.assetList.length; index++) {
+                    var hwObj = {};
+                    hwObj.cpu = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.cpu : 'NA';
+                    hwObj.hdd = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.hdd : 'NA';
+                    hwObj.ram = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.ram : 'NA';
+                    $scope.assetHWConfig[$scope.assetList[index].assetId] = hwObj;
+                }
+            }).error(function (data, status, headers, config) {
+                if (status == 401) {
+                    window.location = ""
+                }
+                else {
+                    showMessage(resolveError(status), "DANGER");
+                }
+                waitingDialog.hide();
+            });
+        }
+
+
+        $scope.closeTypeInput = function () {
             $scope.showTypeInput = false;
         }
 
@@ -211,8 +269,14 @@ angular.module('app')
             $scope.updateHW = {};
         }
 
-        $scope.generateAssetReport = function(){
-           window.location.href = "/inventory/asset/generateAssetReport"
+        $scope.generateAssetReport = function () {
+            window.location.href = "/inventory/asset/generateAssetReport"
+        }
+
+        $scope.processHistAssets = function(){
+            AssetFactory.processHistAssets().success(function(data){
+               var result = angular.copy(data);
+            });
         }
 
         function fetchAllAssetType() {
@@ -227,11 +291,12 @@ angular.module('app')
                 $scope.assetList = angular.copy(data);
                 for (var index = 0; index < $scope.assetList.length; index++) {
                     var hwObj = {};
-                    hwObj.cpu = $scope.assetList[index].hardwareConfiguration.cpu;
-                    hwObj.hdd = $scope.assetList[index].hardwareConfiguration.hdd;
-                    hwObj.ram = $scope.assetList[index].hardwareConfiguration.ram;
+                    hwObj.cpu = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.cpu : 'NA';
+                    hwObj.hdd = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.hdd : 'NA';
+                    hwObj.ram = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.ram : 'NA';
                     $scope.assetHWConfig[$scope.assetList[index].assetId] = hwObj;
                 }
+                showMessage($scope.assetList.length + " Assets(s) Found.", "SUCCESS");
             }).error(function (data, status, headers, config) {
                 if (status == 401) {
                     window.location = ""
@@ -241,7 +306,6 @@ angular.module('app')
                 }
                 waitingDialog.hide();
             });
-            ;
         }
 
         function fetchAllManufacturer() {
@@ -324,11 +388,11 @@ angular.module('app')
         $scope.deleteManu = function (id) {
             AssetFactory.deleteManufacturer(id).success(function (data) {
                 var result = angular.copy(data);
-                if(result.status == "SUCCESS"){
+                if (result.status == "SUCCESS") {
                     showMessage("Manufacturer Info Deleted.", "SUCCESS");
                     fetchAllAssetType();
                 }
-                else{
+                else {
                     showMessage("Unable to delete Manufacturer Info, as it might be possible their associated assests still present in system. Delete them first and try again.", "DANGER");
                 }
             }).error(function (data, status, headers, config) {
@@ -336,14 +400,14 @@ angular.module('app')
             });
         }
 
-        $scope.deleteHWConfig = function(id){
-            AssetFactory.deleteHWConfig(id).success(function(data){
+        $scope.deleteHWConfig = function (id) {
+            AssetFactory.deleteHWConfig(id).success(function (data) {
                 var result = angular.copy(data);
-                if(result.status == "SUCCESS"){
+                if (result.status == "SUCCESS") {
                     showMessage("Hardware Configuration Deleted.", "SUCCESS");
                     fetchHardwareConfigurations();
                 }
-                else{
+                else {
                     showMessage("Unable to delete Hardware Configuration, as it might be possible their associated assests still present in system. Delete them first and try again.", "DANGER");
                 }
 
@@ -414,6 +478,42 @@ angular.module('app')
 
                 });
             }
+        $scope.openDeleteAssetWindow = function (size, assetId) {
+
+            var modalInstance = $uibModal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'assetConfirmation.html',
+                controller: 'DeleteAssetCtrl',
+                size: size,
+                resolve: {
+                    assetId: function () {
+                        return assetId;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+            }, function () {
+
+            });
+        };
+
+        $scope.openExcelImportWindow = function (size) {
+
+            var modalInstance = $uibModal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'excelImport.html',
+                controller: 'ExcelImportCtrl',
+                size: size
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+            }, function () {
+
+            });
+        };
     })
     .factory('AssetFactory', function ($http, $cookieStore) {
         return{
@@ -436,6 +536,11 @@ angular.module('app')
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/updateAssetType', data);
+            },
+            searchAsset: function (data) {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/asset/searchAsset', data);
             },
             getAssetList: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
@@ -462,13 +567,18 @@ angular.module('app')
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/fetchAssetByType', data);
             },
-            getAvailableAssetByType: function (data) {
+            processHistAssets: function(){
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
-                return $http.post('/inventory/asset/fetchAvailableAssetByType', data);
+                return $http.get('/inventory/asset/processHistoricalAssets');
+            },
+            fetchAvailableAssetByTypeAndManu: function (data) {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/asset/fetchAvailableAssetByTypeAndManu', data);
             },
             assignAsset: function (data) {
-                data.userName =  $cookieStore.get('Username');
+                data.userName = $cookieStore.get('Username');
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/assignAsset', data);
@@ -521,17 +631,17 @@ angular.module('app')
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/getAssetsHistory', data);
             },
-            getAssetExpirationReport : function(){
+            getAssetExpirationReport: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/getAssetExpirationReport');
             },
-            generateAssetReport : function() {
+            generateAssetReport: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/generateAssetReport');
             },
-            getEmployeeAssetsFileParam : function(data){
+            getEmployeeAssetsFileParam: function (data) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/getEmployeeAssetsFileParam', data);
@@ -539,6 +649,114 @@ angular.module('app')
         }
     })
 ;
+angular.module('app').controller('DeleteAssetCtrl', function ($scope, $timeout, AssetFactory, $uibModalInstance, assetId) {
+
+    $scope.assetId = assetId;
+    $scope.message = "";
+    $scope.showMessage = false;
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+
+    $scope.delete = function () {
+        $scope.message = "";
+        $scope.showMessage = false;
+        $scope.disableYes = false;
+        AssetFactory.deleteAsset($scope.assetId).success(function (data) {
+            $scope.disableYes = true;
+            if (data.status == 'SUCCESS') {
+                $scope.message = "Asset has been removed from System Successfully. Please trigger your search again to get latest data.";
+            }
+            else {
+                if (data.data.eCode == 'ASSET_ASSINGMENT_ERROR ') {
+                    $scope.message = "Asset you are trying to delete is assigned to " + data.data.empName + ". Please un-assign it before removing it from system.";
+                }
+            }
+            $scope.showMessage = true;
+            $timeout(function () {
+                $uibModalInstance.dismiss('cancel');
+            }, 5000);
+        })
+    }
+
+});
+
+angular.module('app')
+    .directive("fileModel", function () {
+        return {
+            restrict: 'EA',
+            scope: {
+                setFileData: "&"
+            },
+            link: function (scope, ele, attrs) {
+                ele.on('change', function () {
+                    scope.$apply(function () {
+                        var val = ele[0].files[0];
+                        scope.setFileData({ value: val });
+                    });
+                });
+            }
+        }
+    })
+    .service('fileUpload', ['$http','$cookieStore',
+        function ($http,$cookieStore) {
+
+            this.uploadFileToUrl = function (data) {
+                var fd = new FormData();
+                fd.append('file', data);
+
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                $http.post("/inventory/common/uploadExcelFile", fd, {
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': undefined
+                    },
+                    transformRequest: angular.identity
+                })
+                    .success(function (response, status, headers, config) {
+                        console.log(response);
+
+                        if (status == 200 || status == 202){
+
+                        } //do whatever in success
+                        else{
+
+                        } // handle error in  else if needed
+                    })
+                    .error(function (error, status, headers, config) {
+                        console.log(error);
+
+                        // handle else calls
+                    });
+            }
+        }
+    ])
+    .controller('ExcelImportCtrl', function ($scope, fileUpload, $uibModalInstance) {
+
+        $scope.navigate = function () {
+            $uibModalInstance.dismiss('cancel');
+            window.location = "#excelMapping";
+        }
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.fileToUpload={};
+        $scope.process = function () {
+           /* var formData = new FormData();
+            angular.forEach($scope.files, function (value, key) {
+                formData.append(key, value);
+            });*/
+            /*ExcelFactory.uploadExcelFile(formData).success(function (data) {
+                alert(data);
+            })*/
+
+            fileUpload.uploadFileToUrl($scope.fileToUpload);
+        }
+
+    });
 
 angular.module('app').controller('AssetModalInstanceCtrl', function ($scope, AssetFactory, $uibModalInstance, items) {
 
@@ -568,7 +786,7 @@ angular.module('app').controller('AssetModalInstanceCtrl', function ($scope, Ass
 
     function init() {
         AssetFactory.getAssetTypeList().success(function (data) {
-            $scope.assetTypeList1 = angular.copy(data);
+            $scope.assetTypeList1 = angular.copy(data.data.Type);
             $scope.assetTypeDisplayList[0] = ($scope.dummyAssetType);
             $scope.asset.assetType = ($scope.dummyAssetType.id);
             for (var index = 0; index < $scope.assetTypeList1.length; index++) {
@@ -665,3 +883,5 @@ angular.module('app').controller('HWConfigModalInstanceCtrl', function ($scope, 
         $uibModalInstance.dismiss('cancel');
     };
 });
+
+

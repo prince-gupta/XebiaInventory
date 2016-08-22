@@ -33,11 +33,23 @@ angular
                 templateUrl: '../views/underConstruction.html'
             })
             .when('/dashboard', {
-                templateUrl: '../views/dashboard.html'
+                templateUrl: '../views/dashboard.html',
+                controller: 'dashboardController'
             })
             .when('/user', {
                 templateUrl: '../views/user.html',
                 controller: 'userController'
+            })
+            .when('/monitor', {
+                templateUrl: '../views/monitor.html',
+                controller: 'monitorController'
+            })
+            .when('/excelMapping', {
+                templateUrl: '../views/excelMapping.html',
+                controller: 'xlsMappingController'
+            })
+            .otherwise({
+                templateUrl: '../views/404.html'
             });
     });
 
@@ -62,7 +74,7 @@ function resolveError(status) {
 
 angular.module('app')
     .controller('mainController',
-    function ($scope, $interval, MainFactory, Excel, $timeout) {
+    function ($scope, $interval, MainFactory, ExcelFactory, LoginFactory, $timeout, $cookieStore) {
         $scope.pingErrMessage = "";
         $scope.showPingErrMessage = false;
         $scope.pingMessage = "";
@@ -84,16 +96,31 @@ angular.module('app')
             });
         }
 
+        $scope.logout = function(){
+            var userName = $cookieStore.get("Username");
+            var user = {};
+            user.username = userName;
+            LoginFactory.logout(user).success(function (data) {
+                if (data.status == "SUCCESS") {
+                    $scope.loginFailed = true;
+                    $scope.loginMessage = "You are logged out !"
+                    $cookieStore.remove("Username");
+                    $cookieStore.remove("token");
+                    window.location="/";
+                }
+            });
+        }
+
         $interval(ping, 10000);
 
-        $scope.exportToExcel=function(tableId,sheetName,fileName){ // ex: '#my-table'
-            $scope.exportHref=Excel.tableToExcel("#"+tableId,sheetName);
-            $timeout(function(){
+        $scope.exportToExcel = function (tableId, sheetName, fileName) { // ex: '#my-table'
+            $scope.exportHref = Excel.tableToExcel("#" + tableId, sheetName);
+            $timeout(function () {
                 var link = document.createElement('a');
-                link.download = fileName+".xls";
+                link.download = fileName + ".xls";
                 link.href = $scope.exportHref;
                 link.click();
-            },100); // trigger download
+            }, 100); // trigger download
         }
 
 
@@ -105,17 +132,33 @@ angular.module('app')
             }
         }
     })
-    .factory('Excel',function($window){
-        var uri='data:application/vnd.ms-excel;base64,',
-            template='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
-            base64=function(s){return $window.btoa(unescape(encodeURIComponent(s)));},
-            format=function(s,c){return s.replace(/{(\w+)}/g,function(m,p){return c[p];})};
+    .factory('ExcelFactory', function ($window, $http, $cookieStore) {
+        var uri = 'data:application/vnd.ms-excel;base64,',
+            template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>',
+            base64 = function (s) {
+                return $window.btoa(unescape(encodeURIComponent(s)));
+            },
+            format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
         return {
-            tableToExcel:function(tableId,worksheetName){
-                var table=$(tableId),
-                    ctx={worksheet:worksheetName,table:table.html()},
-                    href=uri+base64(format(template,ctx));
+            tableToExcel: function (tableId, worksheetName) {
+                var table = $(tableId),
+                    ctx = {worksheet: worksheetName, table: table.html()},
+                    href = uri + base64(format(template, ctx));
                 return href;
+            },
+            getExcelMappings: function () {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/common/getExcelMappings');
+            },
+            updateExcelMappings: function (data) {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/common/updateExcelMappings', data);
             }
         };
     })

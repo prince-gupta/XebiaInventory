@@ -160,6 +160,9 @@
             #if($dto.approver)
                 <th>Approved By</th>
             #end
+            #if($dto.issuedBy)
+                <th>Issued By</th>
+            #end
         </tr>
         <tr>
             <td>${dto.asset.name}</td>
@@ -168,6 +171,9 @@
             <td>${dto.dateTillValid}</td>
             #if($dto.approver)
                 <td>${dto.approver.firstName} ${dto.approver.lastName}</td>
+            #end
+            #if($dto.issuedBy)
+                <td>${dto.issuedBy.employee.firstName} ${dto.issuedBy.employee.lastName}</td>
             #end
         </tr>
     </table>

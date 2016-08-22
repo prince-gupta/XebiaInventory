@@ -41,6 +41,8 @@ public class MailingServiceImpl implements IMailingService {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setTo(dto.getEmployee().getEmail());
                 message.setSubject(environment.getProperty(Constants.MAIL_ASSET_ASSIGNMENT_SUBJECT));
+                String[] ccArray = environment.getProperty(Constants.IT_MAIL_ADDRESSES).split(",");
+                message.setCc(ccArray);
 
                 Map model = new HashMap<>();
                 model.put("dto", dto);

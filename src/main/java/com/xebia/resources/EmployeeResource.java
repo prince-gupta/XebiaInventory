@@ -4,13 +4,18 @@ import com.xebia.Secured;
 import com.xebia.dao.EmployeeDAO;
 import com.xebia.dto.ActionResult;
 import com.xebia.entities.Employee;
+import com.xebia.exception.ApplicationException;
+import com.xebia.services.IEmployeeService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.swing.*;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import java.sql.Date;
 import java.util.List;
 
@@ -21,6 +26,12 @@ public class EmployeeResource {
 
     @Autowired
     EmployeeDAO employeeDAO;
+
+    @Autowired
+    IEmployeeService employeeService;
+
+    @Context
+    HttpServletRequest httpServletRequest;
 
     @CrossOrigin(origins = "http://localhost:3000")
     @GET
@@ -101,5 +112,20 @@ public class EmployeeResource {
         return employeeDAO.getApprovers();
     }
 
-
+    @POST
+    @Path("delete")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public ActionResult delete(@RequestBody String eCode) {
+        ActionResult result = new ActionResult();
+        try{
+            employeeService.delete(eCode, httpServletRequest.getHeader("Username"));
+            result.setStatus(ActionResult.Status.SUCCESS);
+        }
+        catch (ApplicationException a){
+            result.setStatus(ActionResult.Status.FAILURE);
+            result.addData("eMessage", a.getMessage());
+        }
+        return result;
+    }
 }

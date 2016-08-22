@@ -8,4 +8,6 @@ import java.io.File;
 public interface ExcelService {
 
     public File exportToExcel();
+
+    public void importToDB(File fileToImport);
 }

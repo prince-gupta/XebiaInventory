@@ -1,5 +1,6 @@
 package com.xebia.dao;
 
+import com.xebia.entities.Asset;
 import com.xebia.enums.AssetStatus;
 import com.xebia.entities.AssetHistory;
 import org.springframework.stereotype.Repository;
@@ -27,6 +28,11 @@ public class AssetHistoryDAO {
         return;
     }
 
+    public List<AssetHistory> getHistoryByAsset(Asset asset){
+        return entityManager.createQuery("from AssetHistory where asset = :asset")
+                .setParameter("asset", asset)
+                .getResultList();
+    }
     public List<AssetHistory> getHistory(BigInteger employeeID, BigInteger assetID, AssetStatus status){
         return entityManager.createQuery("from AssetHistory where issued_to = :issuedTo and asset_id = :assetId and status = :status")
                 .setParameter("issuedTo", employeeID)
@@ -70,4 +76,13 @@ public class AssetHistoryDAO {
         entityManager.merge(assetHistory);
         return;
     }
+
+    public void delete(AssetHistory assetHistory) {
+        if (entityManager.contains(assetHistory))
+            entityManager.remove(assetHistory);
+        else
+            entityManager.remove(entityManager.merge(assetHistory));
+        return;
+    }
+
 }

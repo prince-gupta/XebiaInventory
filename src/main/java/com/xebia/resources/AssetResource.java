@@ -9,6 +9,7 @@ import com.xebia.dto.AssetHistoryDTO;
 import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.*;
 import com.xebia.exception.ApplicationException;
+import com.xebia.exception.FileException;
 import com.xebia.services.IAssetService;
 import com.xebia.services.excel.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.math.BigInteger;
@@ -110,18 +112,33 @@ public class AssetResource {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @POST
-    @Path("fetchAvailableAssetByType")
+    @Path("fetchAvailableAssetByTypeAndManu")
     @Produces("application/json")
-    public List<Asset> fetchAvailableAssetByType(@RequestBody BigInteger typeId){
-        return assetService.getAvailableAssetByType(typeId);
+    public List<Asset> fetchAvailableAssetByTypeAndManu(@RequestBody String ids){
+        String[] idArray = ids.split("-");
+        BigInteger typeId = new BigInteger(idArray[0]);
+        BigInteger manuId = new BigInteger(idArray[1]);
+        return assetService.fetchAvailableAssetByTypeAndManu(typeId, manuId);
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
     @POST
     @Path("deleteAsset")
-    @Produces("application/text")
-    public String deleteAsset(@RequestBody String id){
-       return assetService.deleteAsset(id);
+    @Produces("application/json")
+    public ActionResult deleteAsset(@RequestBody String id){
+        ActionResult result = new ActionResult();
+        try{
+            assetService.deleteAsset(id);
+            result.setStatus(ActionResult.Status.SUCCESS);
+        }
+        catch(ApplicationException e){
+            String errorCode = e.getMessage().split(":")[0];
+            String employeeName = e.getMessage().split(":")[1];
+            result.addData("eCode", errorCode);
+            result.addData("empName", employeeName);
+            result.setStatus(ActionResult.Status.FAILURE);
+        }
+        return result;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -137,6 +154,8 @@ public class AssetResource {
     @Path("unAssignAsset")
     @Produces("application/text")
     public String unAssignAsset(@RequestBody AssetDto assetDto){
+        String username = httpServletRequest.getHeader("Username");
+        assetDto.setUserName(username);
         return assetService.unAssignAsset(assetDto);
     }
 
@@ -285,5 +304,27 @@ public class AssetResource {
         response.header("Content-Disposition",
                 "attachment; filename=new-pdf-file.pdf");
         return response.build();
+    }
+
+    @POST
+    @Path("searchAsset")
+    @Produces("application/json")
+    public List<Asset> searchAsset(@RequestBody AssetDto assetDto){
+        return assetService.searchAsset(assetDto);
+    }
+
+    @GET
+    @Path("processHistoricalAssets")
+    @Produces("application/json")
+    public ActionResult processHistoricalAssets(){
+        ActionResult result = new ActionResult();
+        try{
+            assetService.processHistoricalAssets();
+            result.setStatus(ActionResult.Status.SUCCESS);
+        }
+        catch (FileException f){
+            result.setStatus(ActionResult.Status.FAILURE);
+        }
+        return result;
     }
 }

@@ -44,6 +44,7 @@ public class JMSMailListener {
                AssetHistory assetHistory =assetHistoryList.get(0);
                assignAssetMail.setDateOfIssue(assetHistory.getIssueDate());
                assignAssetMail.setDateTillValid(assetHistory.getValidTill());
+               assignAssetMail.setIssuedBy(assetHistory.getUpdatedBy());
                try {
                    mailingService.sendAssetAssignmentMail(assignAssetMail);
                    assignAssetMail.setStatus(MailStatus.SENT.getValue());
@@ -66,6 +67,7 @@ public class JMSMailListener {
                 AssetHistory assetHistory = assetHistoryList.get(0);
                 assignAssetMail.setDateOfIssue(assetHistory.getIssueDate());
                 assignAssetMail.setDateofReturned(assetHistory.getReturnedDate());
+                assignAssetMail.setIssuedBy(assetHistory.getUpdatedBy());
                 try {
                     mailingService.sendAssetReturnedMail(assignAssetMail);
                     assignAssetMail.setStatus(MailStatus.SENT.getValue());

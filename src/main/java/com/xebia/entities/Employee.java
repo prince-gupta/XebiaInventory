@@ -107,4 +107,8 @@ public class Employee implements Serializable {
     public void setMobile(String mobile) {
         this.mobile = mobile;
     }
+
+    public String getFullName(){
+        return this.getFirstName() + " " + this.getLastName();
+    }
 }

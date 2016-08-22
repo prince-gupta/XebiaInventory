@@ -1,6 +1,6 @@
 angular.module('app')
     .controller('registerController',
-    function ($scope, AssetFactory, EmployeeFactory, $uibModal, $cookieStore) {
+    function ($scope, AssetFactory, EmployeeFactory, $uibModal, $cookieStore, $timeout) {
         $scope.animationsEnabled = true;
         $scope.approvalsRequired = false;
         $scope.assets = [];
@@ -14,11 +14,15 @@ angular.module('app')
         };
         $scope.unAssignAsset = {};
 
+        $scope.enableApprover = true;
+
         $scope.assetTabDisable = true;
         $scope.assetHistoryTabDisable = true;
 
 
         $scope.employeeList = [];
+
+        $scope.printAssetDisabled = false;
 
         $scope.search = {};
 
@@ -38,6 +42,12 @@ angular.module('app')
         $scope.lastNameError = false;
         $scope.emailError = false;
         $scope.ecodeError = false;
+
+        init();
+
+        function init(){
+            fetchAll();
+        }
 
         function resetMessages() {
             $scope.showDangerMessage = false;
@@ -67,6 +77,12 @@ angular.module('app')
                 $scope.showDangerMessage = true;
                 $scope.dangerMessage = msg;
             }
+
+            $timeout(function(){
+                $scope.showDangerMessage = false;
+                $scope.showWarningMessage = false;
+                $scope.showSuccessMessage = false;
+            }, 5000);
         }
 
 
@@ -77,7 +93,6 @@ angular.module('app')
 
         $scope.closeWarningMsg = function () {
             $scope.showWarningMessage = false;
-            4
             $scope.warningMessage = "";
         }
 
@@ -131,29 +146,42 @@ angular.module('app')
 
                 }
             }).error(function (data, status, headers, config) {
-                showMessage(resolveError(status), "DANGER");
+                if (status == 401) {
+                    window.location = ""
+                }
+                else {
+                    showMessage(resolveError(status), "DANGER");
+                }
             });
         }
 
         $scope.refreshAssets = function () {
             if ($scope.assetTabDisable == false) {
-                AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
-                    $scope.assets = angular.copy(data);
-                    showMessage($scope.assets.length + " Asset(s) Found.", "SUCCESS");
-                    if (data.length == 0)
-                        $scope.showAssetTable = false;
-                    else
-                        $scope.showAssetTable = true;
-                }).error(function (data, status, headers, config) {
-                    showMessage(resolveError(status), "DANGER");
-                });
+                refreshAssetsOfEmployee();
             }
+        }
+
+        function refreshAssetsOfEmployee(){
+            AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
+                $scope.assets = angular.copy(data);
+                showMessage($scope.assets.length + " Asset(s) Found.", "SUCCESS");
+                if (data.length == 0) {
+                    $scope.showAssetTable = false;
+                    $scope.printAssetDisabled = true;
+                }
+                else {
+                    $scope.showAssetTable = true;
+                    $scope.printAssetDisabled = false;
+                }
+            }).error(function (data, status, headers, config) {
+                showMessage(resolveError(status), "DANGER");
+            });
         }
 
         $scope.printEmployeeAssets = function () {
             var req = new XMLHttpRequest();
-            var fileName = $scope.employeeList[0].firstName+$scope.employeeList[0].lastName;
-            req.open("POST","/inventory/asset/getEmployeeAssetsFileParam" , true);
+            var fileName = $scope.employeeList[0].firstName + $scope.employeeList[0].lastName;
+            req.open("POST", "/inventory/asset/getEmployeeAssetsFileParam", true);
             req.setRequestHeader("Authorization", $cookieStore.get('token'));
             req.setRequestHeader("Username", $cookieStore.get('Username'));
             req.responseType = "blob";
@@ -183,7 +211,7 @@ angular.module('app')
             $scope.lastNameError = false;
             $scope.emailError = false;
             $scope.ecodeError = false;
-            waitingDialog.show("Please wait while data is loading . . .");
+             waitingDialog.show("Please wait while data is loading . . .");
             $scope.assets = [];
             $scope.isResultOK = false;
             //        $scope.parseApprovalCheckBox();
@@ -207,6 +235,7 @@ angular.module('app')
                     if ($scope.employeeList.length == 1) {
                         $scope.isResultOK = true;
                         $scope.employeeId = $scope.employeeList[0].id;
+                        $scope.enableApprover = $scope.employeeList[0].approvalsRequired;
                         AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
                             $scope.assets = angular.copy(data);
                         });
@@ -217,7 +246,7 @@ angular.module('app')
 
                 }
                 //  $myModal.fadeOut();
-                waitingDialog.hide();
+                  waitingDialog.hide();
             })
                 .error(function (data, status, headers, config) {
                     if (status == 401) {
@@ -234,14 +263,8 @@ angular.module('app')
             $scope.unAssignAsset.assetId = assetId;
             $scope.unAssignAsset.employee = $scope.employeeId;
             AssetFactory.unAssignAsset($scope.unAssignAsset).success(function (data) {
-                console.log(data);
-                AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
-                    $scope.assets = angular.copy(data);
-                    showMessage("Asset Un-Assigned Successfully.", "SUCCESS");
-                }).error(function (data, status, headers, config) {
-                    showMessage(resolveError(status), "DANGER");
-                    waitingDialog.hide();
-                });
+                showMessage("Asset Un-Assigned Successfully.", "SUCCESS");
+                refreshAssetsOfEmployee();
             }).error(function (data, status, headers, config) {
                 showMessage(resolveError(status), "DANGER");
                 waitingDialog.hide();
@@ -506,6 +529,30 @@ angular.module('app')
                 resolve: {
                     id: function () {
                         return $scope.employeeId;
+                    },
+                    enableApprovers : function() {
+                        return $scope.enableApprover;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+            }, function () {
+
+            });
+        }
+
+        $scope.openDeleteEmployeeWindow = function (size, ecode) {
+
+            var modalInstance = $uibModal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'employeeConfirmation.html',
+                controller: 'DeleteEmployeeCtrl',
+                size: size,
+                resolve: {
+                    ecode: function () {
+                        return ecode;
                     }
                 }
             });
@@ -518,26 +565,77 @@ angular.module('app')
         };
     }
 );
-angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFactory, EmployeeFactory, $uibModalInstance, id) {
+angular.module('app').controller('DeleteEmployeeCtrl', function($scope, $timeout, EmployeeFactory, $uibModalInstance, ecode){
+
+    $scope.ecode = ecode;
+    $scope.message="";
+    $scope.showMessage = false;
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+
+    $scope.delete = function(){
+        $scope.message="";
+        $scope.showMessage = false;
+        $scope.disableYes = false;
+        EmployeeFactory.delete($scope.ecode).success(function(data){
+            $scope.disableYes = true;
+            if(data.status == 'SUCCESS'){
+                $scope.message="Employee has been removed from System Successfully. Please trigger your search again to get latest data.";
+            }
+            else{
+                if(data.data.eMessage == 'NOT_FOUND'){
+                    $scope.message="Employee you are trying to modify is not present in system.";
+                }
+                if(data.data.eMessage == 'ASSETS_PRESENT'){
+                    $scope.message="There are some assets still assigned to employee. Please try to un-assign them first.";
+                }
+                if(data.data.eMessage == 'LOGGEDIN_USER_ERROR'){
+                    $scope.message="Logged In User can not delete himself from system . Please try to logged in with other user and then try to delete this user.";
+                }
+            }
+            $scope.showMessage = true;
+            $timeout(function(){
+                $uibModalInstance.dismiss('cancel');
+            }, 5000);
+        })
+    }
+
+});
+angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFactory, EmployeeFactory, $uibModalInstance, id, enableApprovers) {
 
     $scope.id = id;
+    $scope.enableApprovers = enableApprovers;
     $scope.showPrint = false;
+    $scope.showApprovers = false;
 
     $scope.assetTypeList = [];
 
+    $scope.assetsFound = false;
+
     $scope.assetList = [];
     $scope.selectedAssetType = "";
+    $scope.selectedManufacturer = "";
     $scope.assignAsset = {};
     $scope.approvers = [];
     $scope.assetTypeDisplayList = [];
     $scope.assetDisplayList = [];
     $scope.approversList = [];
     $scope.approversDisplayList = [];
+    $scope.manufacturerList = [];
+    $scope.manufacturerDisplayList = [];
     $scope.dummyEmployee = {
         id: -1,
         firstName: 'Please select Approver',
         lastName: ""
     };
+
+    $scope.dummyManufacturer = {
+        name: 'Select Manufacturer of Asset',
+        id: -1
+    };
+
     $scope.assetTypeDummy = {
         id: -1,
         type: 'Please select Asset Type',
@@ -559,14 +657,27 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
             }
             $scope.selectedAssetType = $scope.assetTypeDummy.id;
         });
-        EmployeeFactory.getApprovers().success(function (data) {
-            $scope.approvers = angular.copy(data);
-            $scope.approversDisplayList[0] = $scope.dummyEmployee;
-            for (var index = 0; index < $scope.approvers.length; index++) {
-                $scope.approversDisplayList.push($scope.approvers[index]);
+
+        AssetFactory.getManufacturerList().success(function (data) {
+            $scope.manufacturerList = angular.copy(data);
+            $scope.manufacturerDisplayList[0] = ($scope.dummyManufacturer);
+            $scope.selectedManufacturer = $scope.dummyManufacturer.id;
+            for (var index = 0; index < $scope.manufacturerList.length; index++) {
+                $scope.manufacturerDisplayList.push($scope.manufacturerList[index]);
             }
-            $scope.assignAsset.approvedBy = $scope.dummyEmployee.id;
         });
+
+        if($scope.enableApprovers == "Y") {
+            $scope.showApprovers = true;
+            EmployeeFactory.getApprovers().success(function (data) {
+                $scope.approvers = angular.copy(data);
+                $scope.approversDisplayList[0] = $scope.dummyEmployee;
+                for (var index = 0; index < $scope.approvers.length; index++) {
+                    $scope.approversDisplayList.push($scope.approvers[index]);
+                }
+                $scope.assignAsset.approvedBy = $scope.dummyEmployee.id;
+            });
+        }
         console.log($scope.assetTypeDisplayList);
         console.log($scope.approversDisplayList);
     }
@@ -574,21 +685,34 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
     $scope.assetFetched = false;
     $scope.showMessage = false;
     $scope.message = "";
-    $scope.fetchAvailableAssetsByType = function () {
+    $scope.fetchAvailableAssetsByTypeAndManu = function () {
         if ($scope.selectedAssetType == -1) {
             $scope.showMessage = true;
             $scope.message = "Please select type of Asset, you want to fetch."
             $("#assignAssetModalMessage").css("color", "darkorange");
         }
+        else if ($scope.selectedManufacturer == -1) {
+            $scope.showMessage = true;
+            $scope.message = "Please select Manufacturer of Asset, you want to fetch."
+            $("#assignAssetModalMessage").css("color", "darkorange");
+        }
         else {
             $scope.showMessage = false;
             $scope.message = "";
-            AssetFactory.getAvailableAssetByType($scope.selectedAssetType).success(function (data) {
+            var ids = $scope.selectedAssetType + '-' + $scope.selectedManufacturer;
+            AssetFactory.fetchAvailableAssetByTypeAndManu(ids).success(function (data) {
+                $scope.assetDisplayList=[];
                 $scope.assetList = angular.copy(data);
                 $scope.assetDisplayList[0] = $scope.assetDummy;
                 $scope.assignAsset.assetId = $scope.assetDummy.id;
-                for (var index = 0; index < $scope.assetList.length; index++) {
-                    $scope.assetDisplayList.push($scope.assetList[index]);
+                if($scope.assetList.length > 0) {
+                    for (var index = 0; index < $scope.assetList.length; index++) {
+                        $scope.assetDisplayList.push($scope.assetList[index]);
+                    }
+                    $scope.assetsFound = true;
+                }
+                else{
+                    $scope.assetsFound = false;
                 }
                 $scope.assetFetched = true;
             });
@@ -620,8 +744,9 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
             AssetFactory.assignAsset($scope.assignAsset).success(function (data) {
                 console.log(data);
             });
+            $uibModalInstance.close();
         }
-        $uibModalInstance.close();
+
     };
 
     $scope.print = function () {
@@ -686,6 +811,11 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/employee/update', data);
+            },
+            delete: function (data) {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/employee/delete', data);
             }
         }
     })

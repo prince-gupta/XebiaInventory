@@ -1,5 +1,6 @@
 package com.xebia.services.impl;
 
+import com.xebia.common.Constants;
 import com.xebia.dto.AssetFreeMarkerDto;
 import com.xebia.dto.AssetHistoryDTO;
 import com.xebia.enums.AssetStatus;
@@ -11,11 +12,14 @@ import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.*;
 import com.xebia.enums.MailStatus;
 import com.xebia.exception.ApplicationException;
+import com.xebia.exception.FileException;
 import com.xebia.messaging.JMSMailService;
 import com.xebia.services.IAssetService;
+import com.xebia.services.excel.ExcelService;
 import com.xebia.services.print.IPrintService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -57,6 +61,15 @@ public class AssetServiceImpl implements IAssetService {
 
     @Autowired
     IPrintService printService;
+
+    @Autowired
+    AssignAssetMailDAO assignAssetMailDAO;
+
+    @Autowired
+    ExcelService excelService;
+
+    @Autowired
+    Environment environment;
 
     @Override
     public String createAssetType(AssetType assetType) {
@@ -171,13 +184,16 @@ public class AssetServiceImpl implements IAssetService {
         assetDto.setSerialNumber(dbAsset.getSerialNumber());
         assetDto.setName(dbAsset.getName());
         Employee employee = employeeDAO.getById(assetDto.getEmployee());
-        Employee approver = employeeDAO.getById(assetDto.getApprovedBy());
+        Employee approver = null;
+        if (employee.getApprovalsRequired() .equals("Y"))
+            approver = employeeDAO.getById(assetDto.getApprovedBy());
         dbAsset.setEmployee(employee);
         assetDAO.update(dbAsset);
         dbAsset = assetDAO.getById(assetDto.getAssetId());
         AssetHistory assetHistory = new AssetHistory();
         assetHistory.setAsset(dbAsset);
-        assetHistory.setEmployee1(approver);
+        if (approver != null)
+            assetHistory.setEmployee1(approver);
         assetHistory.setEmployee2(employee);
         assetHistory.setIssueDate(assetDto.getDateOfIssue());
         assetHistory.setValidTill(assetDto.getDateTillValid());
@@ -185,11 +201,11 @@ public class AssetServiceImpl implements IAssetService {
         User updatedBy = userDAO.getUserByUName(assetDto.getUserName());
         assetHistory.setUpdatedBy(updatedBy);
         assetHistoryDAO.create(assetHistory);
-        jmsMailService.registerAssignAssetMail(getAssignAssetMailDto(dbAsset, employee, approver, assetDto, AssetStatus.ISSUED));
+        jmsMailService.registerAssignAssetMail(getAssignAssetMailDto(dbAsset, employee, approver, assetDto, AssetStatus.ISSUED, updatedBy));
         return "OK";
     }
 
-    private AssignAssetMail getAssignAssetMailDto(Asset asset, Employee employee, Employee approver, AssetDto assetDto, AssetStatus status) {
+    private AssignAssetMail getAssignAssetMailDto(Asset asset, Employee employee, Employee approver, AssetDto assetDto, AssetStatus status, User updatedBy) {
         AssignAssetMail assignAssetMailDto = new AssignAssetMail();
         assignAssetMailDto.setStatus(MailStatus.NOT_SENT.getValue());
         assignAssetMailDto.setEmployee(employee);
@@ -197,6 +213,7 @@ public class AssetServiceImpl implements IAssetService {
         assignAssetMailDto.setAsset(asset);
         assignAssetMailDto.setAssetStatus(status.getValue());
         assignAssetMailDto.setUpdatedDate(new Date());
+        assignAssetMailDto.setIssuedBy(updatedBy);
         return assignAssetMailDto;
     }
 
@@ -204,14 +221,16 @@ public class AssetServiceImpl implements IAssetService {
         Asset dbAsset = assetDAO.getById(assetDto.getAssetId());
         Employee employee = employeeDAO.getById(assetDto.getEmployee());
         dbAsset.setEmployee(null);
+        User updateBy = userDAO.getUserByUName(assetDto.getUserName());
         List<AssetHistory> dbAssetHistories = assetHistoryDAO.getIssuedNExpiredHistory(assetDto.getEmployee(), assetDto.getAssetId());
         if (dbAssetHistories != null && dbAssetHistories.size() > 0) {
             AssetHistory dbAssetHistory = dbAssetHistories.get(0);
             dbAssetHistory.setStatus(AssetStatus.RETURNED.getValue());
             dbAssetHistory.setReturnedDate(new Date());
+            dbAssetHistory.setUpdatedBy(updateBy);
             assetDAO.update(dbAsset);
             assetHistoryDAO.update(dbAssetHistory);
-            jmsMailService.registerReturnedAssetMail(getAssignAssetMailDto(dbAsset, employee, null, assetDto, AssetStatus.RETURNED));
+            jmsMailService.registerReturnedAssetMail(getAssignAssetMailDto(dbAsset, employee, null, assetDto, AssetStatus.RETURNED, updateBy));
             return "OK";
         } else {
             return "FAIL";
@@ -233,10 +252,19 @@ public class AssetServiceImpl implements IAssetService {
     }
 
     @Override
-    public String deleteAsset(String id) {
-        Asset Asset = assetDAO.getById(new BigInteger(id));
-        assetDAO.delete(Asset);
-        return "OK";
+    public void deleteAsset(String id) throws ApplicationException {
+        Asset asset = assetDAO.getById(new BigInteger(id));
+        if (asset.getEmployee() != null)
+            throw new ApplicationException("ASSET_ASSINGMENT_ERROR : " + asset.getEmployee().getFullName());
+        List<AssetHistory> assetHistoryList = assetHistoryDAO.getHistoryByAsset(asset);
+        for (AssetHistory assetHistory : assetHistoryList) {
+            assetHistoryDAO.delete(assetHistory);
+        }
+        List<AssignAssetMail> assignAssetMails = assignAssetMailDAO.getByAsset(asset);
+        for (AssignAssetMail assignAssetMail : assignAssetMails) {
+            assignAssetMailDAO.delete(assignAssetMail);
+        }
+        assetDAO.delete(asset);
     }
 
     @Override
@@ -255,9 +283,9 @@ public class AssetServiceImpl implements IAssetService {
     }
 
     @Override
-    public List<Asset> getAvailableAssetByType(BigInteger typeId) {
+    public List<Asset> fetchAvailableAssetByTypeAndManu(BigInteger typeId, BigInteger manuId) {
 
-        return assetDAO.getAvailableByTypeId(typeId);
+        return assetDAO.getAvailableByTypeId(typeId, manuId);
     }
 
     @Override
@@ -276,7 +304,8 @@ public class AssetServiceImpl implements IAssetService {
                 assetDto.setDateTillValid(dbAssetHistory.getValidTill());
                 assetDto.setStatus(dbAssetHistory.getStatus());
                 assetDto.setEmployee(employeeID);
-                assetDto.setApprovedBy(dbAssetHistory.getEmployee1().getId());
+                if (dbAssetHistory.getEmployee2().getApprovalsRequired() == "Y")
+                    assetDto.setApprovedBy(dbAssetHistory.getEmployee1().getId());
                 if (Utility.isExpired(new Date(dbAssetHistory.getValidTill().getTime())) && !dbAssetHistory.getStatus().equals(AssetStatus.EXPIRED.getValue())) {
                     dbAssetHistory.setStatus(AssetStatus.EXPIRED.getValue());
                     assetHistoryDAO.update(dbAssetHistory);
@@ -373,15 +402,17 @@ public class AssetServiceImpl implements IAssetService {
     }
 
     public List<AssetHistoryDTO> getAssetsHistory(BigInteger employeeId) {
-        List<AssetHistory> assetHistoryList  = assetHistoryDAO.getHistoryByEmployee(employeeId);
+        List<AssetHistory> assetHistoryList = assetHistoryDAO.getHistoryByEmployee(employeeId);
         List<AssetHistoryDTO> assetHistoryDTOs = new ArrayList<>();
-        for(AssetHistory assetHistory : assetHistoryList){
+        for (AssetHistory assetHistory : assetHistoryList) {
             AssetHistoryDTO assetHistoryDTO = new AssetHistoryDTO();
             assetHistoryDTO.setStatus(assetHistory.getStatus());
             assetHistoryDTO.setAssetName(assetHistory.getAsset().getName());
             assetHistoryDTO.setSerialNumber(assetHistory.getAsset().getSerialNumber());
-            assetHistoryDTO.setApproverFirstName(assetHistory.getEmployee1().getFirstName());
-            assetHistoryDTO.setApproverLastName(assetHistory.getEmployee1().getLastName());
+            if (assetHistory.getEmployee2().getApprovalsRequired() == "Y") {
+                assetHistoryDTO.setApproverFirstName(assetHistory.getEmployee1().getFirstName());
+                assetHistoryDTO.setApproverLastName(assetHistory.getEmployee1().getLastName());
+            }
             assetHistoryDTO.setDateOfIssue(assetHistory.getIssueDate());
             assetHistoryDTO.setDateTillValid(assetHistory.getValidTill());
             assetHistoryDTO.setReturnedDate(assetHistory.getReturnedDate());
@@ -426,10 +457,10 @@ public class AssetServiceImpl implements IAssetService {
         return assetDtos;
     }
 
-    public File getEmployeeAssetsFileParam(BigInteger employeeId, String username){
+    public File getEmployeeAssetsFileParam(BigInteger employeeId, String username) {
         List<AssetDto> assetList = getEmployeeAsset(employeeId);
         List<AssetFreeMarkerDto> freeMarkerDtos = new ArrayList<>();
-        for(AssetDto assetDto : assetList){
+        for (AssetDto assetDto : assetList) {
             AssetFreeMarkerDto assetFreeMarkerDto = new AssetFreeMarkerDto();
             assetFreeMarkerDto.setDateTillValid(assetDto.getDateTillValid());
             assetFreeMarkerDto.setDateOfIssue(assetDto.getDateOfIssue());
@@ -443,7 +474,7 @@ public class AssetServiceImpl implements IAssetService {
         }
 
         File resultFile = null;
-        if(assetList.size() > 0){
+        if (assetList.size() > 0) {
             AssetDto assetDto = assetList.get(0);
             Employee employee = employeeDAO.getById(assetDto.getEmployee());
             Map modelData = new HashMap<>();
@@ -451,9 +482,46 @@ public class AssetServiceImpl implements IAssetService {
             modelData.put("eCode", employee.getECode());
             modelData.put("mobile", employee.getMobile());
             modelData.put("email", employee.getEmail());
-            modelData.put("assets",freeMarkerDtos);
-           resultFile = printService.generatePDF(modelData);
+            modelData.put("assets", freeMarkerDtos);
+            resultFile = printService.generatePDF(modelData);
         }
         return resultFile;
+    }
+
+    public List<Asset> searchAsset(AssetDto assetDto) {
+        AssetManufacturer assetManufacturer = null;
+        AssetType assetType = null;
+        if (assetDto.getAssetManufacturer() != null)
+            assetManufacturer = manufacturerDAO.getById(assetDto.getAssetManufacturer());
+        if (assetDto.getAssetType() != null)
+            assetType = assetTypeDAO.getById(assetDto.getAssetType());
+        Asset asset = new Asset();
+        asset.setName(assetDto.getName());
+        asset.setSerialNumber(assetDto.getSerialNumber());
+        asset.setAssetManufacturer(assetManufacturer);
+        asset.setAssetType(assetType);
+        List<Asset> assetList =  assetDAO.getByAssetObject(asset);
+        for (Asset assetTemp : assetList) {
+            if (assetTemp.getEmployee() == null) {
+                Employee dummyEmployee = new Employee();
+                dummyEmployee.setFirstName("Not");
+                dummyEmployee.setLastName("Issued");
+                assetTemp.setEmployee(dummyEmployee);
+            }
+        }
+        return assetList;
+    }
+
+    public void processHistoricalAssets() throws ApplicationException,FileException{
+        File historicalAssetDir = new File(environment.getProperty(Constants.HIST_ASSETS_TEMP_PATH));
+        File[] files = historicalAssetDir.listFiles();
+        if(files == null || files.length == 0){
+            throw new FileException("DIR_EMPTY");
+        }
+
+        if(files.length > 1){
+            throw new FileException("MORE_FILES");
+        }
+        excelService.importToDB(files[0]);
     }
 }

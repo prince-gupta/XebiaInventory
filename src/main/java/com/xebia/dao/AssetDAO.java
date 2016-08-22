@@ -1,12 +1,15 @@
 package com.xebia.dao;
 
+import com.xebia.dto.AssetDto;
 import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.Asset;
 import com.xebia.entities.AssetType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -33,6 +36,52 @@ public class AssetDAO {
     public List<Asset> getAll() {
         List<Asset> assets = entityManager.createQuery("from Asset").getResultList();
         return assets;
+    }
+
+    public List<Asset> getByAssetObject(Asset asset){
+        StringBuffer conditions = new StringBuffer();
+        String queryString = "from Asset ";
+        boolean isN = false, isSN = false, isM = false, isT = false;
+        if (StringUtils.isNotBlank(asset.getName())) {
+            conditions.append("name = :name");
+            isN = true;
+        }
+        if (StringUtils.isNotBlank(asset.getSerialNumber())) {
+            if (isN)
+                conditions.append(" and ");
+            conditions.append("serial_number = :sno");
+            isSN = true;
+        }
+        if (asset.getAssetManufacturer() != null) {
+            if (isN || isSN)
+                conditions.append(" and ");
+            conditions.append("manufacturer = :manu");
+            isM = true;
+        }
+
+        if (asset.getAssetType() != null) {
+            if (isN || isSN || isM)
+                conditions.append(" and ");
+            conditions.append("type = :type");
+            isT = true;
+        }
+        if (conditions.length() > 0) {
+            queryString += "where " + conditions.toString();
+        }
+        Query query = entityManager.createQuery(queryString);
+        if (isN)
+            query.setParameter("name", asset.getName());
+
+        if (isSN)
+            query.setParameter("sno", asset.getSerialNumber());
+
+        if (isM)
+            query.setParameter("manu", asset.getAssetManufacturer());
+
+        if (isT)
+            query.setParameter("type", asset.getAssetType());
+
+        return query.getResultList();
     }
 
     /**
@@ -64,10 +113,11 @@ public class AssetDAO {
                 .getResultList();
     }
 
-    public List<Asset> getAvailableByTypeId(BigInteger id) {
+    public List<Asset> getAvailableByTypeId(BigInteger typId, BigInteger manuId) {
 
-        return entityManager.createQuery("from Asset where type = :typeId and issued_to = null")
-                .setParameter("typeId",id)
+        return entityManager.createQuery("from Asset where type = :typeId and issued_to = null and manufacturer = :manuId")
+                .setParameter("typeId",typId)
+                .setParameter("manuId",manuId )
                 .getResultList();
     }
 

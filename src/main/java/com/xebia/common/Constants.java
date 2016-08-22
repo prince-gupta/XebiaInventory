@@ -33,6 +33,10 @@ public class Constants {
 
     public static String PDF = "temp.pdf";
 
+    public static String IT_MAIL_ADDRESSES = "it.mail.addresses";
+
+    public static String HIST_ASSETS_TEMP_PATH = "app.historical.assets.file.path";
+
 }
 
 

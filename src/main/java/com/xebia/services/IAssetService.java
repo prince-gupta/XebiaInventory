@@ -5,6 +5,7 @@ import com.xebia.dto.AssetHistoryDTO;
 import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.*;
 import com.xebia.exception.ApplicationException;
+import com.xebia.exception.FileException;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -32,13 +33,13 @@ public interface IAssetService {
 
     public List<Asset> getAllAsset();
 
-    public String deleteAsset(String id);
+    public void deleteAsset(String id) throws ApplicationException;
 
     public String updateAsset(Asset Asset);
 
     public List<Asset> getAssetByType(BigInteger typeId);
 
-    public List<Asset> getAvailableAssetByType(BigInteger typeId);
+    public List<Asset> fetchAvailableAssetByTypeAndManu(BigInteger typeId, BigInteger manuId);
 
     public List<AssetDto> getEmployeeAsset(BigInteger employeeID);
 
@@ -63,4 +64,8 @@ public interface IAssetService {
     public List<AssetDto> getExpirationReportForDashboard();
 
     public File getEmployeeAssetsFileParam(BigInteger employeeId, String userName);
+
+    public List<Asset> searchAsset(AssetDto assetDto);
+
+    public void processHistoricalAssets() throws ApplicationException,FileException;
 }
