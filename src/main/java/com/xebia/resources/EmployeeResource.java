@@ -2,8 +2,10 @@ package com.xebia.resources;
 
 import com.xebia.Secured;
 import com.xebia.dao.EmployeeDAO;
+import com.xebia.dao.UserDAO;
 import com.xebia.dto.ActionResult;
 import com.xebia.entities.Employee;
+import com.xebia.entities.User;
 import com.xebia.exception.ApplicationException;
 import com.xebia.services.IEmployeeService;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,9 @@ public class EmployeeResource {
     @Context
     HttpServletRequest httpServletRequest;
 
+    @Autowired
+    UserDAO userDAO;
+
     @CrossOrigin(origins = "http://localhost:3000")
     @GET
     @Path("fetchAll")
@@ -48,6 +53,16 @@ public class EmployeeResource {
     @Consumes("application/json")
     public List<Employee> getEmployee(@RequestBody Employee employee) {
         return employeeDAO.getByEmployeeObject(employee);
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GET
+    @Path("fetchEmployeeDetails")
+    @Produces("application/json")
+    public Employee getEmployee() {
+        String userName = httpServletRequest.getHeader("Username");
+        User user = userDAO.getUserByUName(userName);
+        return employeeDAO.getById(user.getEmployee().getId());
     }
 
     @CrossOrigin(origins = "http://localhost:3000")

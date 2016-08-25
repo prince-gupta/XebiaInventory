@@ -84,6 +84,52 @@ public class AssetDAO {
         return query.getResultList();
     }
 
+    public List<Asset> getByAssetDtoObject(AssetDto assetDto){
+        StringBuffer conditions = new StringBuffer();
+        String queryString = "from Asset ";
+        boolean isN = false, isSN = false, isM = false, isT = false;
+        if (StringUtils.isNotBlank(assetDto.getName())) {
+            conditions.append("name = :name");
+            isN = true;
+        }
+        if (StringUtils.isNotBlank(assetDto.getSerialNumber())) {
+            if (isN)
+                conditions.append(" and ");
+            conditions.append("serial_number = :sno");
+            isSN = true;
+        }
+        if (assetDto.getAssetManufacturer() != null) {
+            if (isN || isSN)
+                conditions.append(" and ");
+            conditions.append("manufacturer = :manu");
+            isM = true;
+        }
+
+        if (assetDto.getAssetType() != null) {
+            if (isN || isSN || isM)
+                conditions.append(" and ");
+            conditions.append("type = :type");
+            isT = true;
+        }
+        if (conditions.length() > 0) {
+            queryString += "where " + conditions.toString();
+        }
+        Query query = entityManager.createQuery(queryString);
+        if (isN)
+            query.setParameter("name", assetDto.getName());
+
+        if (isSN)
+            query.setParameter("sno", assetDto.getSerialNumber());
+
+        if (isM)
+            query.setParameter("manu", assetDto.getAssetManufacturer());
+
+        if (isT)
+            query.setParameter("type", assetDto.getAssetType());
+
+        return query.getResultList();
+    }
+
     /**
      * Delete the Asset from the database.
      */

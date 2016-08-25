@@ -1,5 +1,7 @@
 package com.xebia.services.excel;
 
+import com.xebia.exception.ApplicationException;
+
 import java.io.File;
 
 /**
@@ -9,5 +11,5 @@ public interface ExcelService {
 
     public File exportToExcel();
 
-    public void importToDB(File fileToImport);
+    public int importToDB(File fileToImport) throws ApplicationException;
 }

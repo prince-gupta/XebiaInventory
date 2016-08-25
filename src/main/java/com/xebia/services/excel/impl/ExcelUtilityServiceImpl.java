@@ -1,26 +1,24 @@
 package com.xebia.services.excel.impl;
 
 import com.xebia.common.Utility;
-import com.xebia.dao.ExcelMappingDAO;
+import com.xebia.dao.*;
+import com.xebia.dto.AssetDto;
 import com.xebia.dto.ExcelImportDto;
-import com.xebia.entities.Asset;
-import com.xebia.entities.Employee;
-import com.xebia.entities.ExcelMapping;
+import com.xebia.entities.*;
 import com.xebia.enums.ExcelMappingEnum;
 import com.xebia.exception.ApplicationException;
 import com.xebia.exception.ParsingException;
 import com.xebia.services.IAssetService;
 import com.xebia.services.excel.ExcelService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.WorkbookUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -40,6 +38,21 @@ public class ExcelUtilityServiceImpl implements ExcelService {
 
     @Autowired
     ExcelMappingDAO excelMappingDAO;
+
+    @Autowired
+    EmployeeDAO employeeDAO;
+
+    @Autowired
+    AssetTypeDAO assetTypeDAO;
+
+    @Autowired
+    ManufacturerDAO manufacturerDAO;
+
+    @Autowired
+    HardwareConfigurationDAO hardwareConfigurationDAO;
+
+    @Autowired
+    AssetDAO assetDAO;
 
     public File exportToExcel() {
         HSSFWorkbook workbook = new HSSFWorkbook();
@@ -124,9 +137,13 @@ public class ExcelUtilityServiceImpl implements ExcelService {
                         case Cell.CELL_TYPE_STRING :
                         case Cell.CELL_TYPE_BLANK:
                             String cellValue = cell.getStringCellValue();
-                            switch (getByDisplayName(appMapping.get(index))) {
+                            ExcelMappingEnum excelMapping = getByDisplayName(appMapping.get(index));
+                            if(excelMapping == null){
+                                throw new ApplicationException("No Mapping Found for " + appMapping.get(index) + " in System Enum.");
+                            }
+                            switch (excelMapping) {
                                 case DOI:
-                                    excelImportDto.setDateOfIssue(new Date(cellValue));
+                                    excelImportDto.setDateOfIssue(StringUtils.isEmpty(cellValue) ? null : new Date(cellValue));
                                     break;
                                 case HN:
                                     excelImportDto.setHostName(cellValue);
@@ -140,7 +157,7 @@ public class ExcelUtilityServiceImpl implements ExcelService {
                                 case DEPART:
                                     excelImportDto.setDepartment(cellValue);
                                     break;
-                                case SNO:
+                                case ASNO:
                                     excelImportDto.setSerialNumber(cellValue);
                                     break;
                                 case OS:
@@ -159,7 +176,7 @@ public class ExcelUtilityServiceImpl implements ExcelService {
                                     excelImportDto.setProcessor(cellValue);
                                     break;
                                 case WED:
-                                    excelImportDto.setWarrantyEndDate(new Date(cellValue));
+                                    excelImportDto.setWarrantyEndDate(StringUtils.isEmpty(cellValue) ? null : new Date(cellValue));
                                     break;
                                 case LB:
                                     excelImportDto.setLaptopBag(cellValue);
@@ -171,10 +188,20 @@ public class ExcelUtilityServiceImpl implements ExcelService {
                                     excelImportDto.setSpeaker(cellValue);
                                     break;
                                 case ARD:
-                                    excelImportDto.setReturnDate(new Date(cellValue));
+                                    excelImportDto.setReturnDate( StringUtils.isEmpty(cellValue) ? null : new Date(cellValue));
                                     break;
                                 case SOU:
                                     excelImportDto.setStatusOfUser(cellValue);
+                                    break;
+                                case SNO:
+                                    break;
+                                case ATO:
+                                    break;
+                                case HP:
+                                    excelImportDto.setHeadPhone(cellValue);
+                                    break;
+                                case MOBILE:
+                                    excelImportDto.setMobile(cellValue);
                                     break;
                                 default:
                                     throw new ApplicationException("Mapping Not Found");
@@ -198,7 +225,7 @@ public class ExcelUtilityServiceImpl implements ExcelService {
                                 case DEPART:
                                     excelImportDto.setDepartment(numericCellValue.toString());
                                     break;
-                                case SNO:
+                                case ASNO:
                                     excelImportDto.setSerialNumber(numericCellValue.toString());
                                     break;
                                 case OS:
@@ -234,6 +261,16 @@ public class ExcelUtilityServiceImpl implements ExcelService {
                                 case SOU:
                                     excelImportDto.setStatusOfUser(numericCellValue.toString());
                                     break;
+                                case SNO:
+                                    break;
+                                case ATO:
+                                    break;
+                                case HP:
+                                    excelImportDto.setHeadPhone(numericCellValue.toString());
+                                    break;
+                                case MOBILE:
+                                    excelImportDto.setMobile(numericCellValue.toString());
+                                    break;
                                 default:
                                     throw new ApplicationException("Mapping Not Found");
                             }
@@ -253,8 +290,66 @@ public class ExcelUtilityServiceImpl implements ExcelService {
         return excelImportDtoList;
     }
 
-    public void importToDB(File fileToImport) {
-        parseExcelFile(fileToImport);
+    public int importToDB(File fileToImport) throws ApplicationException{
+        List<ExcelImportDto> excelImportDtoList = parseExcelFile(fileToImport);
+        for(ExcelImportDto excelImportDto : excelImportDtoList){
+
+        }
+           return 0;
+    }
+
+    private void f(ExcelImportDto excelImportDto){
+        AssetManufacturer assetManufacturer = checkAndCreateAssetManufacturer(excelImportDto.getAssetName().split(" ")[0]);
+        HardwareConfiguration hardwareConfiguration = checkAndCreateHardwareConfiguration(excelImportDto);
+        AssetType assetType = checkAndCreateAssetType("Laptop");
+
+        AssetDto assetDto = new AssetDto();
+        assetDto.setName(excelImportDto.getAssetName());
+        assetDto.setAssetManufacturer(assetManufacturer.getId());
+        assetDto.setAssetType(assetType.getId());
+        assetDto.setSerialNumber(excelImportDto.getSerialNumber());
+        assetDto.setDateOfPurchase(excelImportDto.getDateOfIssue());
+        assetDto.setHardwareConfiguration(hardwareConfiguration.getId());
+        assetService.createAsset(assetDto);
+        Asset dbAsset = assetDAO.getByAssetDtoObject(assetDto).get(0);
+        AssetDto tempAssetDto = new AssetDto();
+        tempAssetDto.setAssetId(tempAssetDto.getAssetId());
+        assetService.assignAsset(assetDto);
+    }
+
+    private AssetType checkAndCreateAssetType(String assetType){
+        List<AssetType> assetTypeList = assetTypeDAO.getByType(assetType);
+        if(assetTypeList == null || assetTypeList.size() == 0){
+            AssetType assetType1 = new AssetType();
+            assetType1.setType(assetType);
+            assetTypeDAO.create(assetType1);
+            return assetTypeDAO.getByType(assetType).get(0);
+        }
+        return assetTypeList.get(0);
+    }
+
+    private AssetManufacturer checkAndCreateAssetManufacturer(String assetManu){
+        List<AssetManufacturer> assetManufacturers= manufacturerDAO.getByName(assetManu);
+        if(assetManufacturers == null){
+            AssetManufacturer assetManufacturer = new AssetManufacturer();
+            assetManufacturer.setName(assetManu);
+            manufacturerDAO.create(assetManufacturer);
+            return manufacturerDAO.getByName(assetManu).get(0);
+        }
+        return assetManufacturers.get(0);
+    }
+
+    private HardwareConfiguration checkAndCreateHardwareConfiguration(ExcelImportDto excelImportDto){
+        HardwareConfiguration hardwareConfiguration = new HardwareConfiguration();
+        hardwareConfiguration.setCpu(excelImportDto.getProcessor());
+        hardwareConfiguration.setHdd(excelImportDto.getHdd());
+        hardwareConfiguration.setRam(excelImportDto.getRam());
+        List<HardwareConfiguration> hardwareConfigurations = hardwareConfigurationDAO.getByObject(hardwareConfiguration);
+        if(hardwareConfigurations == null || hardwareConfigurations.size() == 0){
+            hardwareConfigurationDAO.create(hardwareConfiguration);
+            return hardwareConfigurationDAO.getByObject(hardwareConfiguration).get(0);
+        }
+        return hardwareConfigurations.get(0);
     }
 
     private Map prepareExcelMappingMap(Row row) throws ParsingException {

@@ -1,0 +1,98 @@
+<div class="container">
+
+    <div>
+        <h1>Assets</h1>
+
+        <div class="alert alert-danger fade in fade out" ng-show=showDangerMessage>
+            <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+            <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+        </div>
+        <div class="alert alert-warning fade in fade out" ng-show=showWarningMessage>
+            <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+            <strong>Oh Snap!</strong> <span>{{warningMessage}}</span>
+        </div>
+        <div class="alert alert-success fade in fade out" ng-show=showSuccessMessage>
+            <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+            <strong>Success!</strong> <span>{{successMessage}}</span>
+        </div>
+        <!--<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>-->
+        <div>
+            <uib-tabset active="activeJustified" justified="true">
+                <uib-tab index="0" heading="Assets" ng-click="refreshAssets()">
+                    <table class="table table-hover" ng-show="showAssetTable">
+                        <thead>
+                        <tr>
+                            <th>Asset ID</th>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Serial Number</th>
+                            <th>Date Of Issue</th>
+                            <th>Date Of Till Validity</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="asset in assets" ng-class="asset.status == 'EXPIRED' ? 'danger':'default'">
+                            <td>{{asset.assetId}}</td>
+                            <td>{{asset.name}}</td>
+                            <td>{{asset.assetTypeName}}</td>
+                            <td>{{asset.serialNumber}}</td>
+                            <td>{{asset.dateOfIssue}}</td>
+                            <td>{{asset.dateTillValid}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div ng-hide="showAssetTable" style="margin-top: 20px;color: #FF4500">
+                        It Seems you don't have any assets assigned. Please contact IT Team or Raise a ticket on ext 247
+                        .
+                    </div>
+                    <a class="btn btn-info btn-sm" ng-click="openAssetWindow('lg')" style="margin-top: 10px;">
+                        Request An Asset<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
+                    </a>
+                    <a class="btn btn-info btn-sm" ng-click="refreshAssets()" style="margin-top: 10px;">
+                        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+                    </a>
+
+                </uib-tab>
+                <uib-tab index="2" heading="Assets History" ng-click="fetchHistory()">
+                    <a class="btn btn-info btn-sm" ng-click="fetchHistory()" style="margin-top: 10px;">
+                        Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
+                    </a>
+                    <hr></hr>
+                    <table class="table table-hover" ng-show="showHistoryTable">
+                        <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Approved By</th>
+                            <th>Issued/Returned By</th>
+                            <th>Date Of Issue</th>
+                            <th>Valid Till Date</th>
+                            <th>Returned Date</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="history in assetsHistory"
+                            ng-class="history.status == 'EXPIRED' ? 'danger' : history.status == 'ISSUED' ? 'success' : 'default'">
+                            <td>{{history.assetName}}<br>
+                                <small>{{history.serialNumber}}</small>
+                            </td>
+                            <td>{{history.approverFirstName}}&nbsp;{{history.approverLastName}}</td>
+                            <td>{{history.updaterFirstName}}&nbsp;{{history.updaterLastName}}</td>
+                            <td>{{history.dateOfIssue}}</td>
+                            <td>{{history.dateTillValid}}</td>
+                            <td>{{history.returnedDate}}</td>
+                            <td>{{history.status}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </uib-tab>
+                <uib-tab index="3" heading="Approvals" ng-click="fetchApprovals()">
+
+                </uib-tab>
+
+            </uib-tabset>
+
+
+        </div>
+    </div>
+</div>

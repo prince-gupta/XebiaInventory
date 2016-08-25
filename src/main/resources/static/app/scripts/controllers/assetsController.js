@@ -274,9 +274,12 @@ angular.module('app')
         }
 
         $scope.processHistAssets = function(){
+            waitingDialog.show("Please wait while system is processing the file . . .");
             AssetFactory.processHistAssets().success(function(data){
                var result = angular.copy(data);
+                waitingDialog.hide();
             });
+
         }
 
         function fetchAllAssetType() {

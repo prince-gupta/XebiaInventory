@@ -37,6 +37,10 @@ public class ManufacturerDAO {
         return;
     }
 
+    public List<AssetManufacturer> getByName(String name){
+        return entityManager.createQuery("from AssetManufacturer where name = :name").setParameter("name", name).getResultList();
+    }
+
     public AssetManufacturer getById(BigInteger id) {
         return entityManager.find(AssetManufacturer.class, id);
     }

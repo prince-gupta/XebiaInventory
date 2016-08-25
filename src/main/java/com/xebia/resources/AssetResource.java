@@ -3,6 +3,7 @@ package com.xebia.resources;
 import com.xebia.Secured;
 import com.xebia.common.Constants;
 import com.xebia.dao.AssetDAO;
+import com.xebia.dao.UserDAO;
 import com.xebia.dto.ActionResult;
 import com.xebia.dto.AssetDto;
 import com.xebia.dto.AssetHistoryDTO;
@@ -45,6 +46,9 @@ public class AssetResource {
 
     @Autowired
     ExcelService excelService;
+
+    @Autowired
+    UserDAO userDAO;
     
     @CrossOrigin(origins = "http://localhost:3000")
     @POST
@@ -326,5 +330,26 @@ public class AssetResource {
             result.setStatus(ActionResult.Status.FAILURE);
         }
         return result;
+    }
+
+    @GET
+    @Path("getAssets")
+    @Produces("application/json")
+    public List<AssetDto> getAssets(){
+        String userName = httpServletRequest.getHeader("Username");
+        User user = userDAO.getUserByUName(userName);
+        Employee employee = user.getEmployee();
+        return assetService.getEmployeeAsset(employee.getId());
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GET
+    @Path("getAssetsHistoryLoggedIn")
+    @Produces("application/json")
+    public List<AssetHistoryDTO> getAssetsHistoryLoggedIn(){
+        String userName = httpServletRequest.getHeader("Username");
+        User user = userDAO.getUserByUName(userName);
+        Employee employee = user.getEmployee();
+        return assetService.getAssetsHistory(employee.getId());
     }
 }

@@ -50,6 +50,13 @@ public class AssetTypeDAO {
         return entityManager.find(AssetType.class, id);
     }
 
+    public List<AssetType> getByType(String type){
+        List<AssetType> resultList = entityManager.createQuery("from AssetType where type = :type")
+                .setParameter("type", type)
+                .getResultList();
+        return resultList;
+    }
+
     public void update(AssetType assetType) {
         entityManager.merge(assetType);
         return;

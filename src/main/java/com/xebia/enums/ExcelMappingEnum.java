@@ -4,12 +4,13 @@ package com.xebia.enums;
  * Created by Pgupta on 20-08-2016.
  */
 public enum ExcelMappingEnum {
+    SNO("SNO."),
     DOI("Date Of Issue"),
     HN("Host Name"),
     ASSET_NAME("Asset Name"),
     EMPLOYEE_NAME("Employee Name"),
     DEPART("Department"),
-    SNO("Serial Number"),
+    ASNO("Serial Number"),
     OS("Operating System"),
     MSOFFICE("MS Office"),
     HDD("HDD"),
@@ -21,7 +22,9 @@ public enum ExcelMappingEnum {
     SPK("Speaker"),
     ARD("Asset Return Date"),
     HP("Head Phone"),
-    SOU("Status Of User");
+    SOU("Status Of User"),
+    MOBILE("Mobile"),
+    ATO("Accessories Taken Others");
 
 
     private String displayName;

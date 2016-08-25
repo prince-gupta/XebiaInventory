@@ -1,7 +1,7 @@
 /**
  * Created by Pgupta on 02-08-2016.
  */
-angular.module('app')
+angular.module('userApp')
     .controller('loginController',
     function ($scope, $cookieStore, LoginFactory, $uibModal) {
 
@@ -20,18 +20,16 @@ angular.module('app')
                 $scope.user.username = $cookieStore.get("Username");
                 LoginFactory.logout($scope.user).success(function (data) {
                     if (data.status == "SUCCESS") {
-                        $scope.loginFailed = true;
-                        $scope.loginMessage = "You are logged out !"
                         $cookieStore.remove("Username");
                         $cookieStore.remove("token");
-                        $scope.loggedInObj.isLoggedIn = false;
+                        $scope.loggedInObj.isLoggedIn = true;
                     }
                 });
             }
 
         }
 
-        $scope.reset = function(){
+        $scope.reset = function () {
             $scope.emptyUserName = false;
             $scope.emptyPwd = false;
         }
@@ -49,11 +47,13 @@ angular.module('app')
                     if (data.message == 'SUCCESS') {
                         $cookieStore.put('token', data.token);
                         $cookieStore.put('Username', data.userName);
+                        $scope.loggedInObj.isLoggedIn = true;
+                        $scope.loggedInObj.username = $cookieStore.get('Username');
                         if (data.changePasswordRequired == true) {
-                            window.location = "/app/views/main.html#/changePassword";
+                            window.location = "/user/views/main.html#/changePassword";
                         }
                         else {
-                            window.location = "/app/views/main.html#/dashboard";
+                            window.location = "/user/views/main.html#/register";
                         }
                     }
                     else {

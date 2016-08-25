@@ -1,0 +1,135 @@
+.position--fixed {
+    position: fixed!important;
+}
+.nvaBar {
+    position: fixed!important;
+    background-color: #FBFBFF !important;
+    width: 100%;
+    z-index: 1030;
+    top: 0;
+    padding-top: 29px !important;
+}
+.navBar-image{
+    width: 158px;
+}
+.full button span {
+    background-color: limegreen;
+    border-radius: 32px;
+    color: black;
+}
+.partially button span {
+    background-color: orange;
+    border-radius: 32px;
+    color: black;
+}
+.assetPopOverText {
+    display: inline-block;
+    font-size: smaller;
+    margin-left: 14px;
+}
+
+
+.container{
+    position:relative;
+}
+.custom-modal {
+    width: 200px!important; /* Use !important in case you want to override another val*/
+    height: 200px;
+    position: absolute; /*You can use fixed too*/
+    top: 50%;
+    left: 50%;
+    margin-top: -100px;
+    margin-left: -100px;
+    display:none; /* You want it to be hidden, and show it using jquery*/
+}
+.form-login {
+    background-color: #EDEDED;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 15px;
+    border-color:#d2d2d2;
+    border-width: 5px;
+    box-shadow:0 1px 0 #cfcfcf;
+}
+
+h4 {
+    border:0 solid #fff;
+    border-bottom-width:1px;
+    padding-bottom:10px;
+}
+
+.form-control {
+    border-radius: 10px;
+}
+
+.wrapper {
+    text-align: center;
+}
+
+.github.ribbon {
+    position: fixed;
+    display: block;
+    top: 40px;
+    right: 0;
+    border: 0;
+    z-index: 1001;
+}
+
+.prettyprint {
+    padding: 10px!important;
+}
+
+#wrap {
+    padding-top: 70px;
+}
+
+#home h1 {
+    margin-bottom: 30px;
+}
+#demo,
+#examples,
+#support,
+#download {
+    padding-top: 40px;
+}
+.waitingimg{
+    height: 15px;
+    width: 19px;
+    transform: rotate(-41deg);
+}
+.disabled {
+    cursor: not-allowed;
+}
+
+.dashboardheader{
+    font-family: sans-serif;
+    line-height: 6rem;
+    font-size: x-large;
+}
+.flt{
+    float: left;
+}
+.frt{
+    float: right;
+}
+
+.navbar-login
+{
+    width: 305px;
+    padding: 10px;
+    padding-bottom: 0px;
+}
+
+.navbar-login-session
+{
+    padding: 10px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+
+.icon-size
+{
+    font-size: 87px;
+}
