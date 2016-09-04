@@ -7,7 +7,13 @@ angular.module("app")
         $scope.diskInterval;
         $scope.cpuInterval;
         $scope.memoryInterval;
+
+        $scope.osInfo = [];
         function init() {
+            MonitorFactory.osInfo().success(function(data){
+                $scope.osInfo = angular.copy(data);
+                console.log($scope.osInfo);
+            })
             console.log("Init()")
             google.charts.setOnLoadCallback(drawChart);
            // google.charts.setOnLoadCallback(drawGauge);
@@ -135,6 +141,9 @@ angular.module("app")
         return {
             metrics : function(){
                 return $http.get("/metrics");
+            },
+            osInfo : function(){
+                return $http.get("/inventory/common/osInfo");
             }
         }
     });

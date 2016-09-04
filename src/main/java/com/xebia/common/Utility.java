@@ -2,6 +2,8 @@ package com.xebia.common;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -12,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Pgupta on 26-07-2016.
@@ -20,7 +24,12 @@ import java.util.Date;
 public class Utility {
 
 
+    @Autowired
+    ResourceLoader resourceLoader;
+
     static ApplicationProperties property;
+
+    static final Map<String,Object> appCache = new HashMap<>();
 
     @Autowired
     Utility(ApplicationProperties property){
@@ -75,5 +84,13 @@ public class Utility {
     public static String getFullTempFilePath(String fileName) {
         return property.getTempFilePath() + Constants.FWD_SLASH
                 + fileName;
+    }
+
+    public static Object get(String key){
+        return appCache.get(key);
+    }
+
+    public static void put(String key, Object value){
+        appCache.put(key, value);
     }
 }

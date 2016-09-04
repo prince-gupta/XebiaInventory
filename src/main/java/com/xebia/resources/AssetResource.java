@@ -1,13 +1,10 @@
 package com.xebia.resources;
 
-import com.xebia.Secured;
-import com.xebia.common.Constants;
-import com.xebia.dao.AssetDAO;
+import com.xebia.annotations.Secured;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.ActionResult;
 import com.xebia.dto.AssetDto;
 import com.xebia.dto.AssetHistoryDTO;
-import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.*;
 import com.xebia.exception.ApplicationException;
 import com.xebia.exception.FileException;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.math.BigInteger;

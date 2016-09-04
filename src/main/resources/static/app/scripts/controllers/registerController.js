@@ -120,7 +120,7 @@ angular.module('app')
         function fetchAll() {
             $scope.isResultOK = false;
             EmployeeFactory.getEmployeeList().success(function (data) {
-                $scope.employeeList = angular.copy(data);
+                $scope.employeeList = angular.copy(data.data.list);
                 console.log($scope.employeeList);
                 $scope.isResultOK = true;
                 if ($scope.employeeList.length == 0) {
@@ -404,12 +404,12 @@ angular.module('app')
                         approvalsRequired: 'NA'
                     }
                     if (data.status == 'SUCCESS') {
-                        showMessage("Data Saved Successfully.", "SUCCESS")
+                        showMessage("Data Saved Successfully.", "SUCCESS");
+                        fetchAll();
                     }
                     else {
                         showMessage(data.error['errorMsg'], "DANGER");
                     }
-                    fetchAll();
                 }).error(function (data, status, headers, config) {
                     showMessage(resolveError(status), "DANGER");
                     waitingDialog.hide();
@@ -707,7 +707,9 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
                 $scope.assignAsset.assetId = $scope.assetDummy.id;
                 if($scope.assetList.length > 0) {
                     for (var index = 0; index < $scope.assetList.length; index++) {
-                        $scope.assetDisplayList.push($scope.assetList[index]);
+                        var tempAsset = $scope.assetList[index];
+                        tempAsset.name = $scope.assetList[index].name + "(" + $scope.assetList[index].serialNumber + ")";
+                        $scope.assetDisplayList.push(tempAsset);
                     }
                     $scope.assetsFound = true;
                 }

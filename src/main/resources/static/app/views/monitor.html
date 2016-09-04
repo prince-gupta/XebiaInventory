@@ -1,35 +1,54 @@
 <div class="container">
     <div class="form-group">
         <div class="row">
-            <div class="card col-sm-4">
-                <h3 class="card-header">Memory Usage</h3>
+            <div class="col-md-4">
+                <div class="box-inner">
+                    <div class="box-header well">
+                        <h2><i class="glyphicon glyphicon-info-sign" style="margin-right: 2px;"></i>System Information
+                        </h2>
+                    </div>
+                    <ul class="dashboard-list">
+                        <li>
+                            <span style="color: #317EAC; width: 185px;display: inline-block">OS Name</span><span>{{osInfo.osName}}</span>
+                        </li>
+                        <li>
+                            <span style="color: #317EAC; width: 185px;display: inline-block">OS Version</span><span>{{osInfo.osVersion}}</span>
 
-                <div id="piechart_3d" class="monitor-card"></div>
-                <div class="flt"><span class="legend-element" style="background-color: #DC3912;"></span>Used
-                    <span class="legend-element" style="background-color: #3366CC;margin-right: 12px"></span>Free
+                        </li>
+                        <li>
+                            <span style="color: #317EAC; width: 185px;display: inline-block">OS Architecture</span><span>{{osInfo.osArch}}</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="card col-sm-4">
-                <h3 class="card-header">CPU Usage</h3>
-
-                <div id="cpu_gauge" class="monitor-card" style="height: 305px;
-    margin-top: -28px;"></div>
+            <div class="col-md-4">
+                <div class="box-inner">
+                    <div class="box-header well">
+                        <h2><i class="glyphicon glyphicon-list"></i> Memory Usage C Drive</h2>
+                    </div>
+                    <div id="piechart_3d" class="monitor-card"></div>
+                </div>
             </div>
+
         </div>
-        <div class="row">
-            <div class="card col-sm-4">
-                <h3 class="card-header">Memory Usage</h3>
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-md-4">
+                <div class="box-inner">
+                    <div class="box-header well">
+                        <h2><i class="glyphicon glyphicon-dashboard"></i> CPU Usage</h2>
+                    </div>
 
-                <div id="piechar_3d" class="monitor-card"></div>
-                <div class="flt"><span class="legend-element" style="background-color: #DC3912;"></span>Used
-                    <span class="legend-element" style="background-color: #3366CC;margin-right: 12px"></span>Free
+                    <div id="cpu_gauge" class="monitor-card" style="height: 305px;
+    margin-top: -52px;"></div>
                 </div>
             </div>
-            <div class="card col-sm-4">
-                <h3 class="card-header">CPU Usage</h3>
-
-                <div id="ram_gauge" class="monitor-card" style="height: 305px;
-    margin-top: -28px;"></div>
+            <div class="col-md-4">
+                <div class="box-inner">
+                    <div class="box-header well">
+                        <h2><i class="glyphicon glyphicon-tasks"></i> RAM Usage</h2>
+                    </div>
+                    <div id="ram_gauge" class="monitor-card" style="height: 305px; margin-top: -52px;"></div>
+                </div>
             </div>
         </div>
     </div>

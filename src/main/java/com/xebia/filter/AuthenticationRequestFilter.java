@@ -13,7 +13,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
-import com.xebia.Secured;
+import com.xebia.annotations.Secured;
+import com.xebia.common.Utility;
 import com.xebia.exception.AuthenticationException;
 import com.xebia.services.IAuthenticationService;
 import org.apache.log4j.Logger;
@@ -66,6 +67,7 @@ public class AuthenticationRequestFilter implements ContainerRequestFilter {
         log.info("Token "+authorizationHeaderValue);
         try {
             validateToken(authorizationHeaderValue, userName, ip);
+            Utility.put("username",userName);
         } catch (Exception e) {
             context.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
         }

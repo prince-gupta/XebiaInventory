@@ -23,8 +23,6 @@ public class User implements Serializable {
 
     private String password;
 
-    private BigInteger role;
-
     private String token;
 
     private String username;
@@ -81,14 +79,6 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public BigInteger getRole() {
-        return this.role;
-    }
-
-    public void setRole(BigInteger role) {
-        this.role = role;
     }
 
     public String getToken() {

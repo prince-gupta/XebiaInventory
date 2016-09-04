@@ -1,6 +1,6 @@
 package com.xebia.resources;
 
-import com.xebia.Secured;
+import com.xebia.annotations.Secured;
 import com.xebia.dao.EmployeeDAO;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.ActionResult;
@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import java.sql.Date;
 import java.util.List;
 
 @Component
@@ -42,8 +40,11 @@ public class EmployeeResource {
     @GET
     @Path("fetchAll")
     @Produces("application/json")
-    public List<Employee> getAllEmployee() {
-        return employeeDAO.getAll();
+    public ActionResult getAllEmployee() {
+        ActionResult result = new ActionResult();
+        result.setStatus(ActionResult.Status.SUCCESS);
+        result.addData("list", employeeDAO.getAll());
+        return result;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -74,10 +75,10 @@ public class EmployeeResource {
         ActionResult result = new ActionResult();
         if (employeeDAO.countEmployee(employee.getECode()) > 0) {
             result.setStatus(ActionResult.Status.FAILURE);
-            result.getError().put("errorMsg","Employee Code is not available. Assigned to other employee.");
+            result.getError().put("errorMsg", "Employee Code is not available. Assigned to other employee.");
             return result;
         } else {
-            if(StringUtils.equals("NA",employee.getApprovalsRequired()))
+            if (StringUtils.equals("NA", employee.getApprovalsRequired()))
                 employee.setApprovalsRequired("Y");
             employeeDAO.create(employee);
         }
@@ -94,24 +95,24 @@ public class EmployeeResource {
         ActionResult result = new ActionResult();
         if (employeeDAO.countEmployee(employee.getECode()) > 0) {
             result.setStatus(ActionResult.Status.FAILURE);
-            result.getError().put("errorMsg","Employee Code is not available. Assigned to other employee.");
+            result.getError().put("errorMsg", "Employee Code is not available. Assigned to other employee.");
             return result;
         } else {
-            if(StringUtils.equals("NA",employee.getApprovalsRequired()))
+            if (StringUtils.equals("NA", employee.getApprovalsRequired()))
                 employee.setApprovalsRequired("Y");
             Employee dbEmployee = employeeDAO.getById(employee.getId());
-            if(employee.getApprovalsRequired() != null){
+            if (employee.getApprovalsRequired() != null) {
                 dbEmployee.setApprovalsRequired(employee.getApprovalsRequired());
             }
-            if(employee.getECode() != null)
+            if (employee.getECode() != null)
                 dbEmployee.setECode(employee.getECode());
-            if(employee.getEmail() != null)
+            if (employee.getEmail() != null)
                 dbEmployee.setEmail(employee.getEmail());
-            if(employee.getFirstName() != null)
+            if (employee.getFirstName() != null)
                 dbEmployee.setFirstName(employee.getFirstName());
-            if(employee.getLastName() != null)
+            if (employee.getLastName() != null)
                 dbEmployee.setLastName(employee.getLastName());
-            if(employee.getMobile() != null)
+            if (employee.getMobile() != null)
                 dbEmployee.setMobile(employee.getMobile());
             employeeDAO.update(dbEmployee);
         }
@@ -133,11 +134,10 @@ public class EmployeeResource {
     @Produces("application/json")
     public ActionResult delete(@RequestBody String eCode) {
         ActionResult result = new ActionResult();
-        try{
+        try {
             employeeService.delete(eCode, httpServletRequest.getHeader("Username"));
             result.setStatus(ActionResult.Status.SUCCESS);
-        }
-        catch (ApplicationException a){
+        } catch (ApplicationException a) {
             result.setStatus(ActionResult.Status.FAILURE);
             result.addData("eMessage", a.getMessage());
         }

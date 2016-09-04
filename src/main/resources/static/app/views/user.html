@@ -1,9 +1,10 @@
 <div class="container">
     <div><h1>User Management</h1></div>
-    <h5>
-        <small class="text-info">Only Profile tab is enabled by default. Other tabs will get enabled when you select only one user.
+   <!-- <h5>
+        <small class="text-info">Only Profile tab is enabled by default. Other tabs will get enabled when you select
+            only one user.
         </small>
-    </h5>
+    </h5>-->
     <div class="alert alert-danger fade in" ng-show=showDangerMessage>
         <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
         <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
@@ -17,7 +18,7 @@
         <strong>Success!</strong> <span>{{successMessage}}</span>
     </div>
     <uib-tabset active="activeJustified" justified="true">
-        <uib-tab index="0" heading="Profile">
+        <uib-tab index="0" heading="Profile" ng-click = "refreshUsers()">
             <form class="form-horizontal" role="form" style="margin-top: 5px;">
                 <div class="form-group">
                     <div class="col-sm-4 has-feedback">
@@ -50,8 +51,12 @@
                     <td>{{user.fullName}}</td>
                     <td>{{user.roles}}</td>
                     <td>{{user.active}}</td>
-                    <td><button class="btn-xs btn-primary" type="button" ng-click="resetPassword(user.userName)">Reset Password</button></td>
-                    <td><input type="checkbox" ng-click="selectUser(user.id,$index)" id="selectedUser{{$index}}">
+                    <td>
+                        <button class="btn-xs btn-primary" type="button" ng-click="resetPassword(user.userName)">Reset
+                            Password
+                        </button>
+                    </td>
+                    <td><input type="radio" ng-model="selectedUser.id" name="user" value = "{{user.id}}">
                     </td>
                 </tr>
                 </tbody>
@@ -60,33 +65,32 @@
         <uib-tab index="1" heading="Roles" ng-click="initialize()" disable="roleTabDisabled">
             <div class="row" style="margin-top: 10px;">
                 <div class="col-xs-5">
-                    <select name="from" id="undo_redo" class="form-control" size="13" multiple="multiple">
-                        <option value="1">C++</option>
-                        <option value="2">C#</option>
-                        <option value="3">Haskell</option>
-                        <option value="4">Java</option>
-                        <option value="5">JavaScript</option>
-                        <option value="6">Lisp</option>
-                        <option value="7">Lua</option>
-                        <option value="8">MATLAB</option>
-                        <option value="9">NewLISP</option>
-                        <option value="10">PHP</option>
-                        <option value="11">Perl</option>
-                        <option value="12">SQL</option>
-                        <option value="13">Unix shell</option>
+                    <select class="form-control" id="undo_redo" ng-model="allRoles.role"
+                            ng-options="role.id as role.roleName for role in roles" size="8" multiple="multiple">
                     </select>
                 </div>
                 <div class="col-xs-2">
-                    <button type="button" id="undo_redo_undo" class="btn btn-primary btn-block">undo</button>
-                    <button type="button" id="undo_redo_rightAll" class="btn btn-default btn-block"><i class="glyphicon glyphicon-forward"></i></button>
-                    <button type="button" id="undo_redo_rightSelected" class="btn btn-default btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
-                    <button type="button" id="undo_redo_leftSelected" class="btn btn-default  btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
-                    <button type="button" id="undo_redo_leftAll" class="btn btn-default btn-block"><i class="glyphicon glyphicon-backward"></i></button>
-                    <button type="button" id="undo_redo_redo" class="btn btn-warning btn-block">redo</button>
+                    <button type="button" ng-click="moveAllToRight()" id="undo_redo_rightAl"
+                            class="btn btn-default btn-block"><i class="glyphicon glyphicon-forward"></i></button>
+                    <button type="button" ng-click="moveToRight()" id="undo_redo_rightSelecte"
+                            class="btn btn-default btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+                    <button type="button" ng-click="moveToLeft()" id="undo_redo_leftSelecte"
+                            class="btn btn-default  btn-block"><i class="glyphicon glyphicon-chevron-left"></i></button>
+                    <button type="button" ng-click="moveAllToLeft()" id="undo_redo_leftAl"
+                            class="btn btn-default btn-block"><i class="glyphicon glyphicon-backward"></i></button>
                 </div>
                 <div class="col-xs-5">
-                    <select name="to" id="undo_redo_to" class="form-control" size="13" multiple="multiple">
+                    <select class="form-control" id="undo_redo_to" ng-model="rolesSelected.role"
+                            ng-options="role.id as role.roleName for role in userRoles" size="8" multiple="multiple"
+                            ng-multiple="true">
                     </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2">
+                    <button type="button" class="btn btn-info btn-block" style="margin-top: 5px;"
+                            ng-click="updateUserRoles()">Update Roles
+                    </button>
                 </div>
             </div>
         </uib-tab>

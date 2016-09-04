@@ -70,7 +70,7 @@ angular.module('userApp')
     }).factory('LoginFactory', function ($http, $cookieStore) {
         return{
             login: function (data) {
-                return $http.post('/inventory/logon/generateToken', data);
+                return $http.post('/inventory/logon/generateEmployeeToken', data);
             },
             changePassword: function (data) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');

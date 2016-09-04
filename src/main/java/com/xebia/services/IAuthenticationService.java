@@ -11,6 +11,8 @@ import com.xebia.exception.AuthenticationException;
 public interface IAuthenticationService {
 
 
+    public AuthenticationResponse generateTokenForAdminPortal(final String userName, final String password, final String ipAddr) throws AuthenticationException;
+
     public AuthenticationResponse generateToken(final String userName, final String password, final String ipAddr) throws AuthenticationException;
 
     /**

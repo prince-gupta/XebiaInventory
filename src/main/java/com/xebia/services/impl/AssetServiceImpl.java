@@ -185,7 +185,7 @@ public class AssetServiceImpl implements IAssetService {
         assetDto.setName(dbAsset.getName());
         Employee employee = employeeDAO.getById(assetDto.getEmployee());
         Employee approver = null;
-        if (employee.getApprovalsRequired() .equals("Y"))
+        if (employee.getApprovalsRequired().equals("Y"))
             approver = employeeDAO.getById(assetDto.getApprovedBy());
         dbAsset.setEmployee(employee);
         assetDAO.update(dbAsset);
@@ -308,6 +308,7 @@ public class AssetServiceImpl implements IAssetService {
                     assetDto.setApprovedBy(dbAssetHistory.getEmployee1().getId());
                 if (Utility.isExpired(new Date(dbAssetHistory.getValidTill().getTime())) && !dbAssetHistory.getStatus().equals(AssetStatus.EXPIRED.getValue())) {
                     dbAssetHistory.setStatus(AssetStatus.EXPIRED.getValue());
+                    assetDto.setStatus(AssetStatus.EXPIRED.getValue());
                     assetHistoryDAO.update(dbAssetHistory);
                 }
                 isDataFetched = true;
@@ -444,7 +445,9 @@ public class AssetServiceImpl implements IAssetService {
             dayToExpire--;
         }
 
-        List<AssetHistory> expiredHistory = assetHistoryDAO.getExpiredAssetHistory(input);
+        LocalDate todayDateTemp = input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        Date expiryDate = Date.from(todayDateTemp.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        List<AssetHistory> expiredHistory = assetHistoryDAO.getExpiredAssetHistory(expiryDate);
         for (AssetHistory history : expiredHistory) {
             AssetDto assetDto = new AssetDto();
             assetDto.setStatus(AssetStatus.EXPIRED.getValue());
@@ -468,8 +471,10 @@ public class AssetServiceImpl implements IAssetService {
             assetFreeMarkerDto.setSerialNumber(assetDto.getSerialNumber());
             User user = userDAO.getUserByUName(username);
             assetFreeMarkerDto.setIssuedByName(user.getEmployee().getFirstName() + " " + user.getEmployee().getLastName());
-            Employee approver = employeeDAO.getById(assetDto.getApprovedBy());
-            assetFreeMarkerDto.setApproverName(approver.getFirstName() + " " + approver.getLastName());
+            if (assetDto.getApprovedBy() != null) {
+                Employee approver = employeeDAO.getById(assetDto.getApprovedBy());
+                assetFreeMarkerDto.setApproverName(approver.getFirstName() + " " + approver.getLastName());
+            }
             freeMarkerDtos.add(assetFreeMarkerDto);
         }
 
@@ -500,7 +505,7 @@ public class AssetServiceImpl implements IAssetService {
         asset.setSerialNumber(assetDto.getSerialNumber());
         asset.setAssetManufacturer(assetManufacturer);
         asset.setAssetType(assetType);
-        List<Asset> assetList =  assetDAO.getByAssetObject(asset);
+        List<Asset> assetList = assetDAO.getByAssetObject(asset);
         for (Asset assetTemp : assetList) {
             if (assetTemp.getEmployee() == null) {
                 Employee dummyEmployee = new Employee();
@@ -512,14 +517,14 @@ public class AssetServiceImpl implements IAssetService {
         return assetList;
     }
 
-    public void processHistoricalAssets() throws ApplicationException,FileException{
+    public void processHistoricalAssets() throws ApplicationException, FileException {
         File historicalAssetDir = new File(environment.getProperty(Constants.HIST_ASSETS_TEMP_PATH));
         File[] files = historicalAssetDir.listFiles();
-        if(files == null || files.length == 0){
+        if (files == null || files.length == 0) {
             throw new FileException("DIR_EMPTY");
         }
 
-        if(files.length > 1){
+        if (files.length > 1) {
             throw new FileException("MORE_FILES");
         }
         excelService.importToDB(files[0]);

@@ -16,6 +16,7 @@ import java.util.List;
 @Repository
 @Transactional
 public class UserDAO {
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -30,6 +31,10 @@ public class UserDAO {
     public List<User> getAll() {
         List<User> users = entityManager.createQuery("from User").getResultList();
         return users;
+    }
+
+    public User getById(BigInteger id) {
+        return entityManager.find(User.class, id);
     }
 
     public User getUserByUNamePwd(String userName, String password){

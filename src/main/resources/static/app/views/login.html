@@ -8,8 +8,8 @@
                 <div class="panel-body">
                     <form accept-charset="UTF-8" role="form">
                         <fieldset>
-                            <span ng-show="loginFailed" class="label label-danger"
-                                  style="display: inline-flex;margin-bottom: 10px;font-size: 85%;">{{loginMessage}}</span>
+                            <h3 ng-show="loginFailed"
+                                  ><small style="margin-bottom: 10px;color: darkred;">{{loginMessage}}</small></h3>
 
                             <div class="form-group has-feedback">
                                 <input class="form-control" placeholder="Username" name="username" type="text"

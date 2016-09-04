@@ -56,6 +56,10 @@ angular.module('app')
                             window.location = "/app/views/main.html#/dashboard";
                         }
                     }
+                    else if (data.token == "INVALID-ROLE") {
+                        $scope.loginFailed = true;
+                        $scope.loginMessage = "You don't have permissions to access admin portal. Try to login to employee portal."
+                    }
                     else {
                         $scope.loginFailed = true;
                         $scope.loginMessage = "Invalid Username or Password !"

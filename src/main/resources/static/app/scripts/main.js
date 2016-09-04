@@ -48,6 +48,10 @@ angular
                 templateUrl: '../views/excelMapping.html',
                 controller: 'xlsMappingController'
             })
+            .when('/pageMapping', {
+                templateUrl: '../views/pageMapping.html',
+                controller: 'pageRoleController'
+            })
             .otherwise({
                 templateUrl: '../views/404.html'
             });

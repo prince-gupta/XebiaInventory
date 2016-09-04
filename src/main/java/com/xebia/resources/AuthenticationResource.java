@@ -1,14 +1,12 @@
 package com.xebia.resources;
 
-import com.xebia.Secured;
+import com.xebia.annotations.Secured;
 import com.xebia.dto.ActionResult;
 import com.xebia.dto.AuthenticationResponse;
 import com.xebia.entities.User;
 import com.xebia.exception.AuthenticationException;
 import com.xebia.services.IAuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.web.servlet.support.RequestContext;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -38,6 +36,14 @@ public class AuthenticationResource {
     @Path("/generateToken")
     public AuthenticationResponse generateToken(User user) {
         String ip = httpServletRequest.getRemoteAddr();
+        return  authenticationService.generateTokenForAdminPortal(user.getUsername(),user.getPassword(), ip);
+    }
+
+    @POST
+    @Consumes("application/json")
+    @Path("/generateEmployeeToken")
+    public AuthenticationResponse generateEmployeeToken(User user) {
+        String ip = httpServletRequest.getRemoteAddr();
         return  authenticationService.generateToken(user.getUsername(),user.getPassword(), ip);
     }
 
@@ -50,6 +56,7 @@ public class AuthenticationResource {
     }
 
     @POST
+    @Secured
     @Consumes("application/json")
     @Path("/changePassword")
     @Produces("application/json")

@@ -3,10 +3,12 @@ package com.xebia.services.impl;
 import com.xebia.common.Utility;
 import com.xebia.dao.EmployeeDAO;
 import com.xebia.dao.UserDAO;
+import com.xebia.dao.UserRoleDAO;
 import com.xebia.dto.UserDto;
 import com.xebia.entities.Employee;
 import com.xebia.entities.User;
 import com.xebia.entities.UserRole;
+import com.xebia.enums.UserRoleEnum;
 import com.xebia.exception.ApplicationException;
 import com.xebia.services.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class UserServiceImpl implements IUserService {
 
     @Autowired
     EmployeeDAO employeeDAO;
+
+    @Autowired
+    UserRoleDAO userRoleDAO;
 
     @Override
     public List<UserDto> fetchAllUsers() {
@@ -66,8 +71,8 @@ public class UserServiceImpl implements IUserService {
             throw new ApplicationException("EC_Error:NA");
 
         User userAlreadyPresent = userDAO.getUserByEmployee(dbEmployeeList.get(0));
-        if(userAlreadyPresent != null)
-            throw new ApplicationException("EC_PRESENT_ERROR:"+userAlreadyPresent.getUsername());
+        if (userAlreadyPresent != null)
+            throw new ApplicationException("EC_PRESENT_ERROR:" + userAlreadyPresent.getUsername());
 
         String enCodedPass = Utility.encode("Xebia123");
         User user = new User();
@@ -75,6 +80,7 @@ public class UserServiceImpl implements IUserService {
         user.setActive("Y");
         user.setUsername(userDto.getUserName());
         user.setEmployee(dbEmployeeList.get(0));
+        user.setChangePassword("Y");
         userDAO.create(user);
         user.setPassword("Xebia123");
         return user;
@@ -84,15 +90,57 @@ public class UserServiceImpl implements IUserService {
         return userDAO.getUserByUName(uName) != null;
     }
 
-    public void resetPassword(String username) throws ApplicationException{
+    public void resetPassword(String username) throws ApplicationException {
         User user = userDAO.getUserByUName(username);
-        if(user == null){
-            throw  new ApplicationException("UserNotFound");
+        if (user == null) {
+            throw new ApplicationException("UserNotFound");
         }
         String enCodedPass = Utility.encode("Xebia123");
         user.setPassword(enCodedPass);
         user.setToken(null);
         user.setChangePassword("Y");
+        userDAO.update(user);
+    }
+
+    public List<UserRole> getRoles() {
+        List dbRoles = userRoleDAO.getRoles();
+        List<UserRole> userRoles = new ArrayList<>();
+        for (int index = 0; index < dbRoles.size(); index++) {
+            Object[] roleArray = (Object[]) dbRoles.get(index);
+            UserRole userRole = new UserRole();
+            userRole.setId((BigInteger) roleArray[0]);
+            userRole.setRoleName(UserRoleEnum.resolveByDBValue((String) roleArray[1]).getDisplayValue());
+            userRoles.add(userRole);
+        }
+        return userRoles;
+    }
+
+    public List<UserRole> getUserRoles(BigInteger id) {
+        User user = userDAO.getById(id);
+        List<UserRole> dbRoles = user.getUserRoles();
+        List<UserRole> userRoles = new ArrayList<>();
+        for (int index = 0; index < dbRoles.size(); index++) {
+            UserRole roleArray = dbRoles.get(index);
+            UserRole userRole = new UserRole();
+            userRole.setId(roleArray.getId());
+            userRole.setRoleName(UserRoleEnum.resolveByDBValue(roleArray.getRoleName()).getDisplayValue());
+            userRoles.add(userRole);
+        }
+        return userRoles;
+    }
+
+    public void updateUserRoles(BigInteger id, List<String> userRoles) {
+        User user = userDAO.getById(id);
+        if (userRoles.size() == 0) {
+            user.setUserRoles(null);
+        } else {
+            List<UserRole> dbRoles = new ArrayList<>();
+            for (String roleId : userRoles) {
+                UserRole dbRole = userRoleDAO.getById(new BigInteger(roleId));
+                dbRoles.add(dbRole);
+            }
+            user.setUserRoles(dbRoles);
+        }
         userDAO.update(user);
     }
 }

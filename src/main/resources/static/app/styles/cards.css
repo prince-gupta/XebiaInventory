@@ -30,14 +30,12 @@ h3 {
 
     max-height: 250px;
     overflow: auto;
-    margin-bottom: 10px;
-    border-bottom: 4px solid rgba(0,0,0,.125);
+    margin-bottom: 4px;
 }
 
 .monitor-card{
     max-height: 300px;
     margin-bottom: 10px;
-    border-bottom: 4px solid rgba(0,0,0,.125);
     padding-left: 50px;
 }
 .legend-element{
@@ -45,9 +43,66 @@ h3 {
     width: 10px;
     height: 10px;
     margin-right: 12px;
+    margin-top: 7px;
+    margin-bottom: 30px;
+}
+
+.box-header h2 {
+    font-size: 15px;
+    width: auto;
+    clear: none;
+    float: left;
+    line-height: 25px;
+    white-space: nowrap;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: #317EAC;
 }
 
 .gauge {
     width: 320;
     height: 240px;
+}
+
+.card-inner{
+    webkit-box-shadow: 0 0 10px rgba(189,189,189,0.4);
+    border: 1px solid rgba(0, 0, 0, .125);
+}
+
+.box-inner{
+    border: 1px solid #DEDEDE;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    box-shadow: 0 0 10px rgba(189,189,189,0.4);
+    -webkit-box-shadow: 0 0 10px rgba(189,189,189,0.4);
+    -moz-box-shadow: 0 0 10px rgba(189,189,189,0.4);
+}
+
+.box-header{
+    border: none;
+    padding-top: 5px;
+    border-bottom: 1px solid #DEDEDE;
+    border-radius: 3px 3px 0 0;
+    -webkit-border-radius: 3px 3px 0 0;
+    -moz-border-radius: 3px 3px 0 0;
+    height: 35px;
+    min-height: 35px!important;
+    margin-bottom: 0;
+    font-weight: bold;
+    font-size: 16px;
+    background: -moz-linear-gradient(top,rgba(255,255,255,0) 0%,rgba(0,0,0,0.1) 100%);
+    /* background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,rgba(255,255,255,0)),color-stop(100%,rgba(0,0,0,0.1))); */
+    /* background: -webkit-linear-gradient(top,rgba(255,255,255,0) 0%,rgba(0,0,0,0.1) 100%); */
+    background: -o-linear-gradient(top,rgba(255,255,255,0) 0%,rgba(0,0,0,0.1) 100%);
+    background: -ms-linear-gradient(top,rgba(255,255,255,0) 0%,rgba(0,0,0,0.1) 100%);
+    background: linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(0,0,0,0.1) 100%);
+    color: #317EAC;
+}
+ul.dashboard-list li {
+    padding: 7px 0;
+    list-style: none;
+    border-bottom: 1px solid #EBEBEB;
+    border-top: 1px solid white;
 }

@@ -1,4 +1,4 @@
-package com.xebia;
+package com.xebia.annotations;
 
 import javax.ws.rs.NameBinding;
 import java.lang.annotation.ElementType;
