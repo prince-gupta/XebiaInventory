@@ -22,6 +22,8 @@ public interface IAuthenticationService {
      */
     public void authenticateToken(final String token, final String publicKey, String ipAddr) throws AuthenticationException;
 
+    public void validateRole(String userName, String pathToAccess) throws AuthenticationException;
+
     public User createUser(User user);
 
     public boolean changePassword(User user);

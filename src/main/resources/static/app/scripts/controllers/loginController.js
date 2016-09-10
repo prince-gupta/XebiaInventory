@@ -3,7 +3,7 @@
  */
 angular.module('app')
     .controller('loginController',
-    function ($scope, $cookieStore, LoginFactory, $uibModal) {
+    function ($scope, $cookieStore, LoginFactory, $uibModal, MainFactory) {
 
         $scope.data = {};
         $scope.loginFailed = false;
@@ -21,7 +21,6 @@ angular.module('app')
                 LoginFactory.logout($scope.user).success(function (data) {
                     if (data.status == "SUCCESS") {
                         $scope.loginFailed = true;
-                        $scope.loginMessage = "You are logged out !"
                         $cookieStore.remove("Username");
                         $cookieStore.remove("token");
                         $scope.loggedInObj.isLoggedIn = false;
@@ -31,7 +30,7 @@ angular.module('app')
 
         }
 
-        $scope.reset = function(){
+        $scope.reset = function () {
             $scope.emptyUserName = false;
             $scope.emptyPwd = false;
         }

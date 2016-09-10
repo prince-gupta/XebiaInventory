@@ -1,13 +1,11 @@
 package com.xebia.services.impl;
 
 import com.xebia.common.Constants;
-import com.xebia.dto.AssetFreeMarkerDto;
-import com.xebia.dto.AssetHistoryDTO;
+import com.xebia.dto.*;
+import com.xebia.enums.ApprovalStateEnum;
 import com.xebia.enums.AssetStatus;
 import com.xebia.common.Utility;
 import com.xebia.dao.*;
-import com.xebia.dto.AssetDto;
-import com.xebia.dto.AssetTypeDto;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.*;
 import com.xebia.enums.MailStatus;
@@ -70,6 +68,9 @@ public class AssetServiceImpl implements IAssetService {
 
     @Autowired
     Environment environment;
+
+    @Autowired
+    AssetApprovalDAO assetApprovalDAO;
 
     @Override
     public String createAssetType(AssetType assetType) {
@@ -528,5 +529,81 @@ public class AssetServiceImpl implements IAssetService {
             throw new FileException("MORE_FILES");
         }
         excelService.importToDB(files[0]);
+    }
+
+    public void requestAsset(AssetRequestDTO assetRequestDTO) throws ApplicationException {
+        AssetApproval assetApproval = new AssetApproval();
+        User user = userDAO.getUserByUName(assetRequestDTO.getUserName());
+        assetApproval.setEmployee(user.getEmployee());
+        assetApproval.setDateTillValid(assetRequestDTO.getDateTillValid());
+        assetApproval.setAssetType(assetTypeDAO.getById(assetRequestDTO.getAssetType()));
+        assetApproval.setRemarks(assetRequestDTO.getRemarks());
+        assetApproval.setStatus(ApprovalStateEnum.SENT.getDbName());
+        assetApproval.setSubmittedDate(new Date());
+        assetApprovalDAO.create(assetApproval);
+    }
+
+    public List<AssetApprovalDTO> fetchAssetApprovals(String userName) throws ApplicationException {
+        List<AssetApproval> assetApprovals = null;
+        if (userName != null) {
+            User user = userDAO.getUserByUName(userName);
+            assetApprovals = assetApprovalDAO.getAll(user.getEmployee().getId());
+        } else {
+            assetApprovals = assetApprovalDAO.getAll();
+        }
+        return changeToAssetApprovalDTOs(assetApprovals);
+    }
+
+    public String getApprovalsBadgeCount() throws ApplicationException {
+        List list = assetApprovalDAO.getApprovalsCount(ApprovalStateEnum.SENT.getDbName(), ApprovalStateEnum.PENDING.getDbName());
+        if (list != null)
+            return list.size() + "";
+        return "";
+    }
+
+    public List<AssetApprovalDTO> searchApprovals(AssetApprovalDTO searchDto) throws ApplicationException {
+        List<AssetApproval> dbAssetApprovals = new ArrayList<>();
+        if (!searchDto.isShowApproved() && (searchDto.getIncidentId() != null)) {
+            AssetApproval assetApproval = assetApprovalDAO.getById(searchDto.getIncidentId());
+            dbAssetApprovals.add(assetApproval);
+        } else {
+            dbAssetApprovals = assetApprovalDAO.getByStatus(ApprovalStateEnum.APPROVED.getDbName());
+        }
+        return changeToAssetApprovalDTOs(dbAssetApprovals);
+    }
+
+    public void updateAssetApproval(AssetApprovalDTO assetApprovalDTO) throws ApplicationException {
+        AssetApproval assetApproval = assetApprovalDAO.getById(assetApprovalDTO.getIncidentId());
+        User approvedBy = userDAO.getUserByUName(assetApprovalDTO.getModifiedBy());
+        assetApproval.setUser(approvedBy);
+        assetApproval.setStatus(assetApprovalDTO.getStatus());
+        assetApproval.setRemarks2(assetApprovalDTO.getRemark());
+        assetApprovalDAO.update(assetApproval);
+    }
+
+    public List<AssetApprovalDTO> fetchPendingApprovals() throws ApplicationException{
+        return changeToAssetApprovalDTOs(assetApprovalDAO.getPendingApprovals());
+    }
+
+    private List<AssetApprovalDTO> changeToAssetApprovalDTOs(List<AssetApproval> assetApprovals){
+        List<AssetApprovalDTO> assetApprovalDTOs = new ArrayList<>();
+
+        for (AssetApproval assetApproval : assetApprovals) {
+            AssetApprovalDTO assetApprovalDTO = new AssetApprovalDTO();
+            assetApprovalDTO.setIncidentId(assetApproval.getId());
+            assetApprovalDTO.setAssetType(assetApproval.getAssetType().getType());
+            assetApprovalDTO.setModifiedBy(assetApproval.getUser() != null ? assetApproval.getUser().getEmployee().getFullName() : "");
+            assetApprovalDTO.setRaisedBy(assetApproval.getEmployee().getFullName());
+            assetApprovalDTO.setEmployeeCode(assetApproval.getEmployee().getECode());
+            assetApprovalDTO.setDateTillValid(assetApproval.getDateTillValid());
+            assetApprovalDTO.setSubmittedDate(assetApproval.getSubmittedDate());
+            assetApprovalDTO.setRemark(assetApproval.getRemarks2());
+            assetApprovalDTO.setSpecificRequirement(assetApproval.getRemarks());
+            assetApprovalDTO.setStatus(assetApproval.getStatus());
+            assetApprovalDTO.setDisplayStatus(ApprovalStateEnum.getByDBName(assetApproval.getStatus()).getDisplayName());
+            assetApprovalDTO.setPending(Utility.isExpired(new Date(assetApproval.getSubmittedDate().getTime())) && (ApprovalStateEnum.SENT.getDbName().equals(assetApproval.getStatus())));
+            assetApprovalDTOs.add(assetApprovalDTO);
+        }
+        return assetApprovalDTOs;
     }
 }

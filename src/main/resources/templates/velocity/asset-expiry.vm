@@ -1,53 +1,21 @@
+<!DOCTYPE html>
 <html>
-<head>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
     <style>
         /*@import url(http://fonts.googleapis.com/css?family=Roboto:400,500,700,300,100);
-    */
+   */
         body {
-            background-color: #fffff;
+            background-color: #ffffff;
             font-family: "Roboto", helvetica, arial, sans-serif;
-            font-size: 12px;
             font-weight: 400;
             text-rendering: optimizeLegibility;
-        }
-
-        div.table-title {
-            display: block;
-            margin: auto;
-            max-width: 600px;
-            padding: 5px;
-            width: 100%;
-        }
-
-        .table-title h3 {
-            color: #fafafa;
-            font-size: 11px;
-            font-weight: 400;
-            font-style: normal;
-            font-family: "Roboto", helvetica, arial, sans-serif;
-            text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
-            text-transform: uppercase;
-        }
-
-        /*** Table Styles **/
-
-        .table-fill {
-            background: white;
-            border-radius: 3px;
-            border-collapse: collapse;
-            height: 320px;
-            margin: auto;
-            max-width: 600px;
-            padding: 5px;
-            width: 100%;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-            animation: float 5s infinite;
         }
 
         th {
             color: #D5DDE5;;
             background: #1b1e24;
-            border-bottom: 4px solid #9ea7af;
             border-right: 1px solid #343a45;
             font-size: 12px;
             font-weight: 100;
@@ -57,120 +25,105 @@
             vertical-align: middle;
         }
 
-        th:first-child {
-            border-top-left-radius: 3px;
-        }
-
-        th:last-child {
-            border-top-right-radius: 3px;
-            border-right: none;
-        }
-
-        tr {
+        .trClass {
             border-top: 1px solid #C1C3D1;
-            border-bottom-: 1px solid #C1C3D1;
             color: #666B85;
-            font-size: 12px;
+            font-size: 16px;
             font-weight: normal;
-            text-shadow: 0 1px 1px rgba(256, 256, 256, 0.1);
+            background: #ebecec;
         }
 
-        tr:hover td {
-            background: #4E5066;
-            color: #FFFFFF;
-            border-top: 1px solid #22262e;
-            border-bottom: 1px solid #22262e;
+        .trClass td {
+            padding: 10px;
         }
 
-        tr:first-child {
-            border-top: none;
-        }
-
-        tr:last-child {
-            border-bottom: none;
-        }
-
-        tr:nth-child(odd) td {
-            background: #EBEBEB;
-        }
-
-        tr:nth-child(odd):hover td {
-            background: #4E5066;
-        }
-
-        tr:last-child td:first-child {
-            border-bottom-left-radius: 3px;
-        }
-
-        tr:last-child td:last-child {
-            border-bottom-right-radius: 3px;
-        }
-
-        td {
-            background: #FFFFFF;
-            padding: 20px;
-            text-align: left;
-            vertical-align: middle;
-            font-weight: 300;
-            font-size: 12px;
-            text-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
-            border-right: 1px solid #C1C3D1;
-        }
-
-        td:last-child {
-            border-right: 0px;
-        }
-
-        th.text-left {
-            text-align: left;
-        }
-
-        th.text-center {
-            text-align: center;
-        }
-
-        th.text-right {
-            text-align: right;
-        }
-
-        td.text-left {
-            text-align: left;
-        }
-
-        td.text-center {
-            text-align: center;
-        }
-
-        td.text-right {
-            text-align: right;
-        }
     </style>
 </head>
 <body>
-<p>Hi ${employee.firstName} ${employee.lastName}, </p>
+<table cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#cecece" width="100%"
+       style="max-width: 800px;">
+    <tbody>
+    <tr>
+        <td dir="auto" align="center" valign="top" width="100%" style="padding: 0px 0px 0px 0px;" class="">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tbody>
+                <tr>
+                    <td width="100%"><img src="logo.jpg"
+                                          width="800" alt="Xebia" border="0" align="center"
+                                          style="width: 100%; max-width: 800px;"></td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td dir="auto" align="center" valign="top" width="100%" style="padding: 0px 0px 0px 0px;" class="">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tbody>
+                <tr>
+                    <td align="center" width="100%" style=" color: white;
+                    font-size: large;
+                    font-weight: 900;background-color: #000000">
+                        <div style="padding: 20px;">ASSIGNED ASSET DETAILS</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    <tr>
+        <td dir="auto" align="center" valign="top" width="100%" style="padding: 0px 0px 0px 0px;" class="">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tbody>
+                <tr>
+                    <td align="center" width="100%">
+                        <div style="padding: 20px;">
+                            <table align="center" cellpadding="1" cellspacing="1" width="100%"
+                                   style="background-color: #ffffff">
+                                <thead style="background-color: dimgrey">
+                                <tr style="color: #ffffff">
+                                    <th align="center">ASSET NAME</th>
+                                    <th align="center">SERIAL NO.</th>
+                                    <th align="center">ISSUE DATE</th>
+                                    <th align="center">VALIDITY UPTO</th>
+                                    <th align="center">ISSUED BY</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    #foreach($dto in $dtos)
+                                    <tr class="trClass">
+                                        <td align="center">${dto.asset.name}</td>
+                                        <td align="center">${dto.asset.serialNumber}</td>
+                                        <td align="center">${dto.dateOfIssue}</td>
+                                        <td style="color: red" align="center">${dto.dateTillValid}</td>
+                                        <td align="center">${dto.approver.firstName} ${dto.approver.lastName}</td>
+                                    </tr>
+                                    #end
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td dir="auto" align="center" valign="top" width="100%" style="padding: 0px 0px 0px 0px;" class="">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tbody>
+                <tr>
+                    <td width="100%" style="color: #1b1e24;background-color: #ebecec;">
+                        <div style="padding: 20px;">NOTE: If you want to extend validity , please reach out to IT Team or Raise ticket at ext 247</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tbody>
 
-<div>
-    <p>Following Asset's Validity is going to expire :</p>
-    <table>
-        <tr>
-            <th>Asset Name</th>
-            <th>Asset Serial Number</th>
-            <th>Date Of Issue</th>
-            <th>Date Till Valid</th>
-            <th>Approved By</th>
-        </tr>
-        #foreach($dto in $dtos)
-            <tr>
-                <td>${dto.asset.name}</td>
-                <td>${dto.asset.serialNumber}</td>
-                <td>${dto.dateOfIssue}</td>
-                <td style="color: darkred">${dto.dateTillValid}</td>
-                <td>${dto.approver.firstName} ${dto.approver.lastName}</td>
-            </tr>
-        #end
+</table>
 
-    </table>
-    <p>To extend validity, please contact Admin or IT.</p>
-</div>
+
 </body>
 </html>

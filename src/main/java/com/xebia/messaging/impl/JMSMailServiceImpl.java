@@ -117,7 +117,7 @@ public class JMSMailServiceImpl implements JMSMailService {
             template.convertAndSend("registerAssetExpiryMailQueue", mailDtos);
 
 
-        }, new CronTrigger("00 30 09 * * *"));
+        }, new CronTrigger("00 */5 * * * *"));
 
     }
 

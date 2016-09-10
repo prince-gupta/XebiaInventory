@@ -5,7 +5,27 @@ angular
         'ui.bootstrap',
         'ngCookies'
     ])
-    .config(function ($routeProvider) {
+
+   /* .config(['$httpProvider', function ($httpProvider) {
+        $httpProvider.interceptors.push('securityInterceptor');
+    }])
+    .factory('securityInterceptor', function ($q) {
+        return {
+            response: function (response) {
+                // do something on success
+                if (response.status === 403 || response.status === 401) {
+                    $location.path('');
+                    return $q.reject(response);
+                }
+                return response;
+
+            },
+            responseError: function (response) {
+                // do something on error
+                return $q.reject(response);
+            }
+        };
+    })*/.config(function ($routeProvider) {
         $routeProvider
             .when('/', {
                 templateUrl: '../views/login.html',
@@ -17,14 +37,15 @@ angular
             })
             .when('/register', {
                 templateUrl: '../views/register.html',
-                controller: 'registerController'
+                controller: 'registerController',
             })
             .when('/assets', {
                 templateUrl: '../views/assets.html',
                 controller: 'assetController'
             })
             .when('/approvals', {
-                templateUrl: '../views/underConstruction.html'
+                templateUrl: '../views/approvals.html',
+                controller: 'approvalController'
             })
             .when('/about', {
                 templateUrl: '../views/underConstruction.html'
@@ -78,11 +99,23 @@ function resolveError(status) {
 
 angular.module('app')
     .controller('mainController',
-    function ($scope, $interval, MainFactory, ExcelFactory, LoginFactory, $timeout, $cookieStore) {
+    function ($scope, $interval, $location, MainFactory, ExcelFactory, LoginFactory, $timeout, $cookieStore, AssetFactory) {
         $scope.pingErrMessage = "";
         $scope.showPingErrMessage = false;
         $scope.pingMessage = "";
         $scope.showPingMessage = false;
+        $scope.approvalsBadgeCount = "";
+
+        init();
+
+        function init(){
+            badgeCount();
+        }
+        function badgeCount(){
+            AssetFactory.getApprovalsBadgeCount().success(function(data){
+                $scope.approvalsBadgeCount = data;
+            });
+        }
 
         function ping() {
             MainFactory.ping().success(function (data) {
@@ -100,7 +133,7 @@ angular.module('app')
             });
         }
 
-        $scope.logout = function(){
+        $scope.logout = function () {
             var userName = $cookieStore.get("Username");
             var user = {};
             user.username = userName;
@@ -110,12 +143,13 @@ angular.module('app')
                     $scope.loginMessage = "You are logged out !"
                     $cookieStore.remove("Username");
                     $cookieStore.remove("token");
-                    window.location="/";
+                    window.location = "/";
                 }
             });
         }
 
         $interval(ping, 10000);
+        $interval(badgeCount, 20000);
 
         $scope.exportToExcel = function (tableId, sheetName, fileName) { // ex: '#my-table'
             $scope.exportHref = Excel.tableToExcel("#" + tableId, sheetName);
@@ -133,7 +167,11 @@ angular.module('app')
         return{
             ping: function () {
                 return $http.get('/inventory/logon/dummy');
-            }
+            },
+            getUserRoles : function(){
+            $http.defaults.headers.common.Username = $cookieStore.get('Username');
+            return $http.get('/inventory/common/getUserRoles');
+        }
         }
     })
     .factory('ExcelFactory', function ($window, $http, $cookieStore) {

@@ -648,6 +648,31 @@ angular.module('app')
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/getEmployeeAssetsFileParam', data);
+            },
+            getApprovalsBadgeCount: function(){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/asset/getApprovalsBadgeCount');
+            },
+            getAllApprovals : function(){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/asset/getAllApprovals');
+            },
+            searchApprovals : function(data){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/asset/searchApprovals', data);
+            },
+            updateApproval : function(data){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/asset/updateApproval', data);
+            },
+            fetchPendingApprovals : function(){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/asset/fetchPendingApprovals');
             }
         }
     })

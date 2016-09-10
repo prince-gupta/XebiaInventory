@@ -1,8 +1,6 @@
 package com.xebia.services;
 
-import com.xebia.dto.AssetDto;
-import com.xebia.dto.AssetHistoryDTO;
-import com.xebia.dto.AssetTypeDto;
+import com.xebia.dto.*;
 import com.xebia.entities.*;
 import com.xebia.exception.ApplicationException;
 import com.xebia.exception.FileException;
@@ -68,4 +66,16 @@ public interface IAssetService {
     public List<Asset> searchAsset(AssetDto assetDto);
 
     public void processHistoricalAssets() throws ApplicationException,FileException;
+
+    public void requestAsset(AssetRequestDTO assetRequestDTO) throws ApplicationException;
+
+    public List<AssetApprovalDTO> fetchAssetApprovals(String userName) throws ApplicationException;
+
+    public String getApprovalsBadgeCount() throws ApplicationException;
+
+    public List<AssetApprovalDTO> searchApprovals(AssetApprovalDTO searchDto) throws ApplicationException;
+
+    public void updateAssetApproval(AssetApprovalDTO assetApprovalDTO) throws ApplicationException;
+
+    public List<AssetApprovalDTO> fetchPendingApprovals() throws ApplicationException;
 }

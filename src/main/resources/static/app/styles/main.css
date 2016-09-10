@@ -12,6 +12,16 @@
 .navBar-image{
     width: 158px;
 }
+
+.active{
+    display: block;
+}
+.table-select {
+    font-size: 10px !important;
+    height: 24px !important;
+    width: 90px !important;
+    padding: initial !important;
+}
 .full button span {
     background-color: limegreen;
     border-radius: 32px;

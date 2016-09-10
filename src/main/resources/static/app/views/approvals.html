@@ -1,0 +1,105 @@
+<div class="container">
+    <div><h1>Approvals</h1></div>
+    <div class="alert alert-danger fade in" ng-show=showDangerMessage>
+        <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+    </div>
+    <div class="alert alert-warning fade in" ng-show=showWarningMessage>
+        <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{warningMessage}}</span>
+    </div>
+    <div class="alert alert-success fade in" ng-show=showSuccessMessage>
+        <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+        <strong>Success!</strong> <span>{{successMessage}}</span>
+    </div>
+    <script type="text/ng-template" id="Suggestion.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Suggestion</h3>
+        </div>
+        <div class="modal-body">
+            <form role="form">
+                <h5>
+                    <small>It is suggested to provide Remarks in case of <strong>Not Approved</strong> and <strong>Attention</strong>
+                        action.
+                    </small>
+                </h5>
+            </form>
+        </div>
+        <!--<div class="modal-footer">
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Dismiss</button>
+        </div>-->
+    </script>
+    <uib-tabset active="activeJustified" justified="true">
+        <uib-tab index="0" heading="">
+            <form class="form-horizontal" role="form">
+                <div class="col-sm-3 has-feedback">
+                    <input type="text" class="form-control" id="incidentBox" placeholder="Incident#"
+                           ng-required="true" ng-model="search.incidentId" ng-focus="toggleSearchErr()">
+                <span class="glyphicon glyphicon-warning-sign form-control-feedback"
+                      style="color: darkred" ng-show="searchBoxErr"></span>
+                </div>
+                <div class="col-sm-1">
+                    <i class="glyphicon glyphicon-search btn btn-success"
+                       ng-click="performSearch();" ng-disabled="searchBoxErr || disableAllButtons"></i>
+                </div>
+                <div class="col-sm-1">
+                    <i class="btn btn-info glyphicon glyphicon-refresh" type="button" ng-click="refresh()" ng-disabled="disableAllButtons"
+                            ></i>
+                </div>
+
+                <div class="material-switch col-sm-7">
+                    Approved Only
+                    <input id="someSwitchOptionSuccess" name="someSwitchOption001" type="checkbox" ng-model="isApprovedOnly.status" ng-change="fetchApprovedOnly()" ng-disabled="disableAllButtons"/>
+                    <label for="someSwitchOptionSuccess" class="label-success"></label>
+                </div>
+
+            </form>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Incident#</th>
+                    <th>Raised By</th>
+                    <th>Raised On</th>
+                    <th>For</th>
+                    <th>Specific Requirements</th>
+                    <th>Date Till Valid Asked</th>
+                    <th>Remarks</th>
+                    <th>Req. Status</th>
+                    <th>Action</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="approval in approvals" ng-class="approval.pending == true ? 'warning':'default'">
+                    <td>{{approval.incidentId}}</td>
+                    <td>{{approval.raisedBy}}<br>
+                        <small>{{approval.employeeCode}}</small>
+                    </td>
+                    <td>{{approval.submittedDate}}</td>
+                    <td>{{approval.assetType}}</td>
+                    <td>{{approval.specificRequirement}}</td>
+                    <td>{{approval.dateTillValid}}</td>
+                    <td>
+                        <a href=""><i class="glyphicon glyphicon-edit" id="editRemark{{$index}}"
+                                      ng-click="edit($index)"></i></a>
+                        <textarea class="form-control" style="resize: none; display: none" rows="2"
+                                  ng-model="uapproval.remark" id="textArea{{$index}}"></textarea></td>
+                    <td>{{approval.status == 'SENT' ? 'RECEIVED' : approval.status}}</td>
+                    <td><select class="form-control table-select" ng-model="statusArray[$index]"
+                                ng-options="s.id as s.name for s in status" ng-hide="{{approval.status == 'APPROVED'}}">
+                    </select></td>
+                    <td>
+                        <button class="btn btn-info table-select" ng-click="update($index, approval.incidentId);" ng-hide="{{approval.status == 'APPROVED'}}" ng-disabled="disableAllButtons">
+                            Update
+                        </button>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+            <div id="k"></div>
+            <ul uib-pagination total-items="totalItems" ng-model="currentPage" max-size="maxSize" class="pagination-sm"
+                boundary-link-numbers="true" ng-change="pageChanged()" items-per-page="itemsPerPage"></ul>
+        </uib-tab>
+    </uib-tabset>
+</div>

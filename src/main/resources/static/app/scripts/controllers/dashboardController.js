@@ -8,6 +8,7 @@ angular.module('app')
         $scope.manuMap = [];
         $scope.manuNameMap = [];
         $scope.assetExpirationReport = [];
+        $scope.pendingApprovals = [];
 
         init();
 
@@ -19,6 +20,17 @@ angular.module('app')
                     window.location = ""
                 }
             });
+        }
+
+        function fetchPendingApprovals() {
+            AssetFactory.fetchPendingApprovals().success(function (data) {
+                $scope.pendingApprovals = angular.copy(data);
+            })
+                .error(function (data, status, headers, config) {
+                    if (status == 401) {
+                        window.location = ""
+                    }
+                });
         }
 
         function fetchAssetAvailability() {
@@ -50,15 +62,15 @@ angular.module('app')
                 });
         }
 
-        $scope.availabilityInterval ;
-        $scope.reportInterval ;
+        $scope.availabilityInterval;
+        $scope.reportInterval;
         function init() {
             fetchAssetAvailability();
             fetchAssetExpirationReport();
+            fetchPendingApprovals();
             $scope.reportInterval = $interval(fetchAssetExpirationReport, 10000);
             $scope.availabilityInterval = $interval(fetchAssetAvailability, 10000);
-
-            $scope.$on('$locationChangeStart', function(){
+            $scope.$on('$locationChangeStart', function () {
                 $interval.cancel($scope.availabilityInterval);
                 $interval.cancel($scope.reportInterval);
             });

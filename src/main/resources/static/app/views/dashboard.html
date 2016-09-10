@@ -65,4 +65,28 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-md-5" style="margin-top: 5px;margin-bottom: 5px;"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="box-inner">
+                <div class="box-header well">Pending Approvals</div>
+
+                <div class="scroll-card">
+                    <table class="table table-hover">
+                        <tr ng-repeat="approval in pendingApprovals"
+                            ng-class="warning">
+                            <td>{{approval.incidentId}}</td>
+                            <td>{{approval.raisedBy}}<br>
+                                <small>{{approval.employeeCode}}</small>
+                            </td>
+                            <td>{{approval.submittedDate}}</td>
+                            <td>{{approval.assetType}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

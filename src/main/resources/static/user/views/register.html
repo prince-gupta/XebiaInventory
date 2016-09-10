@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" ng-controller="registerController">
 
     <div>
         <h1>Assets</h1>
@@ -17,6 +17,52 @@
         </div>
         <!--<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>-->
         <div>
+            <script type="text/ng-template" id="ModalContent.html">
+                <div class="modal-header">
+                    <h3 class="modal-title">Enter Asset Details To Request</h3>
+                </div>
+                <div class="modal-body" ng-show="!showPrint">
+                    <form role="form">
+                        <div class="form-group">
+                            <select class="form-control" ng-model="requestAsset.assetType"
+                                    ng-options="type.id as type.type for type in assetTypeDisplayList">
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="comment">Specific Requirements:</label>
+                            <textarea class="form-control" style="resize: none;" rows="5" id="comment"
+                                      ng-model="requestAsset.remarks"></textarea>
+                        </div>
+
+                        <label class="control-label" for="dov">Till Validity Date</label>
+
+                        <div id="dov">
+                            <div>
+                                <p class="input-group">
+                                    <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                                           ng-model="requestAsset.dateTillValid" is-open="popup4.opened"
+                                           datepicker-options="dateOptions"
+                                           ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                                           placeholder="Date Of Till Validity"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open4()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                              </span>
+                                </p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <h4 ng-show="showMessage" style="float:left">
+                        <small id="messageId">{{message}}</small>
+                    </h4>
+                    <button class="btn btn-primary" ng-disabled="disableReq" type="button" ng-click="ok()">Request</button>
+                    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+                </div>
+            </script>
+
             <uib-tabset active="activeJustified" justified="true">
                 <uib-tab index="0" heading="Assets" ng-click="refreshAssets()">
                     <table class="table table-hover" ng-show="showAssetTable">
@@ -45,13 +91,12 @@
                         It Seems you don't have any assets assigned. Please contact IT Team or Raise a ticket on ext 247
                         .
                     </div>
-                    <a class="btn btn-info btn-sm" ng-click="openAssetWindow('lg')" style="margin-top: 10px;">
+                    <a class="btn btn-info btn-sm" ng-click="openRequestAssetWindow('lg')" style="margin-top: 10px;">
                         Request An Asset<span class="glyphicon glyphicon-plus" style="margin-left: 8px;"></span>
                     </a>
                     <a class="btn btn-info btn-sm" ng-click="refreshAssets()" style="margin-top: 10px;">
                         Refresh<span class="glyphicon glyphicon-refresh" style="margin-left: 8px;"></span>
                     </a>
-
                 </uib-tab>
                 <uib-tab index="2" heading="Assets History" ng-click="fetchHistory()">
                     <a class="btn btn-info btn-sm" ng-click="fetchHistory()" style="margin-top: 10px;">
@@ -87,7 +132,31 @@
                     </table>
                 </uib-tab>
                 <uib-tab index="3" heading="Approvals" ng-click="fetchApprovals()">
-
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Incident#</th>
+                            <th>For</th>
+                            <th>Modified By</th>
+                            <th>Date Till Valid</th>
+                            <th>Specific Requirement Mentioned</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="approval in approvals"
+                            ng-class="approval.status == 'NOT_APPROVED' ? 'danger' : approval.status == 'ATTENTION' ? 'warning' : 'default'">
+                            <td>{{approval.incidentId}}</td>
+                            <td>{{approval.assetType}}</td>
+                            <td>{{approval.modifiedBy}}</td>
+                            <td>{{approval.dateTillValid}}</td>
+                            <td>{{approval.specificRequirement}}</td>
+                            <td>{{approval.displayStatus}}</td>
+                            <td>{{approval.remark}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </uib-tab>
 
             </uib-tabset>

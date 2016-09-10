@@ -1,8 +1,10 @@
 package com.xebia.services.impl;
 
 import com.xebia.common.Utility;
+import com.xebia.dao.PageRoleDao;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.AuthenticationResponse;
+import com.xebia.entities.PageRole;
 import com.xebia.entities.User;
 import com.xebia.entities.UserRole;
 import com.xebia.enums.UserRoleEnum;
@@ -23,6 +25,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Autowired
     UserDAO userDAO;
+
+    @Autowired
+    PageRoleDao pageRoleDao;
 
 
     @Override
@@ -70,6 +75,37 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     public void authenticateToken(String token, String userName, String ipAddr) throws AuthenticationException {
         tokenService.validateToken(token, userName, ipAddr);
     }
+
+    @Override
+    public void validateRole(String userName, String pathToAccess) throws AuthenticationException {
+        User user = userDAO.getUserByUName(userName);
+        List<UserRole> userRoles = user.getUserRoles();
+        boolean needToProceed = true;
+        for(UserRole userRole : userRoles){
+            if(userRole.getRoleName().equals(UserRoleEnum.ADMIN.getDbValue()))
+            {
+                needToProceed = false;
+                break;
+            }
+        }
+        if(needToProceed) {
+            String path = pathToAccess.substring(pathToAccess.lastIndexOf('/'), pathToAccess.length());
+            PageRole pageRole = pageRoleDao.getByPath(path);
+            List<UserRole> dbUserRoleList = pageRole.getUserRoles();
+            boolean havingValidRole = false;
+            for (UserRole userRole : userRoles) {
+                for (UserRole dbUserRole : dbUserRoleList) {
+                    if (dbUserRole.getRoleName().equals(userRole.getRoleName())) {
+                        havingValidRole = true;
+                        break;
+                    }
+                }
+            }
+            if (!havingValidRole)
+                throw new AuthenticationException("INVALID-ROLE");
+        }
+    }
+
 
     @Override
     public User createUser(User user) {

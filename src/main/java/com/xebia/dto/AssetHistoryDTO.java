@@ -1,6 +1,5 @@
 package com.xebia.dto;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 /**

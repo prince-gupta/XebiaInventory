@@ -15,12 +15,12 @@ import javax.ws.rs.ext.Provider;
 
 import com.xebia.annotations.Secured;
 import com.xebia.common.Utility;
+import com.xebia.entities.User;
 import com.xebia.exception.AuthenticationException;
 import com.xebia.services.IAuthenticationService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 
 
 /**
@@ -50,7 +50,7 @@ public class AuthenticationRequestFilter implements ContainerRequestFilter {
      *
      * @param context - ContainerRequestContext
      * @throws IOException - In case of any error occures , context abort the application
-     *                          and send UNATHORIZED status.
+     *                     and send UNATHORIZED status.
      */
     @Override
     public void filter(ContainerRequestContext context) throws IOException {
@@ -58,16 +58,19 @@ public class AuthenticationRequestFilter implements ContainerRequestFilter {
         String userName = context.getHeaderString(USERNAME);
         String ip = httpServletRequest.getRemoteAddr();
         log.info("in Filter()");
-        log.info("AuthorizationHeaderValue"+authorizationHeaderValue);
+        log.info("AuthorizationHeaderValue" + authorizationHeaderValue);
         log.info("UserName:" + userName);
         if (authorizationHeaderValue == null) {
             throw new NotAuthorizedException("Authorization Exception : Header is not valid.");
         }
 
-        log.info("Token "+authorizationHeaderValue);
+        log.info("Token " + authorizationHeaderValue);
         try {
             validateToken(authorizationHeaderValue, userName, ip);
-            Utility.put("username",userName);
+            validateRole(userName, httpServletRequest.getPathInfo());
+            Utility.put("username", userName);
+        } catch (AuthenticationException e) {
+            context.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
         } catch (Exception e) {
             context.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
         }
@@ -76,11 +79,15 @@ public class AuthenticationRequestFilter implements ContainerRequestFilter {
     /**
      * Method to validate token against username.
      *
-     * @param token - Token that need to be validated.
+     * @param token    - Token that need to be validated.
      * @param userName - UserName.
      */
-    private void validateToken(final String token, final String userName, final String ipAddr) throws AuthenticationException{
+    private void validateToken(final String token, final String userName, final String ipAddr) throws AuthenticationException {
         authenticationService.authenticateToken(token, userName, ipAddr);
+    }
+
+    private void validateRole(String userName, String pathToAccess) throws AuthenticationException {
+        authenticationService.validateRole(userName, pathToAccess);
     }
 }
 

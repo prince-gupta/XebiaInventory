@@ -36,6 +36,11 @@ public class PageRoleDao {
         return (pageRoles != null && pageRoles.size() > 0) ? pageRoles.get(0) : null;
     }
 
+    public PageRole getByPath(String path){
+        List<PageRole> pageRoles = entityManager.createQuery("from PageRole where url = :path").setParameter("path", path).getResultList();
+        return (pageRoles != null && pageRoles.size() > 0) ? pageRoles.get(0) : null;
+    }
+
     public void update(PageRole pageRole) {
         entityManager.merge(pageRole);
         return;

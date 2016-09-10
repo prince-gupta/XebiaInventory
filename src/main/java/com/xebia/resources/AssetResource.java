@@ -2,9 +2,7 @@ package com.xebia.resources;
 
 import com.xebia.annotations.Secured;
 import com.xebia.dao.UserDAO;
-import com.xebia.dto.ActionResult;
-import com.xebia.dto.AssetDto;
-import com.xebia.dto.AssetHistoryDTO;
+import com.xebia.dto.*;
 import com.xebia.entities.*;
 import com.xebia.exception.ApplicationException;
 import com.xebia.exception.FileException;
@@ -348,4 +346,64 @@ public class AssetResource {
         Employee employee = user.getEmployee();
         return assetService.getAssetsHistory(employee.getId());
     }
+
+    @POST
+    @Path("assetApproval")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public ActionResult requestAsset(@RequestBody AssetRequestDTO assetRequestDTO){
+        ActionResult actionResult = new ActionResult();
+        String userNamme = httpServletRequest.getHeader("Username");
+        assetRequestDTO.setUserName(userNamme);
+        assetService.requestAsset(assetRequestDTO);
+        actionResult.setStatus(ActionResult.Status.SUCCESS);
+        return actionResult;
+    }
+
+    @GET
+    @Path("getApprovals")
+    @Produces("application/json")
+    public List<AssetApprovalDTO> fetchAssetApprovals(){
+        String userNamme = httpServletRequest.getHeader("Username");
+        return assetService.fetchAssetApprovals(userNamme);
+    }
+
+    @GET
+    @Path("getAllApprovals")
+    @Produces("application/json")
+    public List<AssetApprovalDTO> fetchAllAssetApprovals(){
+        return assetService.fetchAssetApprovals(null);
+    }
+
+    @GET
+    @Path("getApprovalsBadgeCount")
+    @Produces("application/text")
+    public String getApprovalsBadgeCount(){
+        return assetService.getApprovalsBadgeCount();
+    }
+
+    @POST
+    @Path("searchApprovals")
+    @Produces("application/json")
+    public List<AssetApprovalDTO> searchApprovals(@RequestBody AssetApprovalDTO assetApprovalDTO){
+        return assetService.searchApprovals(assetApprovalDTO);
+    }
+
+    @POST
+    @Path("updateApproval")
+    @Produces("application/text")
+    public String updateApproval(@RequestBody AssetApprovalDTO assetApprovalDTO){
+        assetApprovalDTO.setModifiedBy(httpServletRequest.getHeader("Username"));
+        assetService.updateAssetApproval(assetApprovalDTO);
+        return "OK";
+    }
+
+    @GET
+    @Path("/fetchPendingApprovals")
+    @Produces("application/json")
+    public List<AssetApprovalDTO> getPendingApprovals(){
+        return assetService.fetchPendingApprovals();
+    }
+
+
 }

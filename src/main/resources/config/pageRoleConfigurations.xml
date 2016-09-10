@@ -19,7 +19,7 @@
             /fetchAllAssetType
         </url>
         <roleName>
-            IT,ADMIN
+            IT,ADMIN,EMP
         </roleName>
     </config>
     <config>
@@ -88,4 +88,144 @@
             IT,ADMIN
         </roleName>
     </config>
+    <config>
+        <displayName>
+            GET_ASSET_EXPIRATION_REPORT
+        </displayName>
+        <url>
+            /getAssetExpirationReport
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            CHANGE_PASSWORD
+        </displayName>
+        <url>
+            /changePassword
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            FETCH_EMPLOYEE_DETAILS
+        </displayName>
+        <url>
+            /fetchEmployeeDetails
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            GET_USER_ASSETS
+        </displayName>
+        <url>
+            /getAssets
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            GET_USER_ASSETS_HISTORY
+        </displayName>
+        <url>
+            /getAssetsHistoryLoggedIn
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            ASSET_REQUEST
+        </displayName>
+        <url>
+            /assetApproval
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            ASSET_APPROVALS
+        </displayName>
+        <url>
+            /getApprovals
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            ASSET_APPROVALS_BADGE_COUNT
+        </displayName>
+        <url>
+            /getApprovalsBadgeCount
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            ALL_ASSET_APPROVALS
+        </displayName>
+        <url>
+            /getAllApprovals
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            SEARCH_ASSET_APPROVALS
+        </displayName>
+        <url>
+            /searchApprovals
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            UPDATE_ASSET_APPROVALS
+        </displayName>
+        <url>
+            /updateApproval
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            FETCH_PENDING_ASSET_APPROVALS
+        </displayName>
+        <url>
+            /fetchPendingApprovals
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
 </configurations>

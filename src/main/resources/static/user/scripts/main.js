@@ -16,8 +16,7 @@ angular
                 controller: 'passwordController'
             })
             .when('/register', {
-                templateUrl: '../views/register.html',
-                controller: 'registerController'
+                templateUrl: '../views/register.html'
             })
             .when('/approvals', {
                 templateUrl: '../views/underConstruction.html'
@@ -49,16 +48,15 @@ angular.module('userApp')
 
         init();
 
-        function init(){
+        function init() {
             var username = $cookieStore.get("Username");
             var token = $cookieStore.get("token");
             $scope.loggedInObj.username = $cookieStore.get('Username');
-            if(username === undefined || username == "" || token === undefined || token == "")
-            {
+            if (username === undefined || username == "" || token === undefined || token == "") {
                 $scope.loggedInObj = {};
                 $scope.loggedInObj.isLoggedIn = false;
             }
-            else{
+            else {
                 var username = $cookieStore.get("Username");
                 $scope.userName = username;
                 $scope.loggedInObj = {};
@@ -83,13 +81,13 @@ angular.module('userApp')
             });
         }
 
-        $scope.populateUser = function(){
-            Factory.getEmployee().success(function(data){
+        $scope.populateUser = function () {
+            Factory.getEmployee().success(function (data) {
                 $scope.loggedInUser = angular.copy(data);
             });
         }
 
-        $scope.logout = function(){
+        $scope.logout = function () {
             var userName = $cookieStore.get("Username");
             var user = {};
             user.username = userName;
@@ -99,7 +97,7 @@ angular.module('userApp')
                     $scope.loginMessage = "You are logged out !"
                     $cookieStore.remove("Username");
                     $cookieStore.remove("token");
-                    window.location="/";
+                    window.location = "/";
                     $scope.loggedInObj.isLoggedIn = false;
                 }
             });
@@ -133,9 +131,9 @@ angular.module('userApp')
     })
 ;
 
-angular.module('userApp').controller('EmployeeProfileCtrl', function($scope,$uibModalInstance,Factory){
+angular.module('userApp').controller('EmployeeProfileCtrl', function ($scope, $uibModalInstance, Factory) {
 
-    $scope.message="";
+    $scope.message = "";
     $scope.showMessage = false;
     $scope.showEdit = true;
     $scope.showDone = false;
@@ -143,24 +141,24 @@ angular.module('userApp').controller('EmployeeProfileCtrl', function($scope,$uib
 
     init();
 
-    function init(){
+    function init() {
         Factory.getEmployee().success(function (data) {
             $scope.user = angular.copy(data);
 
         });
     }
 
-    $scope.editEmployee = function(){
+    $scope.editEmployee = function () {
         $scope.showEdit = false;
         $scope.showDone = true;
     }
 
-    $scope.doneEmployee = function(){
+    $scope.doneEmployee = function () {
         $scope.showEdit = true;
         $scope.showDone = false;
     }
 
-    $scope.cancleEdit = function(){
+    $scope.cancleEdit = function () {
         $scope.showEdit = true;
         $scope.showDone = false;
     }
@@ -177,3 +175,22 @@ function resolveError(status) {
         return "Something went wrong at Server Side."
     }
 }
+
+angular.module('userApp')
+    .service('FileUpload', ['$http', function ($http) {
+        this.uploadFileToUrl = function (file, uploadUrl) {
+            var fd = new FormData();
+            fd.append('file', file);
+            var url = "/inventory/common"+uploadUrl;
+            $http.post(url, fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            })
+
+                .success(function () {
+                })
+
+                .error(function () {
+                });
+        }
+    }]);
