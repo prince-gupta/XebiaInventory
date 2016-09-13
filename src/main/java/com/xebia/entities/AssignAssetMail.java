@@ -1,9 +1,7 @@
 package com.xebia.entities;
 
-import com.xebia.enums.MailStatus;
-
-import java.io.Serializable;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 

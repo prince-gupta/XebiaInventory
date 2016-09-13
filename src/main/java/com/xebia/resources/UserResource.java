@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -157,10 +158,20 @@ public class UserResource {
     }
 
     @GET
+    @Path("/getPageRolesCount")
+    @Produces("application/json")
+    public long getPageRolesCount() {
+       return pageRoleService.getPageRolesCount();
+    }
+
+    @GET
     @Path("/getPageRoles")
     @Produces("application/json")
     @Secured
-    public List<PageRoleDTO> getPageRoles() {
-        return pageRoleService.getPageRoles();
+    public ActionResult getPageRoles(@QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+        ActionResult result = new ActionResult();
+        result.addData("list", pageRoleService.getPageRoles(offset, limit));
+        result.setStatus(ActionResult.Status.SUCCESS);
+        return result;
     }
 }

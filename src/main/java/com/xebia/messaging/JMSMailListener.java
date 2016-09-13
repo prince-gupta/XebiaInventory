@@ -188,4 +188,9 @@ public class JMSMailListener {
     public void registerReturnedAssetMail(AssignAssetMail assignAssetMail){
         assignAssetMailDAO.create(assignAssetMail);
     }
+
+    @JmsListener(destination = "mailQueue")
+    public void registerMail(AssignAssetMail assignAssetMail){
+        assignAssetMailDAO.create(assignAssetMail);
+    }
 }

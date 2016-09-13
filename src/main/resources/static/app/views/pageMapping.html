@@ -17,9 +17,11 @@
             <button class="btn btn-info" type="button" ng-click="populateRoles()"
                     style="margin-top: 5px;">Populate Roles
             </button>
+            <div style="float: right" class="well well-sm"> Total Roles : {{page.totalItems}}</div>
             <table class="table table-hover">
                 <thead>
                 <tr>
+                    <th>#</th>
                     <th>Role Display Name</th>
                     <th>Page URL</th>
                     <th>Role</th>
@@ -27,12 +29,19 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="role in pageRoles">
+                    <td>{{role.id}}</td>
                     <td>{{role.name}}</td>
                     <td>{{role.url}}</td>
                     <td><span ng-repeat="userRole in role.userRole">{{userRole}}<br></span></td>
                 </tr>
                 </tbody>
             </table>
+            <div id="k">
+
+            </div>
+            <!--<ul uib-pagination total-items="page.totalItems" ng-model="page.currentPage" max-size="page.maxSize" class="pagination-sm"
+                boundary-link-numbers="true" ng-change="pageChanged()" items-per-page="page.itemsPerPage" style="margin-left: 50%"></ul>-->
+            <ul uib-pager total-items="page.totalItems" ng-model="page.currentPage" ng-change="pageChanged()"></ul>
         </uib-tab>
     </uib-tabset>
 </div>

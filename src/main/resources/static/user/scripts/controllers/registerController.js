@@ -208,6 +208,11 @@ angular.module('userApp')
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/getApprovals');
+            },
+            updateEmployee : function(data){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/employee/updateEmployee', data);
             }
         }
     });

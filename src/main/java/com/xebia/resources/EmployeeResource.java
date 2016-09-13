@@ -143,4 +143,24 @@ public class EmployeeResource {
         }
         return result;
     }
+
+    @POST
+    @Path("/updateEmployee")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public ActionResult updateEmployee(@RequestBody Employee employee){
+        ActionResult result = new ActionResult();
+        try {
+            User user = userDAO.getUserByUName(httpServletRequest.getHeader("Username"));
+            Employee dbEmployee = user.getEmployee();
+            dbEmployee.setMobile(employee.getMobile());
+            employeeDAO.update(dbEmployee);
+            result.setStatus(ActionResult.Status.SUCCESS);
+        }
+        catch (Exception e){
+            result.setStatus(ActionResult.Status.FAILURE);
+        }
+        return result;
+
+    }
 }

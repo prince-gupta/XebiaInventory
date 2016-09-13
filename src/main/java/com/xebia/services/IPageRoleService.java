@@ -10,5 +10,7 @@ public interface IPageRoleService {
 
     public void populatePageRoles();
 
-    public List<PageRoleDTO> getPageRoles();
+    public List<PageRoleDTO> getPageRoles(int offset, int limit);
+
+    public long getPageRolesCount();
 }

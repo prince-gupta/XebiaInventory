@@ -228,4 +228,28 @@
         </roleName>
     </config>
 
+    <config>
+        <displayName>
+            UPDATE_EMPLOYEE
+        </displayName>
+        <url>
+            /updateEmployee
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            UPDATE_EMPLOYEE_2
+        </displayName>
+        <url>
+            /updateEmployee2
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
+        </roleName>
+    </config>
+
 </configurations>

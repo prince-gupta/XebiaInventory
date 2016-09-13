@@ -5,27 +5,50 @@ angular.module('app')
 
         $scope.pageRoles = [];
 
+        $scope.page = {};
+        $scope.page.maxSize = 4;
+        $scope.page.totalItems = 0;
+        $scope.page.currentPage = 1;
+        $scope.page.itemsPerPage = 10;
+
         init();
+        function getOffset() {
+            return ((($scope.page.currentPage - 1) * $scope.page.itemsPerPage));
+        }
+
+        function getLimit(){
+            return ($scope.page.itemsPerPage);
+        }
+
         function init() {
-            fetchAllPageRoles();
+            fetchAllPageRoles(getOffset(), getLimit());
         }
 
-        function fetchAllPageRoles(){
-            UserFactory.getPageRoles().success(function(data){
-                $scope.pageRoles = angular.copy(data);
+        function fetchAllPageRoles(offset, limit) {
+            UserFactory.getPageRolesCount().success(function(data)
+            {
+                $scope.page.totalItems = data;
+                UserFactory.getPageRoles(offset, limit).success(function (data) {
+                    $scope.pageRoles = angular.copy(data.data.list);
+                });
             });
+
         }
 
-        $scope.populateRoles = function(){
+        $scope.pageChanged = function(){
+            init();
+        }
+
+        $scope.populateRoles = function () {
             waitingDialog.show("Please wait while application is parsing xml and populating data . . .")
-            UserFactory.populatePageRoles().success(function(data){
-               if(data.status != "SUCCESS"){
-                   showMessage(data.error.eMessage,"DANGER")
-               }
-                else{
-                   showMessage("Data has been populated successfully.","SUCCESS");
-                   fetchAllPageRoles();
-               }
+            UserFactory.populatePageRoles().success(function (data) {
+                if (data.status != "SUCCESS") {
+                    showMessage(data.error.eMessage, "DANGER")
+                }
+                else {
+                    showMessage("Data has been populated successfully.", "SUCCESS");
+                    init();
+                }
                 waitingDialog.hide();
             });
         }

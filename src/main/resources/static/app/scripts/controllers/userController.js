@@ -315,15 +315,20 @@ angular.module('app')
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/user/updateUserRoles',data);
             },
-            getPageRoles: function(){
+            getPageRoles: function(offset, limit){
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
-                return $http.get('/inventory/user/getPageRoles');
+                return $http.get('/inventory/user/getPageRoles?offset='+offset+"&limit="+limit);
             },
             populatePageRoles: function(){
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/user/populatePageRoles');
+            },
+            getPageRolesCount: function() {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/user/getPageRolesCount');
             }
         }
     });

@@ -117,7 +117,7 @@ public class JMSMailServiceImpl implements JMSMailService {
             template.convertAndSend("registerAssetExpiryMailQueue", mailDtos);
 
 
-        }, new CronTrigger("00 */5 * * * *"));
+        }, new CronTrigger("00 30 09 * * *"));
 
     }
 
@@ -162,6 +162,11 @@ public class JMSMailServiceImpl implements JMSMailService {
     @Override
     public void registerReturnedAssetMail(AssignAssetMail assignAssetMail){
         template.convertAndSend("registerReturnedAssetMailQueue", assignAssetMail);
+    }
+
+    @Override
+    public void registerToMailQueue(AssignAssetMail assignAssetMail){
+        template.convertAndSend("mailQueue", assignAssetMail);
     }
 
 }

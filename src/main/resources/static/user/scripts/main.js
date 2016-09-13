@@ -138,6 +138,8 @@ angular.module('userApp').controller('EmployeeProfileCtrl', function ($scope, $u
     $scope.showEdit = true;
     $scope.showDone = false;
     $scope.user = {};
+    $scope.employee = {};
+    $scope.mobileErr = false;
 
     init();
 
@@ -154,8 +156,16 @@ angular.module('userApp').controller('EmployeeProfileCtrl', function ($scope, $u
     }
 
     $scope.doneEmployee = function () {
-        $scope.showEdit = true;
-        $scope.showDone = false;
+        if($scope.employee.mobile.length != 10){
+            $scope.mobileErr = true;
+            $scope.employee = {};
+            return;
+        }
+        Factory.updateEmployee($scope.employee).success(function(data){
+            $scope.showEdit = true;
+            $scope.showDone = false;
+            init();
+        });
     }
 
     $scope.cancleEdit = function () {

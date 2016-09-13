@@ -26,17 +26,28 @@ public class PageRoleDao {
     /**
      * Return all the Users stored in the database.
      */
+
     public List<PageRole> getAll() {
         List<PageRole> pageRole = entityManager.createQuery("from PageRole").getResultList();
         return pageRole;
     }
 
-    public PageRole getByName(String name){
+    public List<PageRole> getAll(int offset, int limit) {
+        List<PageRole> pageRole = entityManager.createQuery("from PageRole").setFirstResult(offset).setMaxResults(limit).getResultList();
+        return pageRole;
+    }
+
+    public PageRole getByName(String name) {
         List<PageRole> pageRoles = entityManager.createQuery("from PageRole where name = :name").setParameter("name", name).getResultList();
         return (pageRoles != null && pageRoles.size() > 0) ? pageRoles.get(0) : null;
     }
 
-    public PageRole getByPath(String path){
+    public long getCount(){
+        List list = entityManager.createQuery("select count(pr) from PageRole pr").getResultList();
+        return (long)list.get(0);
+    }
+
+    public PageRole getByPath(String path) {
         List<PageRole> pageRoles = entityManager.createQuery("from PageRole where url = :path").setParameter("path", path).getResultList();
         return (pageRoles != null && pageRoles.size() > 0) ? pageRoles.get(0) : null;
     }

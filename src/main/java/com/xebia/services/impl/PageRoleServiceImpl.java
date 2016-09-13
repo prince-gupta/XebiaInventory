@@ -98,11 +98,12 @@ public class PageRoleServiceImpl implements IPageRoleService {
         return map;
     }
 
-    public List<PageRoleDTO> getPageRoles() {
-        List<PageRole> dbPageRoles = pageRoleDao.getAll();
+    public List<PageRoleDTO> getPageRoles(int offset, int limit) {
+        List<PageRole> dbPageRoles = pageRoleDao.getAll(offset, limit);
         List<PageRoleDTO> pageRoles = new ArrayList<>();
         for (PageRole pageRole : dbPageRoles) {
             PageRoleDTO pageRoleDTO = new PageRoleDTO();
+            pageRoleDTO.setId(pageRole.getId());
             pageRoleDTO.setName(pageRole.getName());
             pageRoleDTO.setUrl(pageRole.getUrl());
             List<String> userRoles = new ArrayList<>();
@@ -113,5 +114,9 @@ public class PageRoleServiceImpl implements IPageRoleService {
             pageRoles.add(pageRoleDTO);
         }
         return pageRoles;
+    }
+
+    public long getPageRolesCount(){
+        return pageRoleDao.getCount();
     }
 }

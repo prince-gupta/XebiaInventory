@@ -81,9 +81,11 @@
                     <td>{{approval.dateTillValid}}</td>
                     <td>
                         <a href=""><i class="glyphicon glyphicon-edit" id="editRemark{{$index}}"
-                                      ng-click="edit($index)"></i></a>
+                                      ng-click="edit($index)" ng-hide="{{approval.status == 'APPROVED'}}"></i></a>
                         <textarea class="form-control" style="resize: none; display: none" rows="2"
-                                  ng-model="uapproval.remark" id="textArea{{$index}}"></textarea></td>
+                                  ng-model="uapproval.remark" id="textArea{{$index}}"></textarea>
+                        <span ng-show="{{approval.status == 'APPROVED'}}">{{approval.remark}}</span>
+                    </td>
                     <td>{{approval.status == 'SENT' ? 'RECEIVED' : approval.status}}</td>
                     <td><select class="form-control table-select" ng-model="statusArray[$index]"
                                 ng-options="s.id as s.name for s in status" ng-hide="{{approval.status == 'APPROVED'}}">
@@ -97,9 +99,6 @@
                 </tr>
                 </tbody>
             </table>
-            <div id="k"></div>
-            <ul uib-pagination total-items="totalItems" ng-model="currentPage" max-size="maxSize" class="pagination-sm"
-                boundary-link-numbers="true" ng-change="pageChanged()" items-per-page="itemsPerPage"></ul>
         </uib-tab>
     </uib-tabset>
 </div>

@@ -26,17 +26,9 @@ angular.module('app')
         $scope.statusArray = [];
         $scope.searchBoxErr = false;
         $scope.search = {};
-        $scope.maxSize = 4;
-        $scope.totalItems = 0;
-        $scope.currentPage = 1;
-        $scope.itemsPerPage = 2;
         $scope.animationsEnabled = true;
         $scope.isApprovedOnly = {};
         $scope.disableAllButtons = false;
-
-        $scope.pageChanged = function () {
-            $("#k").html($scope.currentPage);
-        };
 
         init();
 

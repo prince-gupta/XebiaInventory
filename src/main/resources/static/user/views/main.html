@@ -75,8 +75,8 @@
                             </tr>
                             <tr>
                                 <td>Phone Number</td>
-                                <td><span ng-show="showEdit">{{user.mobile}}</span><span ng-show="showDone"><input type="text" placeholder="{{user.mobile}}" style="    width: 114px;
-    height: 20px;"></span></td>
+                                <td><span ng-show="showEdit">{{user.mobile}}</span><span ng-show="showDone"><input type="text" placeholder="{{user.mobile}}" style="width: 114px;
+    height: 20px;" ng-model="employee.mobile" maxlength="10"><i class="glyphicon glyphicon-warning-sign" style="color: darkred; margin-left: 5px;" ng-show="mobileErr"></i></span></td>
                             </tr>
                             </tbody>
                         </table>
