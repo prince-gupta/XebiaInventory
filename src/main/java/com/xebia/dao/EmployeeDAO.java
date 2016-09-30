@@ -5,7 +5,9 @@ package com.xebia.dao;
  */
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -14,6 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.transaction.Transactional;
 
+import com.xebia.dto.EmployeeSearchDTO;
 import com.xebia.entities.Employee;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -45,7 +48,7 @@ public class EmployeeDAO {
     }
 
     public long countEmployee(String eCode) {
-        return (long) entityManager.createQuery("SELECT count(e) from Employee e where e_code = :eCode")
+        return (long) entityManager.createQuery("SELECT count(e) from Employee e where e_code = :eCode and deleted = 'N'")
                 .setParameter("eCode", eCode)
                 .getSingleResult();
     }
@@ -65,15 +68,20 @@ public class EmployeeDAO {
      * Return all the Employees stored in the database.
      */
     @SuppressWarnings("unchecked")
-    public List<Employee> getAll() {
-        return entityManager.createQuery("from Employee").getResultList();
+    public List<Employee> getAll(int offset, int limit) {
+        return entityManager.createQuery("from Employee where deleted = 'N'").setFirstResult(offset).setMaxResults(limit).getResultList();
+    }
+
+    public long getCount() {
+        List list = entityManager.createQuery("select count(e) from Employee e where deleted = 'N'").getResultList();
+        return (long) list.get(0);
     }
 
     /**
      * Return the Employee having the passed email.
      */
     public Employee getByEmail(String email) {
-        return (Employee) entityManager.createQuery("from Employee where email = :email")
+        return (Employee) entityManager.createQuery("from Employee where email = :email and deleted = 'N'")
                 .setParameter("email", email)
                 .getSingleResult();
     }
@@ -86,7 +94,7 @@ public class EmployeeDAO {
     }
 
     public List<Employee> getApprovers() {
-        return entityManager.createQuery("from Employee where approvals_required = 'N'").getResultList();
+        return entityManager.createQuery("from Employee where approvals_required = 'N' and deleted = 'N'").getResultList();
     }
 
     /**
@@ -97,13 +105,19 @@ public class EmployeeDAO {
         return;
     }
 
+    public void markDeleted(Employee employee) {
+        employee.setDeleted("Y");
+        update(employee);
+    }
+
 
     /**
      * Return the Employee having the values.
      */
-    public List<Employee> getByEmployeeObject(Employee employee) {
+    public Map getByEmployeeObject(EmployeeSearchDTO employee) {
         StringBuffer conditions = new StringBuffer();
         String queryString = "from Employee ";
+        String countQueryString = "select count(e) from Employee e ";
         boolean isFN = false, isLN = false, isEC = false, isDOJ = false, isE = false, isM = false;
         if (StringUtils.isNotBlank(employee.getFirstName())) {
             conditions.append("first_name = :firstName");
@@ -150,30 +164,49 @@ public class EmployeeDAO {
         }
 
         if (conditions.length() > 0) {
-            queryString += "where " + conditions.toString();
+            queryString += "where " + conditions.toString() + " and deleted = 'N'";
+            countQueryString += "where " + conditions.toString() + " and deleted = 'N'";
+        }
+        else{
+            queryString += "where deleted = 'N'";
+            countQueryString += "where deleted = 'N'";
         }
         Query query = entityManager.createQuery(queryString);
-        if (isFN)
+        Query countQuery = entityManager.createQuery(countQueryString);
+        if (isFN) {
             query.setParameter("firstName", employee.getFirstName());
-
-        if (isLN)
+            countQuery.setParameter("firstName", employee.getFirstName());
+        }
+        if (isLN) {
             query.setParameter("lastName", employee.getLastName());
+            countQuery.setParameter("lastName", employee.getLastName());
+        }
 
-        if (isEC)
+        if (isEC) {
             query.setParameter("ecode", employee.getECode());
-
-        if (isDOJ)
+            countQuery.setParameter("ecode", employee.getECode());
+        }
+        if (isDOJ) {
             query.setParameter("doj", employee.getDateOfJoining());
-
-        if (isM)
+            countQuery.setParameter("doj", employee.getDateOfJoining());
+        }
+        if (isM) {
             query.setParameter("mobile", employee.getMobile());
-
-        if (isE)
+            countQuery.setParameter("mobile", employee.getMobile());
+        }
+        if (isE) {
             query.setParameter("email", employee.getEmail());
-        if (isA)
+            countQuery.setParameter("email", employee.getEmail());
+        }
+        if (isA) {
             query.setParameter("approvalsRequired", employee.getApprovalsRequired());
+            countQuery.setParameter("approvalsRequired", employee.getApprovalsRequired());
+        }
 
-        return query.getResultList();
+        Map resultMap = new HashMap<>();
+        resultMap.put("result", query.setFirstResult(employee.getOffset()).setMaxResults(employee.getLimit()).getResultList());
+        resultMap.put("count", (long)countQuery.getResultList().get(0));
+        return resultMap;
     }
 
     // ------------------------

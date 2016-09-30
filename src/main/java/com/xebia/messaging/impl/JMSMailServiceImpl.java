@@ -2,9 +2,12 @@ package com.xebia.messaging.impl;
 
 import com.xebia.dao.AssetHistoryDAO;
 import com.xebia.dao.AssignAssetMailDAO;
+import com.xebia.dao.EventMailDAO;
 import com.xebia.entities.AssetHistory;
 import com.xebia.entities.AssignAssetMail;
+import com.xebia.entities.EventMail;
 import com.xebia.enums.AssetStatus;
+import com.xebia.enums.EventType;
 import com.xebia.enums.MailStatus;
 import com.xebia.messaging.JMSMailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,9 @@ public class JMSMailServiceImpl implements JMSMailService {
     @Autowired
     AssetHistoryDAO assetHistoryDAO;
 
+    @Autowired
+    EventMailDAO eventMailDAO;
+
     @Scheduled(fixedRate = 20000)
     @Override
     public void processUnsentAssetMails() {
@@ -77,13 +83,20 @@ public class JMSMailServiceImpl implements JMSMailService {
         if (unsentExpiringAssetMails.size() > 0)
             template.convertAndSend("expiringAssetMailQueue", unsentExpiringAssetMails);
 
-        if(unsentExpiredAssetMails.size() > 0)
+        if (unsentExpiredAssetMails.size() > 0)
             template.convertAndSend("expiredAssetMailQueue", unsentExpiredAssetMails);
 
-        if(unsentReturnedAssetMails.size() > 0)
+        if (unsentReturnedAssetMails.size() > 0)
             template.convertAndSend("returnedAssetMailQueue", unsentReturnedAssetMails);
     }
 
+    @Scheduled(fixedRate = 40000)
+    @Override
+    public void processUnsentEventMails() {
+        List<EventMail> unsentEventMail = eventMailDAO.getMailObjectsByStatus(MailStatus.NOT_SENT.getValue(), MailStatus.PENDING.getValue());
+        if(unsentEventMail.size() >= 1)
+            template.convertAndSend("unsentEventMailQueue", unsentEventMail);
+    }
 
     @PostConstruct
     @Override
@@ -160,13 +173,13 @@ public class JMSMailServiceImpl implements JMSMailService {
     }
 
     @Override
-    public void registerReturnedAssetMail(AssignAssetMail assignAssetMail){
+    public void registerReturnedAssetMail(AssignAssetMail assignAssetMail) {
         template.convertAndSend("registerReturnedAssetMailQueue", assignAssetMail);
     }
 
     @Override
-    public void registerToMailQueue(AssignAssetMail assignAssetMail){
-        template.convertAndSend("mailQueue", assignAssetMail);
+    public void registerToMailQueue(EventMail eventMail) {
+        template.convertAndSend("mailQueue", eventMail);
     }
 
 }

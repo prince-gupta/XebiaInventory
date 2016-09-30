@@ -4,6 +4,7 @@ import com.xebia.common.Utility;
 import com.xebia.dao.EmployeeDAO;
 import com.xebia.dao.UserDAO;
 import com.xebia.dao.UserRoleDAO;
+import com.xebia.dto.EmployeeSearchDTO;
 import com.xebia.dto.UserDto;
 import com.xebia.entities.Employee;
 import com.xebia.entities.User;
@@ -63,10 +64,10 @@ public class UserServiceImpl implements IUserService {
         if (checkIfUserNameAlreadyPresent(userDto.getUserName()))
             throw new ApplicationException("UN_Error:NA");
 
-        Employee employee = new Employee();
+        EmployeeSearchDTO employee = new EmployeeSearchDTO();
         employee.setECode(userDto.getEcode());
         employee.setApprovalsRequired("NA");
-        List<Employee> dbEmployeeList = employeeDAO.getByEmployeeObject(employee);
+        List<Employee> dbEmployeeList = (List)employeeDAO.getByEmployeeObject(employee).get("result");
         if (dbEmployeeList.size() == 0)
             throw new ApplicationException("EC_Error:NA");
 

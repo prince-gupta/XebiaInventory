@@ -2,8 +2,10 @@ package com.xebia.messaging;
 
 import com.xebia.dao.AssetHistoryDAO;
 import com.xebia.dao.AssignAssetMailDAO;
+import com.xebia.dao.EventMailDAO;
 import com.xebia.entities.AssetHistory;
 import com.xebia.entities.AssignAssetMail;
+import com.xebia.entities.EventMail;
 import com.xebia.enums.AssetStatus;
 import com.xebia.enums.MailStatus;
 import com.xebia.exception.MailException;
@@ -36,26 +38,29 @@ public class JMSMailListener {
     @Autowired
     AssignAssetMailDAO assignAssetMailDAO;
 
+    @Autowired
+    EventMailDAO eventMailDAO;
+
     @JmsListener(destination = "assignAssetMailQueue")
     public void sendAssignAssetMails(List<AssignAssetMail> mailDtos) {
         for (AssignAssetMail assignAssetMail : mailDtos) {
             List<AssetHistory> assetHistoryList = assetHistoryDAO.getHistory(assignAssetMail.getEmployee().getId(), assignAssetMail.getAsset().getAssetId(), AssetStatus.ISSUED);
-           if(assetHistoryList.size() > 0) {
-               AssetHistory assetHistory =assetHistoryList.get(0);
-               assignAssetMail.setDateOfIssue(assetHistory.getIssueDate());
-               assignAssetMail.setDateTillValid(assetHistory.getValidTill());
-               assignAssetMail.setIssuedBy(assetHistory.getUpdatedBy());
-               try {
-                   mailingService.sendAssetAssignmentMail(assignAssetMail);
-                   assignAssetMail.setStatus(MailStatus.SENT.getValue());
-                   assignAssetMail.setAssetStatus(AssetStatus.ISSUED.getValue());
-               } catch (MailException mailException) {
-                   assignAssetMail.setStatus(MailStatus.resovleStatus(mailException.getMessage()).getValue());
-                   assignAssetMail.setAssetStatus(AssetStatus.ISSUED.getValue());
-               }
-               assignAssetMail.setUpdatedDate(new Date());
-               assignAssetMailDAO.update(assignAssetMail);
-           }
+            if (assetHistoryList.size() > 0) {
+                AssetHistory assetHistory = assetHistoryList.get(0);
+                assignAssetMail.setDateOfIssue(assetHistory.getIssueDate());
+                assignAssetMail.setDateTillValid(assetHistory.getValidTill());
+                assignAssetMail.setIssuedBy(assetHistory.getUpdatedBy());
+                try {
+                    mailingService.sendAssetAssignmentMail(assignAssetMail);
+                    assignAssetMail.setStatus(MailStatus.SENT.getValue());
+                    assignAssetMail.setAssetStatus(AssetStatus.ISSUED.getValue());
+                } catch (MailException mailException) {
+                    assignAssetMail.setStatus(MailStatus.resovleStatus(mailException.getMessage()).getValue());
+                    assignAssetMail.setAssetStatus(AssetStatus.ISSUED.getValue());
+                }
+                assignAssetMail.setUpdatedDate(new Date());
+                assignAssetMailDAO.update(assignAssetMail);
+            }
         }
     }
 
@@ -110,9 +115,8 @@ public class JMSMailListener {
                     assignAssetMail.setUpdatedDate(new Date());
                     assignAssetMailDAO.update(assignAssetMail);
                 }
-            }
-            catch (MailException m){
-                for(AssignAssetMail assignAssetMail : assignAssetMails){
+            } catch (MailException m) {
+                for (AssignAssetMail assignAssetMail : assignAssetMails) {
                     assignAssetMail.setStatus(MailStatus.resovleStatus(m.getMessage()).getValue());
                     assignAssetMail.setUpdatedDate(new Date());
                     assignAssetMailDAO.update(assignAssetMail);
@@ -126,8 +130,8 @@ public class JMSMailListener {
     public void sendExpiredAssetMails(List<AssignAssetMail> mailDtos) {
         for (AssignAssetMail assignAssetMail : mailDtos) {
             List<AssetHistory> expiredHistoryList = assetHistoryDAO.getHistory(assignAssetMail.getEmployee().getId(), assignAssetMail.getAsset().getAssetId(), AssetStatus.EXPIRED);
-            if(expiredHistoryList.size() > 0) {
-                AssetHistory assetHistory =expiredHistoryList.get(0);
+            if (expiredHistoryList.size() > 0) {
+                AssetHistory assetHistory = expiredHistoryList.get(0);
                 assignAssetMail.setDateOfIssue(assetHistory.getIssueDate());
                 assignAssetMail.setDateTillValid(assetHistory.getValidTill());
                 assignAssetMail.setUpdatedDate(new Date());
@@ -151,9 +155,8 @@ public class JMSMailListener {
                     assignAssetMail.setUpdatedDate(new Date());
                     assignAssetMailDAO.update(assignAssetMail);
                 }
-            }
-            catch (MailException m){
-                for(AssignAssetMail assignAssetMail : assignAssetMails){
+            } catch (MailException m) {
+                for (AssignAssetMail assignAssetMail : assignAssetMails) {
                     assignAssetMail.setStatus(MailStatus.resovleStatus(m.getMessage()).getValue());
                     assignAssetMail.setUpdatedDate(new Date());
                     assignAssetMailDAO.update(assignAssetMail);
@@ -172,8 +175,8 @@ public class JMSMailListener {
     }
 
     @JmsListener(destination = "registerAssetExpiredMailQueue")
-    public void processExpiredAssetMail(List<AssignAssetMail> mails){
-        for(AssignAssetMail mail : mails) {
+    public void processExpiredAssetMail(List<AssignAssetMail> mails) {
+        for (AssignAssetMail mail : mails) {
             mail.setUpdatedDate(new Date());
             assignAssetMailDAO.create(mail);
         }
@@ -185,12 +188,23 @@ public class JMSMailListener {
     }
 
     @JmsListener(destination = "registerReturnedAssetMailQueue")
-    public void registerReturnedAssetMail(AssignAssetMail assignAssetMail){
+    public void registerReturnedAssetMail(AssignAssetMail assignAssetMail) {
         assignAssetMailDAO.create(assignAssetMail);
     }
 
     @JmsListener(destination = "mailQueue")
-    public void registerMail(AssignAssetMail assignAssetMail){
-        assignAssetMailDAO.create(assignAssetMail);
+    public void registerMail(EventMail eventMail) {
+        eventMail.setStatus(MailStatus.NOT_SENT.getValue());
+        eventMailDAO.create(eventMail);
+    }
+
+    @JmsListener(destination = "unsentEventMailQueue")
+    public void sendEventMail(List<EventMail> eventMails) {
+        for (EventMail eventMail : eventMails) {
+            mailingService.sendEventMails(eventMail);
+            EventMail dbEventMail = eventMailDAO.getById(eventMail.getId());
+            dbEventMail.setStatus(MailStatus.SENT.getValue());
+            eventMailDAO.update(dbEventMail);
+        }
     }
 }

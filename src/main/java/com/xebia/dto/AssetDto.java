@@ -42,6 +42,10 @@ public class AssetDto {
 
     private String userName;
 
+    private int offset;
+
+    private int limit;
+
     public BigInteger getAssetId() {
         return assetId;
     }
@@ -176,6 +180,22 @@ public class AssetDto {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 }
 

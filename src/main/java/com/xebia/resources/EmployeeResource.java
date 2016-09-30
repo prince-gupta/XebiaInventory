@@ -4,6 +4,7 @@ import com.xebia.annotations.Secured;
 import com.xebia.dao.EmployeeDAO;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.ActionResult;
+import com.xebia.dto.EmployeeSearchDTO;
 import com.xebia.entities.Employee;
 import com.xebia.entities.User;
 import com.xebia.exception.ApplicationException;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Path("/employee")
@@ -36,14 +38,21 @@ public class EmployeeResource {
     @Autowired
     UserDAO userDAO;
 
+    @GET
+    @Path("/getTotalEmployeeCount")
+    @Produces("application/json")
+    public long getCount() {
+        return employeeDAO.getCount();
+    }
+
     @CrossOrigin(origins = "http://localhost:3000")
     @GET
     @Path("fetchAll")
     @Produces("application/json")
-    public ActionResult getAllEmployee() {
+    public ActionResult getAllEmployee(@QueryParam("offset") int offset, @QueryParam("limit") int limit) {
         ActionResult result = new ActionResult();
         result.setStatus(ActionResult.Status.SUCCESS);
-        result.addData("list", employeeDAO.getAll());
+        result.addData("list", employeeDAO.getAll(offset, limit));
         return result;
     }
 
@@ -52,8 +61,12 @@ public class EmployeeResource {
     @Path("fetch")
     @Produces("application/json")
     @Consumes("application/json")
-    public List<Employee> getEmployee(@RequestBody Employee employee) {
-        return employeeDAO.getByEmployeeObject(employee);
+    public ActionResult getEmployee(@RequestBody EmployeeSearchDTO employee) {
+        ActionResult result = new ActionResult();
+        Map resultMap = employeeDAO.getByEmployeeObject(employee);
+        result.addData("result", resultMap.get("result"));
+        result.addData("count", resultMap.get("count"));
+        return result;
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -73,16 +86,13 @@ public class EmployeeResource {
     @Consumes("application/json")
     public ActionResult create(@RequestBody Employee employee) {
         ActionResult result = new ActionResult();
-        if (employeeDAO.countEmployee(employee.getECode()) > 0) {
-            result.setStatus(ActionResult.Status.FAILURE);
+        try {
+            employeeService.create(employee, httpServletRequest.getHeader("Username"));
+            result.setStatus(ActionResult.Status.SUCCESS);
+        } catch (ApplicationException e) {
             result.getError().put("errorMsg", "Employee Code is not available. Assigned to other employee.");
-            return result;
-        } else {
-            if (StringUtils.equals("NA", employee.getApprovalsRequired()))
-                employee.setApprovalsRequired("Y");
-            employeeDAO.create(employee);
+            result.setStatus(ActionResult.Status.FAILURE);
         }
-        result.setStatus(ActionResult.Status.SUCCESS);
         return result;
     }
 
@@ -93,30 +103,14 @@ public class EmployeeResource {
     @Consumes("application/json")
     public ActionResult update(@RequestBody Employee employee) {
         ActionResult result = new ActionResult();
-        if (employeeDAO.countEmployee(employee.getECode()) > 0) {
+        try {
+            employeeService.update(employee, httpServletRequest.getHeader("Username"));
+            result.setStatus(ActionResult.Status.SUCCESS);
+        } catch (ApplicationException e) {
             result.setStatus(ActionResult.Status.FAILURE);
             result.getError().put("errorMsg", "Employee Code is not available. Assigned to other employee.");
             return result;
-        } else {
-            if (StringUtils.equals("NA", employee.getApprovalsRequired()))
-                employee.setApprovalsRequired("Y");
-            Employee dbEmployee = employeeDAO.getById(employee.getId());
-            if (employee.getApprovalsRequired() != null) {
-                dbEmployee.setApprovalsRequired(employee.getApprovalsRequired());
-            }
-            if (employee.getECode() != null)
-                dbEmployee.setECode(employee.getECode());
-            if (employee.getEmail() != null)
-                dbEmployee.setEmail(employee.getEmail());
-            if (employee.getFirstName() != null)
-                dbEmployee.setFirstName(employee.getFirstName());
-            if (employee.getLastName() != null)
-                dbEmployee.setLastName(employee.getLastName());
-            if (employee.getMobile() != null)
-                dbEmployee.setMobile(employee.getMobile());
-            employeeDAO.update(dbEmployee);
         }
-        result.setStatus(ActionResult.Status.SUCCESS);
         return result;
     }
 
@@ -148,7 +142,7 @@ public class EmployeeResource {
     @Path("/updateEmployee")
     @Produces("application/json")
     @Consumes("application/json")
-    public ActionResult updateEmployee(@RequestBody Employee employee){
+    public ActionResult updateEmployee(@RequestBody Employee employee) {
         ActionResult result = new ActionResult();
         try {
             User user = userDAO.getUserByUName(httpServletRequest.getHeader("Username"));
@@ -156,11 +150,22 @@ public class EmployeeResource {
             dbEmployee.setMobile(employee.getMobile());
             employeeDAO.update(dbEmployee);
             result.setStatus(ActionResult.Status.SUCCESS);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             result.setStatus(ActionResult.Status.FAILURE);
         }
         return result;
 
+    }
+
+    @POST
+    @Path("/isECodeAvailable")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public ActionResult isECodeAvailable(@RequestBody Employee employee){
+        ActionResult result = new ActionResult();
+        if(employeeDAO.countEmployee(employee.getECode()) > 0){
+            result.setStatus(ActionResult.Status.FAILURE);
+        }
+        return result;
     }
 }

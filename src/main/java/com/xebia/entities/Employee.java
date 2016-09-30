@@ -41,6 +41,8 @@ public class Employee implements Serializable {
     @Column(name="mobile")
     private String mobile;
 
+    private String deleted;
+
 	public Employee() {
 	}
 
@@ -110,5 +112,13 @@ public class Employee implements Serializable {
 
     public String getFullName(){
         return this.getFirstName() + " " + this.getLastName();
+    }
+
+    public String getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(String deleted) {
+        this.deleted = deleted;
     }
 }

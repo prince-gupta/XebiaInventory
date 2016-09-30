@@ -1,6 +1,7 @@
 package com.xebia.messaging;
 
 import com.xebia.entities.AssignAssetMail;
+import com.xebia.entities.EventMail;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,5 +19,7 @@ public interface JMSMailService {
 
     public void registerReturnedAssetMail(AssignAssetMail assignAssetMail);
 
-    public void registerToMailQueue(AssignAssetMail assignAssetMail);
+    public void registerToMailQueue(EventMail eventMail);
+
+    public void processUnsentEventMails();
 }

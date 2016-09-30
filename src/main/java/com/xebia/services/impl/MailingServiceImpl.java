@@ -1,7 +1,11 @@
 package com.xebia.services.impl;
 
 import com.xebia.common.Constants;
+import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.AssignAssetMail;
+import com.xebia.entities.EventMail;
+import com.xebia.messaging.ResolverChain;
+import com.xebia.messaging.resolvers.EmployeeResolver;
 import com.xebia.services.IMailingService;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
+import javax.mail.MessagingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +37,9 @@ public class MailingServiceImpl implements IMailingService {
     @Autowired
     Environment environment;
 
+    @Autowired
+    ResolverChain chain;
+
     private static final String CHARSET_UTF8 = "UTF-8";
 
     @Override
@@ -40,10 +48,8 @@ public class MailingServiceImpl implements IMailingService {
             MimeMessagePreparator preparator = mimeMessage -> {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setTo(dto.getEmployee().getEmail());
+                message = addCCToMessage(message);
                 message.setSubject(environment.getProperty(Constants.MAIL_ASSET_ASSIGNMENT_SUBJECT));
-                String[] ccArray = environment.getProperty(Constants.IT_MAIL_ADDRESSES).split(",");
-                message.setCc(ccArray);
-
                 Map model = new HashMap<>();
                 model.put("dto", dto);
 
@@ -104,6 +110,7 @@ public class MailingServiceImpl implements IMailingService {
             MimeMessagePreparator preparator = mimeMessage -> {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setTo(dtos.get(0).getEmployee().getEmail());
+                message = addCCToMessage(message);
                 message.setSubject(environment.getProperty(Constants.MAIL_ASSET_EXPIRED_SUBJECT));
 
                 Map model = new HashMap<>();
@@ -122,11 +129,12 @@ public class MailingServiceImpl implements IMailingService {
     }
 
     @Override
-    public boolean sendAssetReturnedMail(AssignAssetMail dto) throws MailException{
+    public boolean sendAssetReturnedMail(AssignAssetMail dto) throws MailException {
         try {
             MimeMessagePreparator preparator = mimeMessage -> {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setTo(dto.getEmployee().getEmail());
+                message = addCCToMessage(message);
                 message.setSubject(environment.getProperty(Constants.MAIL_ASSET_RETURNED_SUBJECT));
 
                 Map model = new HashMap<>();
@@ -141,5 +149,29 @@ public class MailingServiceImpl implements IMailingService {
         } catch (MailException e) {
             throw new com.xebia.exception.MailException(e.getMessage());
         }
+    }
+
+    @Override
+    public boolean sendEventMails(EventMail eventMail) throws MailException {
+        try {
+            MimeMessagePreparator preparator = mimeMessage -> {
+                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+                message = addCCToMessage(message);
+                EventMailDTO eventMailDTO = chain.resolve(eventMail);
+                message.setTo(eventMailDTO.getToMail());
+                message.setText(eventMailDTO.getMessageBody(), true);
+                message.setSubject(eventMailDTO.getSubject());
+            };
+            this.javaMailSender.send(preparator);
+            return true;
+        } catch (MailException e) {
+            throw new com.xebia.exception.MailException(e.getMessage());
+        }
+    }
+
+    private MimeMessageHelper addCCToMessage(MimeMessageHelper messageHelper) throws MessagingException {
+        String[] ccArray = environment.getProperty(Constants.IT_MAIL_ADDRESSES).split(",");
+        messageHelper.setCc(ccArray);
+        return messageHelper;
     }
 }

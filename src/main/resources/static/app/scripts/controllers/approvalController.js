@@ -40,7 +40,15 @@ angular.module('app')
                     $scope.statusArray.push($scope.status);
                 }
                 $scope.totalItems = $scope.approvals.length;
-            });
+            })
+                .error(function (data, status, headers, config) {
+                    if (status == 401) {
+                        window.location = ""
+                    }
+                    else {
+                    }
+                    waitingDialog.hide();
+                });
         }
 
         function init() {

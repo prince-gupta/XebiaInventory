@@ -56,4 +56,9 @@ public class PageRoleDao {
         entityManager.merge(pageRole);
         return;
     }
+
+    public void truncate(){
+        entityManager.createQuery("delete from PageRoleMapping").executeUpdate();
+        entityManager.createQuery("delete from PageRole").executeUpdate();
+    }
 }

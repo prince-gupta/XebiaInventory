@@ -60,7 +60,7 @@ public class ExcelUtilityServiceImpl implements ExcelService {
         //Create a blank sheet
         HSSFSheet sheet = workbook.createSheet("Assets Report");
 
-        List<Asset> assetList = assetService.getAllAsset();
+        List<Asset> assetList = assetService.getAllAsset(0,0);
         Map<BigInteger, Object[]> data = new TreeMap<>();
 
         data.put(new BigInteger("0"), new Object[]{"AssetID", "Type", "Asset Name", "Manufacturer", "Serial Number", "Date Of Purchase", "Issued To"});

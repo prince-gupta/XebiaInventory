@@ -16,7 +16,7 @@ angular.module('app')
             return ((($scope.page.currentPage - 1) * $scope.page.itemsPerPage));
         }
 
-        function getLimit(){
+        function getLimit() {
             return ($scope.page.itemsPerPage);
         }
 
@@ -25,21 +25,30 @@ angular.module('app')
         }
 
         function fetchAllPageRoles(offset, limit) {
-            UserFactory.getPageRolesCount().success(function(data)
-            {
+            UserFactory.getPageRolesCount().success(function (data) {
                 $scope.page.totalItems = data;
                 UserFactory.getPageRoles(offset, limit).success(function (data) {
                     $scope.pageRoles = angular.copy(data.data.list);
-                });
+                })
+                    .error(function (data, status, headers, config) {
+                        if (status == 401) {
+                            window.location = ""
+                        }
+                        else {
+                        }
+                        waitingDialog.hide();
+                    });
             });
 
         }
 
-        $scope.pageChanged = function(){
+        $scope.pageChanged = function () {
             init();
         }
 
+        $scope.hidePopulateBtn = false;
         $scope.populateRoles = function () {
+            $scope.hidePopulateBtn = false;
             waitingDialog.show("Please wait while application is parsing xml and populating data . . .")
             UserFactory.populatePageRoles().success(function (data) {
                 if (data.status != "SUCCESS") {
@@ -48,6 +57,15 @@ angular.module('app')
                 else {
                     showMessage("Data has been populated successfully.", "SUCCESS");
                     init();
+                }
+                waitingDialog.hide();
+            }).error(function (data, status, headers, config) {
+                if (status == 401) {
+                    showMessage("It seems this user don't have permission to update Page Roles.", "WARNING");
+                    $scope.hidePopulateBtn = true;
+                }
+                else {
+                    showMessage(resolveError(status), "DANGER");
                 }
                 waitingDialog.hide();
             });

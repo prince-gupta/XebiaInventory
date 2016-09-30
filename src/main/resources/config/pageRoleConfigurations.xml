@@ -35,6 +35,73 @@
     </config>
     <config>
         <displayName>
+            DELETE_ASSET
+        </displayName>
+        <url>
+            /deleteAsset
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            ASSIGN_ASSET
+        </displayName>
+        <url>
+            /assignAsset
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            UNASSIGN_ASSET
+        </displayName>
+        <url>
+            /unAssignAsset
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            UPDATE_ASSET
+        </displayName>
+        <url>
+            /updateAsset
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+    <config>
+        <displayName>
+            FETCH_EMP_ASSET
+        </displayName>
+        <url>
+            /fetchEmployeeAsset
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            CREATE_ASSET_MANUFACTURER
+        </displayName>
+        <url>
+            /createAssetManufacturer
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+    <config>
+        <displayName>
             UPDATE_ASSET_TYPE
         </displayName>
         <url>
@@ -68,10 +135,10 @@
     </config>
     <config>
         <displayName>
-            FETCH_ALL_ASSET
+            FETCH_ALL_EMP
         </displayName>
         <url>
-            /fetchAllAsset
+            /fetchAll
         </url>
         <roleName>
             IT,ADMIN
@@ -79,10 +146,22 @@
     </config>
     <config>
         <displayName>
-            FETCH_ASSET_BY
+            FETCH_ASSET_BY_TYPE
         </displayName>
         <url>
             /fetchAssetByType
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            FETCH_AVAILABLE_ASSET_BY_TYPE_N_MANUFACTURER
+        </displayName>
+        <url>
+            /fetchAvailableAssetByTypeAndManu
         </url>
         <roleName>
             IT,ADMIN
@@ -97,6 +176,18 @@
         </url>
         <roleName>
             IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            GET_ASSET_HISTORY
+        </displayName>
+        <url>
+            /getAssetsHistory
+        </url>
+        <roleName>
+            IT,ADMIN,EMP
         </roleName>
     </config>
     <config>
@@ -249,6 +340,186 @@
         </url>
         <roleName>
             IT,ADMIN,EMP
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            GET_TOTAL_EMP_COUNT
+        </displayName>
+        <url>
+            /getTotalEmployeeCount
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            GET_TOTAL_ASSET_COUNT
+        </displayName>
+        <url>
+            /getAssetCount
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            GET_ALL_ASSET_MANUFACTURER
+        </displayName>
+        <url>
+            /fetchAllAssetManufacturer
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            DELETE_ASSET_MANUFACTURER
+        </displayName>
+        <url>
+            /deleteAssetManufacturer
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            UPDATE_ASSET_MANUFACTURER
+        </displayName>
+        <url>
+            /updateAssetManufacturer
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            FETCH_ALL_HW_CONFIGURATION
+        </displayName>
+        <url>
+            /fetchAllConfiguration
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            CREATE_HW_CONFIGURATION
+        </displayName>
+        <url>
+            /createHardwareConfigurations
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            UPDATE_HW_CONFIGURATION
+        </displayName>
+        <url>
+            /updateHardwareConfigurations
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            DELETE_HW_CONFIGURATION
+        </displayName>
+        <url>
+            /deleteHardwareConfiguration
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            GENERATE_ASSET_REPORT
+        </displayName>
+        <url>
+            /generateAssetReport
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            FETCH_EMP_ASSETS_FILE_PARAM
+        </displayName>
+        <url>
+            /getEmployeeAssetsFileParam
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            SEARCH_ASSET
+        </displayName>
+        <url>
+            /searchAsset
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            FETCH_EMPLOYEE
+        </displayName>
+        <url>
+            /fetch
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            FETCH_PAGE_ROLES
+        </displayName>
+        <url>
+            /getPageRoles
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            CHECK_CODE_AVAILABILITY
+        </displayName>
+        <url>
+            /isECodeAvailable
+        </url>
+        <roleName>
+            IT,ADMIN
         </roleName>
     </config>
 

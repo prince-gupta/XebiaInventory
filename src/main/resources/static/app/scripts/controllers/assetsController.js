@@ -48,12 +48,29 @@ angular.module('app')
             id: -1
         };
 
+        //Variables for Pagging.
+        $scope.assetPage = {};
+        $scope.assetPage.maxSize = 4;
+        $scope.assetPage.totalItems = 0;
+        $scope.assetPage.currentPage = 1;
+        $scope.assetPage.itemsPerPage = 10;
+
+
         init();
 
+        function getOffset() {
+            return ((($scope.assetPage.currentPage - 1) * $scope.assetPage.itemsPerPage));
+        }
+
+        function getLimit() {
+            return ($scope.assetPage.itemsPerPage);
+        }
+
+        $scope.pageChanged = function () {
+            init();
+        }
         function init() {
-            fetchAllAsset();
-
-
+            fetchAllAsset(getOffset(), getLimit());
             AssetFactory.getAssetTypeList().success(function (data) {
                 $scope.assetTypeList1 = angular.copy(data.data.Type);
                 $scope.assetTypeDisplayList[0] = ($scope.dummyAssetType);
@@ -78,8 +95,13 @@ angular.module('app')
         }
 
         $scope.performSearch = function () {
+            $scope.assetPage.currentPage = 1;
+            $scope.search.offset = getOffset();
+            $scope.search.limit = getLimit();
             AssetFactory.searchAsset($scope.search).success(function (data) {
-                $scope.assetList = angular.copy(data);
+                $scope.assetPage.totalItems = data.data.count;
+                $scope.assetList = angular.copy(data.data.result);
+
                 for (var index = 0; index < $scope.assetList.length; index++) {
                     var hwObj = {};
                     hwObj.cpu = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.cpu : 'NA';
@@ -87,6 +109,7 @@ angular.module('app')
                     hwObj.ram = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.ram : 'NA';
                     $scope.assetHWConfig[$scope.assetList[index].assetId] = hwObj;
                 }
+                showMessage($scope.assetPage.totalItems + " Asset(s) found.", "SUCCESS");
             }).error(function (data, status, headers, config) {
                 if (status == 401) {
                     window.location = ""
@@ -273,10 +296,10 @@ angular.module('app')
             window.location.href = "/inventory/asset/generateAssetReport"
         }
 
-        $scope.processHistAssets = function(){
+        $scope.processHistAssets = function () {
             waitingDialog.show("Please wait while system is processing the file . . .");
-            AssetFactory.processHistAssets().success(function(data){
-               var result = angular.copy(data);
+            AssetFactory.processHistAssets().success(function (data) {
+                var result = angular.copy(data);
                 waitingDialog.hide();
             });
 
@@ -289,26 +312,30 @@ angular.module('app')
             });
         }
 
-        function fetchAllAsset() {
-            AssetFactory.getAssetList().success(function (data) {
-                $scope.assetList = angular.copy(data);
-                for (var index = 0; index < $scope.assetList.length; index++) {
-                    var hwObj = {};
-                    hwObj.cpu = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.cpu : 'NA';
-                    hwObj.hdd = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.hdd : 'NA';
-                    hwObj.ram = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.ram : 'NA';
-                    $scope.assetHWConfig[$scope.assetList[index].assetId] = hwObj;
-                }
-                showMessage($scope.assetList.length + " Assets(s) Found.", "SUCCESS");
-            }).error(function (data, status, headers, config) {
-                if (status == 401) {
-                    window.location = ""
-                }
-                else {
-                    showMessage(resolveError(status), "DANGER");
-                }
-                waitingDialog.hide();
-            });
+        function fetchAllAsset(offset, limit) {
+            AssetFactory.getTotalCount().success(function (data) {
+                $scope.assetPage.totalItems = data;
+                AssetFactory.getAssetList(offset, limit).success(function (data) {
+                    $scope.assetList = angular.copy(data);
+                    for (var index = 0; index < $scope.assetList.length; index++) {
+                        var hwObj = {};
+                        hwObj.cpu = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.cpu : 'NA';
+                        hwObj.hdd = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.hdd : 'NA';
+                        hwObj.ram = $scope.assetList[index].hardwareConfiguration != null ? $scope.assetList[index].hardwareConfiguration.ram : 'NA';
+                        $scope.assetHWConfig[$scope.assetList[index].assetId] = hwObj;
+                    }
+                    showMessage($scope.assetPage.totalItems + " Assets(s) Found.", "SUCCESS");
+                })
+            })
+                .error(function (data, status, headers, config) {
+                    if (status == 401) {
+                        window.location = ""
+                    }
+                    else {
+                        showMessage(resolveError(status), "DANGER");
+                    }
+                    waitingDialog.hide();
+                });
         }
 
         function fetchAllManufacturer() {
@@ -545,10 +572,15 @@ angular.module('app')
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/searchAsset', data);
             },
-            getAssetList: function () {
+            getAssetList: function (offset, limit) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
-                return $http.get('/inventory/asset/fetchAllAsset');
+                return $http.get('/inventory/asset/fetchAllAsset?offset=' + offset + "&limit=" + limit);
+            },
+            getTotalCount: function () {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/asset/getAssetCount');
             },
             saveAsset: function (data) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
@@ -570,7 +602,7 @@ angular.module('app')
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/fetchAssetByType', data);
             },
-            processHistAssets: function(){
+            processHistAssets: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/processHistoricalAssets');
@@ -649,27 +681,27 @@ angular.module('app')
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/getEmployeeAssetsFileParam', data);
             },
-            getApprovalsBadgeCount: function(){
+            getApprovalsBadgeCount: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/getApprovalsBadgeCount');
             },
-            getAllApprovals : function(){
+            getAllApprovals: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/getAllApprovals');
             },
-            searchApprovals : function(data){
+            searchApprovals: function (data) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/searchApprovals', data);
             },
-            updateApproval : function(data){
+            updateApproval: function (data) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/asset/updateApproval', data);
             },
-            fetchPendingApprovals : function(){
+            fetchPendingApprovals: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.get('/inventory/asset/fetchPendingApprovals');
@@ -727,8 +759,8 @@ angular.module('app')
             }
         }
     })
-    .service('fileUpload', ['$http','$cookieStore',
-        function ($http,$cookieStore) {
+    .service('fileUpload', ['$http', '$cookieStore',
+        function ($http, $cookieStore) {
 
             this.uploadFileToUrl = function (data) {
                 var fd = new FormData();
@@ -746,10 +778,10 @@ angular.module('app')
                     .success(function (response, status, headers, config) {
                         console.log(response);
 
-                        if (status == 200 || status == 202){
+                        if (status == 200 || status == 202) {
 
                         } //do whatever in success
-                        else{
+                        else {
 
                         } // handle error in  else if needed
                     })
@@ -771,15 +803,15 @@ angular.module('app')
             $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.fileToUpload={};
+        $scope.fileToUpload = {};
         $scope.process = function () {
-           /* var formData = new FormData();
-            angular.forEach($scope.files, function (value, key) {
-                formData.append(key, value);
-            });*/
+            /* var formData = new FormData();
+             angular.forEach($scope.files, function (value, key) {
+             formData.append(key, value);
+             });*/
             /*ExcelFactory.uploadExcelFile(formData).success(function (data) {
-                alert(data);
-            })*/
+             alert(data);
+             })*/
 
             fileUpload.uploadFileToUrl($scope.fileToUpload);
         }

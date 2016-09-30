@@ -162,9 +162,10 @@
 
             <div class="col-sm-4 has-feedback">
                 <input type="text" class="form-control" id="ecode" placeholder="Enter Employee Code"
-                       ng-required="true" ng-model="search.ecode">
+                       ng-required="true" ng-model="search.ecode" ng-blur="isECodeAvailable()">
                 <span class="glyphicon glyphicon-warning-sign form-control-feedback" ng-show="ecodeError"
                       style="color: darkred"></span>
+                <span class="alert-danger" ng-show="showErrECodeResult"><small>{{ecodeResult}}</small></span>
             </div>
             <label class="control-label col-sm-2" for="doj">Date Of Joining:</label>
 
@@ -197,7 +198,7 @@
 
             <div class="col-sm-4">
                 <input type="text" class="form-control" id="mobile" placeholder="Enter Mobile Number"
-                       ng-required="true" ng-model="search.mobile">
+                       ng-required="true" ng-model="search.mobile" maxlength="10">
             </div>
         </div>
         <div class="form-group">
@@ -296,6 +297,7 @@
         </tr>
         </tbody>
     </table>
+    <ul uib-pagination total-items="empPage.totalItems" ng-model="empPage.currentPage" max-size="empPage.maxSize" class="pagination-sm" boundary-links="true" rotate="false" ng-change="pageChanged()"></ul>
 </uib-tab>
 <uib-tab index="1" heading="Assets" disable="assetTabDisable" ng-click="refreshAssets()">
     <table class="table table-hover" ng-show="showAssetTable">

@@ -96,8 +96,15 @@ public class AssetResource {
     @GET
     @Path("fetchAllAsset")
     @Produces("application/json")
-    public List<Asset> getAllAsset(){
-        return assetService.getAllAsset();
+    public List<Asset> getAllAsset(@QueryParam("offset") int offset, @QueryParam("limit") int limit){
+        return assetService.getAllAsset(offset, limit);
+    }
+
+    @GET
+    @Path("getAssetCount")
+    @Produces("application/json")
+    public long getAssetCount(){
+        return assetService.getAssetsCount();
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -307,8 +314,12 @@ public class AssetResource {
     @POST
     @Path("searchAsset")
     @Produces("application/json")
-    public List<Asset> searchAsset(@RequestBody AssetDto assetDto){
-        return assetService.searchAsset(assetDto);
+    public ActionResult searchAsset(@RequestBody AssetDto assetDto){
+        ActionResult result = new ActionResult();
+        Map resultMap =  assetService.searchAsset(assetDto);
+        result.addData("result", resultMap.get("result"));
+        result.addData("count", resultMap.get("count"));
+        return result;
     }
 
     @GET

@@ -3,13 +3,13 @@
         <div class="col-md-4 col-md-offset-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Please sign in</h3>
+                    <h3 class="panel-title">Please sign in</h3><span id="adminPageIndentifier" style="display: none">Admin Login Page</span>
                 </div>
                 <div class="panel-body">
                     <form accept-charset="UTF-8" role="form">
                         <fieldset>
                             <h3 ng-show="loginFailed"
-                                  ><small style="margin-bottom: 10px;color: darkred;">{{loginMessage}}</small></h3>
+                                  ><small style="margin-bottom: 10px;color: darkred;" id="loginFailed">{{loginMessage}}</small></h3>
 
                             <div class="form-group has-feedback">
                                 <input class="form-control" placeholder="Username" name="username" type="text"
@@ -24,7 +24,7 @@
                                       style="color: darkred"></span>
                             </div>
                             <button class="btn btn-lg btn-success btn-block " value="Login"
-                                    ng-click="login();">
+                                    ng-click="login();" id="loginButton">
                                 <span class="glyphicon glyphicon-log-in "></span> Log in</button>
                         </fieldset>
                     </form>

@@ -42,40 +42,28 @@ public class PageRoleServiceImpl implements IPageRoleService {
         Configurations configurations;
         try {
             configurations = XMLParser.unMarshall(resouceHandler.getFileStream("config/pageRoleConfigurations.xml"), Configurations.class);
+            pageRoleDao.truncate();
             Map<String, PageRole> pageRoleMap = new HashMap<>();
             for (Config config : configurations.getConfig()) {
                 String displayName = config.getDisplayName().trim();
                 if (pageRoleMap.get(displayName) != null && !(pageRoleMap.get(displayName).getUrl().equals(config.getUrl().trim()))) {
                     throw new ParsingException("Inconsistency in mapping : No url mapping can have same displayName = " + config.getDisplayName().trim());
                 }
-                PageRole pageRole = pageRoleDao.getByName(displayName);
-                if (pageRole == null) {
-                    pageRole = new PageRole();
-                    pageRole.setName(displayName);
-                    pageRole.setUrl(config.getUrl().trim());
-                    pageRoleDao.create(pageRole);
-                }
-                pageRoleMap.put(displayName, pageRole);
-
+                PageRole pageRole = new PageRole();
+                pageRole.setName(displayName);
+                pageRole.setUrl(config.getUrl().trim());
                 String[] roleNames = config.getRoleName().trim().split(",");
-                for(String roleName : roleNames) {
+                List<UserRole> userRoles = new ArrayList<>();
+                for (String roleName : roleNames) {
                     UserRole dbRole = userRoleDAO.getByRoleName(roleName);
-                    if (dbRole == null)
+                    if (dbRole == null) {
                         throw new ParsingException("Undefined Role : Role Name configured in " + displayName + " does not present in DB.");
-                    PageRole dbPageRole = pageRoleDao.getByName(displayName);
-                    List<UserRole> savedUserRoles = dbPageRole.getUserRoles();
-                    boolean alreadySaved = false;
-                    for (UserRole userRole : savedUserRoles) {
-                        if (userRole.getRoleName().equals(dbRole.getRoleName())) {
-                            alreadySaved = true;
-                            break;
-                        }
                     }
-                    if (!alreadySaved) {
-                        dbPageRole.getUserRoles().add(dbRole);
-                        pageRoleDao.update(dbPageRole);
-                    }
+                    userRoles.add(dbRole);
                 }
+                pageRole.setUserRoles(userRoles);
+                pageRoleDao.create(pageRole);
+                pageRoleMap.put(displayName, pageRole);
             }
         } catch (IOException e) {
             throw new ApplicationException("Got Exception while trying to convert pageRoleConfiguration.xml to Object.");
@@ -116,7 +104,7 @@ public class PageRoleServiceImpl implements IPageRoleService {
         return pageRoles;
     }
 
-    public long getPageRolesCount(){
+    public long getPageRolesCount() {
         return pageRoleDao.getCount();
     }
 }

@@ -13,7 +13,9 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Pgupta on 24-07-2016.
@@ -30,17 +32,23 @@ public class AssetDAO {
         return;
     }
 
+    public long getTotalCount(){
+        List list = entityManager.createQuery("select count(a) from Asset a").getResultList();
+        return (long) list.get(0);
+    }
+
     /**
      * Return all the Asset stored in the database.
      */
-    public List<Asset> getAll() {
-        List<Asset> assets = entityManager.createQuery("from Asset").getResultList();
+    public List<Asset> getAll(int offset, int limit) {
+        List<Asset> assets = entityManager.createQuery("from Asset").setFirstResult(offset).setMaxResults(limit).getResultList();
         return assets;
     }
 
-    public List<Asset> getByAssetObject(Asset asset){
+    public Map getByAssetObject(Asset asset, int offset, int limit){
         StringBuffer conditions = new StringBuffer();
         String queryString = "from Asset ";
+        String countQueryString = "select count(a) from Asset a ";
         boolean isN = false, isSN = false, isM = false, isT = false;
         if (StringUtils.isNotBlank(asset.getName())) {
             conditions.append("name = :name");
@@ -67,21 +75,31 @@ public class AssetDAO {
         }
         if (conditions.length() > 0) {
             queryString += "where " + conditions.toString();
+            countQueryString += "where " + conditions.toString();
         }
         Query query = entityManager.createQuery(queryString);
-        if (isN)
+        Query countQuery = entityManager.createQuery(countQueryString);
+        if (isN) {
             query.setParameter("name", asset.getName());
-
-        if (isSN)
+            countQuery.setParameter("name", asset.getName());
+        }
+        if (isSN) {
             query.setParameter("sno", asset.getSerialNumber());
-
-        if (isM)
+            countQuery.setParameter("sno", asset.getSerialNumber());
+        }
+        if (isM) {
             query.setParameter("manu", asset.getAssetManufacturer());
-
-        if (isT)
+            countQuery.setParameter("manu", asset.getAssetManufacturer());
+        }
+        if (isT) {
             query.setParameter("type", asset.getAssetType());
+            countQuery.setParameter("type", asset.getAssetType());
+        }
 
-        return query.getResultList();
+        Map resultMap = new HashMap<>();
+        resultMap.put("result", query.setFirstResult(offset).setMaxResults(limit).getResultList());
+        resultMap.put("count", (long)countQuery.getResultList().get(0));
+        return resultMap;
     }
 
     public List<Asset> getByAssetDtoObject(AssetDto assetDto){

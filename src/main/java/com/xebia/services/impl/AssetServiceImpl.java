@@ -239,8 +239,8 @@ public class AssetServiceImpl implements IAssetService {
     }
 
     @Override
-    public List<Asset> getAllAsset() {
-        List<Asset> assets = assetDAO.getAll();
+    public List<Asset> getAllAsset(int offset, int limit) {
+        List<Asset> assets = assetDAO.getAll(offset, limit);
         for (Asset asset : assets) {
             if (asset.getEmployee() == null) {
                 Employee dummyEmployee = new Employee();
@@ -494,7 +494,7 @@ public class AssetServiceImpl implements IAssetService {
         return resultFile;
     }
 
-    public List<Asset> searchAsset(AssetDto assetDto) {
+    public Map searchAsset(AssetDto assetDto) {
         AssetManufacturer assetManufacturer = null;
         AssetType assetType = null;
         if (assetDto.getAssetManufacturer() != null)
@@ -506,7 +506,8 @@ public class AssetServiceImpl implements IAssetService {
         asset.setSerialNumber(assetDto.getSerialNumber());
         asset.setAssetManufacturer(assetManufacturer);
         asset.setAssetType(assetType);
-        List<Asset> assetList = assetDAO.getByAssetObject(asset);
+        Map resultMap = assetDAO.getByAssetObject(asset, assetDto.getOffset(), assetDto.getLimit());
+        List<Asset> assetList = (List<Asset>)resultMap.get("result");
         for (Asset assetTemp : assetList) {
             if (assetTemp.getEmployee() == null) {
                 Employee dummyEmployee = new Employee();
@@ -515,7 +516,7 @@ public class AssetServiceImpl implements IAssetService {
                 assetTemp.setEmployee(dummyEmployee);
             }
         }
-        return assetList;
+        return resultMap;
     }
 
     public void processHistoricalAssets() throws ApplicationException, FileException {
@@ -605,5 +606,9 @@ public class AssetServiceImpl implements IAssetService {
             assetApprovalDTOs.add(assetApprovalDTO);
         }
         return assetApprovalDTOs;
+    }
+
+    public long getAssetsCount(){
+        return assetDAO.getTotalCount();
     }
 }

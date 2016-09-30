@@ -1,6 +1,7 @@
 package com.xebia.services;
 
 import com.xebia.entities.AssignAssetMail;
+import com.xebia.entities.EventMail;
 import org.springframework.mail.MailException;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface IMailingService {
     public boolean sendAssetExpiredMail(List<AssignAssetMail> dto) throws MailException;
 
     public boolean sendAssetReturnedMail(AssignAssetMail dto) throws MailException;
+
+    public boolean sendEventMails(EventMail dto) throws MailException;
 }

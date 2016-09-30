@@ -43,10 +43,31 @@ angular.module('app')
         $scope.emailError = false;
         $scope.ecodeError = false;
 
+        //Variables for Pagging.
+        $scope.empPage = {};
+        $scope.empPage.maxSize = 4;
+        $scope.empPage.totalItems = 0;
+        $scope.empPage.currentPage = 1;
+        $scope.empPage.itemsPerPage = 10;
+
+        $scope.enteredECode = {};
+
         init();
 
-        function init(){
-            fetchAll();
+        function getOffset() {
+            return ((($scope.empPage.currentPage - 1) * $scope.empPage.itemsPerPage));
+        }
+
+        function getLimit() {
+            return ($scope.empPage.itemsPerPage);
+        }
+
+        function init() {
+            fetchAll(getOffset(), getLimit());
+        }
+
+        $scope.pageChanged = function () {
+            init();
         }
 
         function resetMessages() {
@@ -78,7 +99,7 @@ angular.module('app')
                 $scope.dangerMessage = msg;
             }
 
-            $timeout(function(){
+            $timeout(function () {
                 $scope.showDangerMessage = false;
                 $scope.showWarningMessage = false;
                 $scope.showSuccessMessage = false;
@@ -117,34 +138,55 @@ angular.module('app')
 
         }
 
-        function fetchAll() {
-            $scope.isResultOK = false;
-            EmployeeFactory.getEmployeeList().success(function (data) {
-                $scope.employeeList = angular.copy(data.data.list);
-                console.log($scope.employeeList);
-                $scope.isResultOK = true;
-                if ($scope.employeeList.length == 0) {
-                    showMessage(" No Records Found.", "WARNING")
-                } else if ($scope.employeeList.length > 1) {
-                    $scope.isResultOK = true;
-                    $scope.canAssetFetched = false;
-                    $scope.assetTabDisable = true;
-                    $scope.assetHistoryTabDisable = true;
-                    showMessage($scope.employeeList.length + " Employee(s) Found. But no tabs are enabled. To Enable them restrict your search to one result.", "SUCCESS");
-                }
-                else {
-                    if ($scope.employeeList.length == 1) {
-                        $scope.isResultOK = true;
-                        $scope.employeeId = $scope.employeeList[0].id;
-                        AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
-                            $scope.assets = angular.copy(data);
-                        });
-                        $scope.assetTabDisable = false;
-                        $scope.assetHistoryTabDisable = false;
-                        showMessage(" Asset & Asset History Tabs is enable now.", "SUCCESS");
-                    }
+        $scope.ecodeResult = "";
+        $scope.showErrECodeResult = false;
+        $scope.isECodeAvailable = function(){
+            if(!(($scope.search.ecode=== undefined) || ($scope.search.ecode.trim == ""))){
+                EmployeeFactory.isECodeAvailable($scope.search).success(function(data){
+                   if(data.status == 'FAILURE'){
+                       $scope.ecodeResult = "Code is already assigned to other employee.";
+                       $scope.showErrECodeResult = true;
+                       $scope.search.ecode = "";
+                   }
+                    else{
+                       $scope.ecodeResult = "";
+                       $scope.showErrECodeResult = false;
+                   }
+                });
+            }
+        }
 
-                }
+        function fetchAll(offset, limit) {
+            $scope.isResultOK = false;
+            EmployeeFactory.getTotalCount().success(function (data) {
+                $scope.empPage.totalItems = data;
+                EmployeeFactory.getEmployeeList(offset, limit).success(function (data) {
+                    $scope.employeeList = angular.copy(data.data.list);
+                    console.log($scope.employeeList);
+                    $scope.isResultOK = true;
+                    if ($scope.employeeList.length == 0) {
+                        showMessage(" No Records Found.", "WARNING")
+                    } else if ($scope.employeeList.length > 1) {
+                        $scope.isResultOK = true;
+                        $scope.canAssetFetched = false;
+                        $scope.assetTabDisable = true;
+                        $scope.assetHistoryTabDisable = true;
+                        showMessage($scope.empPage.totalItems + " Employee(s) Found. But no tabs are enabled. To Enable them restrict your search to one result.", "SUCCESS");
+                    }
+                    else {
+                        if ($scope.employeeList.length == 1) {
+                            $scope.isResultOK = true;
+                            $scope.employeeId = $scope.employeeList[0].id;
+                            AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
+                                $scope.assets = angular.copy(data);
+                            });
+                            $scope.assetTabDisable = false;
+                            $scope.assetHistoryTabDisable = false;
+                            showMessage(" Asset & Asset History Tabs is enable now.", "SUCCESS");
+                        }
+
+                    }
+                })
             }).error(function (data, status, headers, config) {
                 if (status == 401) {
                     window.location = ""
@@ -161,7 +203,7 @@ angular.module('app')
             }
         }
 
-        function refreshAssetsOfEmployee(){
+        function refreshAssetsOfEmployee() {
             AssetFactory.getAssetListByEmployee($scope.employeeList[0].id).success(function (data) {
                 $scope.assets = angular.copy(data);
                 showMessage($scope.assets.length + " Asset(s) Found.", "SUCCESS");
@@ -211,12 +253,20 @@ angular.module('app')
             $scope.lastNameError = false;
             $scope.emailError = false;
             $scope.ecodeError = false;
-             waitingDialog.show("Please wait while data is loading . . .");
+            waitingDialog.show("Please wait while data is loading . . .");
             $scope.assets = [];
             $scope.isResultOK = false;
             //        $scope.parseApprovalCheckBox();
+            $scope.empPage.currentPage = 1;
+            $scope.search.offset = getOffset();
+            $scope.search.limit = getLimit();
+            $scope.ecodeResult = "";
+            $scope.showErrECodeResult = false;
             EmployeeFactory.fetchEmployee($scope.search).success(function (data) {
-                $scope.employeeList = angular.copy(data);
+                $scope.ecodeResult = "";
+                $scope.showErrECodeResult = false;
+                $scope.empPage.totalItems = angular.copy(data.data.count);
+                $scope.employeeList = angular.copy(data.data.result);
                 console.log($scope.employeeList);
 
                 $scope.search = {
@@ -229,7 +279,7 @@ angular.module('app')
                     $scope.canAssetFetched = false;
                     $scope.assetTabDisable = true;
                     $scope.assetHistoryTabDisable = true;
-                    showMessage($scope.employeeList.length + " Employee(s) Found. But no tabs are enabled. To Enable them restrict your search to one result.", "SUCCESS");
+                    showMessage(data.data.count + " Employee(s) Found. But no tabs are enabled. To Enable them restrict your search to one result.", "SUCCESS");
                 }
                 else {
                     if ($scope.employeeList.length == 1) {
@@ -246,7 +296,7 @@ angular.module('app')
 
                 }
                 //  $myModal.fadeOut();
-                  waitingDialog.hide();
+                waitingDialog.hide();
             })
                 .error(function (data, status, headers, config) {
                     if (status == 401) {
@@ -291,6 +341,7 @@ angular.module('app')
 
 
         $scope.validateForm = function () {
+            $scope.isValidForm = true;
             $scope.firstNameError = false;
             $scope.lastNameError = false;
             $scope.emailError = false;
@@ -530,7 +581,7 @@ angular.module('app')
                     id: function () {
                         return $scope.employeeId;
                     },
-                    enableApprovers : function() {
+                    enableApprovers: function () {
                         return $scope.enableApprover;
                     }
                 }
@@ -565,41 +616,51 @@ angular.module('app')
         };
     }
 );
-angular.module('app').controller('DeleteEmployeeCtrl', function($scope, $timeout, EmployeeFactory, $uibModalInstance, ecode){
+angular.module('app').controller('DeleteEmployeeCtrl', function ($scope, $timeout, EmployeeFactory, $uibModalInstance, ecode) {
 
     $scope.ecode = ecode;
-    $scope.message="";
+    $scope.message = "";
     $scope.showMessage = false;
 
     $scope.cancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
 
-    $scope.delete = function(){
-        $scope.message="";
+    $scope.delete = function () {
+        $scope.message = "";
         $scope.showMessage = false;
         $scope.disableYes = false;
-        EmployeeFactory.delete($scope.ecode).success(function(data){
+        EmployeeFactory.delete($scope.ecode).success(function (data) {
             $scope.disableYes = true;
-            if(data.status == 'SUCCESS'){
-                $scope.message="Employee has been removed from System Successfully. Please trigger your search again to get latest data.";
+            if (data.status == 'SUCCESS') {
+                $scope.message = "Employee has been removed from System Successfully. Please trigger your search again to get latest data.";
             }
-            else{
-                if(data.data.eMessage == 'NOT_FOUND'){
-                    $scope.message="Employee you are trying to modify is not present in system.";
+            else {
+                if (data.data.eMessage == 'NOT_FOUND') {
+                    $scope.message = "Employee you are trying to modify is not present in system.";
                 }
-                if(data.data.eMessage == 'ASSETS_PRESENT'){
-                    $scope.message="There are some assets still assigned to employee. Please try to un-assign them first.";
+                if (data.data.eMessage == 'ASSETS_PRESENT') {
+                    $scope.message = "There are some assets still assigned to employee. Please try to un-assign them first.";
                 }
-                if(data.data.eMessage == 'LOGGEDIN_USER_ERROR'){
-                    $scope.message="Logged In User can not delete himself from system . Please try to logged in with other user and then try to delete this user.";
+                if (data.data.eMessage == 'LOGGEDIN_USER_ERROR') {
+                    $scope.message = "Logged In User can not delete himself from system . Please try to logged in with other user and then try to delete this user.";
                 }
             }
             $scope.showMessage = true;
-            $timeout(function(){
+            $timeout(function () {
                 $uibModalInstance.dismiss('cancel');
             }, 5000);
-        })
+        }).error(function (data, status, headers, config) {
+            $scope.disableYes = true;
+            if (status == 401) {
+                $scope.message = "It seems this user don't have permission to delete an Employee.";
+                $scope.showMessage = true;
+            }
+            else {
+                $scope.message = "Snap! An error har occured at server side. Please try after some time.";
+                $scope.showMessage = true;
+            }
+        });
     }
 
 });
@@ -667,7 +728,7 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
             }
         });
 
-        if($scope.enableApprovers == "Y") {
+        if ($scope.enableApprovers == "Y") {
             $scope.showApprovers = true;
             EmployeeFactory.getApprovers().success(function (data) {
                 $scope.approvers = angular.copy(data);
@@ -701,11 +762,11 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
             $scope.message = "";
             var ids = $scope.selectedAssetType + '-' + $scope.selectedManufacturer;
             AssetFactory.fetchAvailableAssetByTypeAndManu(ids).success(function (data) {
-                $scope.assetDisplayList=[];
+                $scope.assetDisplayList = [];
                 $scope.assetList = angular.copy(data);
                 $scope.assetDisplayList[0] = $scope.assetDummy;
                 $scope.assignAsset.assetId = $scope.assetDummy.id;
-                if($scope.assetList.length > 0) {
+                if ($scope.assetList.length > 0) {
                     for (var index = 0; index < $scope.assetList.length; index++) {
                         var tempAsset = $scope.assetList[index];
                         tempAsset.name = $scope.assetList[index].name + "(" + $scope.assetList[index].serialNumber + ")";
@@ -713,7 +774,7 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
                     }
                     $scope.assetsFound = true;
                 }
-                else{
+                else {
                     $scope.assetsFound = false;
                 }
                 $scope.assetFetched = true;
@@ -789,10 +850,15 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
     .factory('EmployeeFactory', function ($http, $cookieStore) {
 
         return{
-            getEmployeeList: function () {
+            getTotalCount: function () {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
-                return $http.get('/inventory/employee/fetchAll');
+                return $http.get('/inventory/employee/getTotalEmployeeCount');
+            },
+            getEmployeeList: function (offset, limit) {
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.get('/inventory/employee/fetchAll?offset=' + offset + "&limit=" + limit);
             },
             fetchEmployee: function (data) {
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
@@ -818,6 +884,11 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
                 $http.defaults.headers.common.Authorization = $cookieStore.get('token');
                 $http.defaults.headers.common.Username = $cookieStore.get('Username');
                 return $http.post('/inventory/employee/delete', data);
+            },
+            isECodeAvailable: function(data){
+                $http.defaults.headers.common.Authorization = $cookieStore.get('token');
+                $http.defaults.headers.common.Username = $cookieStore.get('Username');
+                return $http.post('/inventory/employee/isECodeAvailable', data);
             }
         }
     })

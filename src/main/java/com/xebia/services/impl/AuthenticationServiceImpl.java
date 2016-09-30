@@ -90,6 +90,9 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         }
         if(needToProceed) {
             String path = pathToAccess.substring(pathToAccess.lastIndexOf('/'), pathToAccess.length());
+            if(path != null && path.contains("?")){
+                path = path.substring(0,path.indexOf('?'));
+            }
             PageRole pageRole = pageRoleDao.getByPath(path);
             List<UserRole> dbUserRoleList = pageRole.getUserRoles();
             boolean havingValidRole = false;

@@ -29,7 +29,7 @@ public interface IAssetService {
 
     public String unAssignAsset(AssetDto assetDto);
 
-    public List<Asset> getAllAsset();
+    public List<Asset> getAllAsset(int offset, int limit);
 
     public void deleteAsset(String id) throws ApplicationException;
 
@@ -63,7 +63,7 @@ public interface IAssetService {
 
     public File getEmployeeAssetsFileParam(BigInteger employeeId, String userName);
 
-    public List<Asset> searchAsset(AssetDto assetDto);
+    public Map searchAsset(AssetDto assetDto);
 
     public void processHistoricalAssets() throws ApplicationException,FileException;
 
@@ -78,4 +78,6 @@ public interface IAssetService {
     public void updateAssetApproval(AssetApprovalDTO assetApprovalDTO) throws ApplicationException;
 
     public List<AssetApprovalDTO> fetchPendingApprovals() throws ApplicationException;
+
+    public long getAssetsCount();
 }
