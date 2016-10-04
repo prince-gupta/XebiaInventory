@@ -7,22 +7,17 @@ import com.xebia.dao.UserRoleDAO;
 import com.xebia.entities.ExcelMapping;
 import com.xebia.entities.User;
 import com.xebia.entities.UserRole;
-import com.xebia.services.monitor.IMonitorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Pgupta on 20-08-2016.
@@ -33,9 +28,6 @@ public class CommonResource {
 
     @Autowired
     ExcelMappingDAO excelMappingDAO;
-
-    @Autowired
-    IMonitorService monitorService;
 
     @Autowired
     UserRoleDAO userRoleDAO;
@@ -62,13 +54,6 @@ public class CommonResource {
     public List<ExcelMapping> updateExcelMappings(@RequestBody List<ExcelMapping> mappings) {
         mappings.forEach(excelMappingDAO::update);
         return excelMappingDAO.getAll();
-    }
-
-    @GET
-    @Path("/osInfo")
-    @Produces("application/json")
-    public Map getOsInfo(){
-        return monitorService.osInfo();
     }
 
     @GET
