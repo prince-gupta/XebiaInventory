@@ -71,7 +71,7 @@ public class AssetResource {
     @Path("deleteAssetType")
     @Produces("application/text")
     public String deleteAssetType(@RequestBody String id){
-        return assetService.deleteAssetType(id);
+        return assetService.deleteAssetType(id, httpServletRequest.getHeader("UserName"));
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -79,7 +79,7 @@ public class AssetResource {
     @Path("updateAssetType")
     @Produces("application/text")
     public String updateAssetType(@RequestBody AssetType assetType){
-        return assetService.updateAssetType(assetType);
+        return assetService.updateAssetType(assetType, httpServletRequest.getHeader("Username"));
     }
 
 

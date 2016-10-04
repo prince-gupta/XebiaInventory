@@ -19,9 +19,9 @@ public interface IAssetService {
 
     public Map<String,List<AssetTypeDto>> getAllAssetType();
 
-    public String deleteAssetType(String id);
+    public String deleteAssetType(String id, String userName);
 
-    public String updateAssetType(AssetType assetType);
+    public String updateAssetType(AssetType assetType, String userName);
 
     public String createAsset(AssetDto assetDto);
 

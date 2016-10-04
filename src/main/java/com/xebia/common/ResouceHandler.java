@@ -7,6 +7,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,9 +17,9 @@ import java.io.InputStream;
 @Component
 public class ResouceHandler {
 
-	Logger logger = Logger.getLogger(ResouceHandler.class);
+    Logger logger = Logger.getLogger(ResouceHandler.class);
 
-	@Autowired
+    @Autowired
     ResourceLoader resourceLoader;
 
     /**
@@ -27,22 +28,21 @@ public class ResouceHandler {
      *
      * @param fileName - File need to be loaded.
      * @return - File object that has been loaded.
-     *
      * @throws java.io.IOException - In case of any error occured while laoding file.
      */
-	public File getFile(String fileName) throws IOException {
-		logger.debug("Loading : " + fileName);
-		Resource resource = resourceLoader.getResource("classpath:" + fileName);
-		File loadedResource = null;
-		try {
-			loadedResource = resource.getFile();
-			logger.debug("Loaded : " + fileName);
-		} catch (IOException e) {
-			logger.error("Failed to load file. ", e);
-			throw new IOException("Unable to Load File.");
-		}
-		return loadedResource;
-	}
+    public File getFile(String fileName) throws IOException {
+        logger.debug("Loading : " + fileName);
+        Resource resource = resourceLoader.getResource("classpath:" + fileName);
+        File loadedResource = null;
+        try {
+            loadedResource = resource.getFile();
+            logger.debug("Loaded : " + fileName);
+        } catch (IOException e) {
+            logger.error("Failed to load file. ", e);
+            throw new IOException("Unable to Load File.");
+        }
+        return loadedResource;
+    }
 
     /**
      * Method will load file mentioned in passed parameter and
@@ -50,24 +50,39 @@ public class ResouceHandler {
      *
      * @param fileName - File need to be loaded.
      * @return - InputStream object of File that has been loaded.
-     *
      * @throws java.io.IOException - In case of any error occured while laoding file.
      */
 
-	public InputStream getFileStream(String fileName) throws IOException {
-		logger.debug("Loading : " + fileName);
-		Resource resource = resourceLoader.getResource("classpath:" + fileName);
-		InputStream stream = null;
-		try {
-			logger.debug("Trying to generate Stream.");
-			stream = resource.getInputStream();
-			logger.debug("Generated Stream  successfully.");
+    public InputStream getFileStream(String fileName) throws IOException {
+        logger.debug("Loading : " + fileName);
+        Resource resource = resourceLoader.getResource("classpath:" + fileName);
+        InputStream stream;
+        try {
+            logger.debug("Trying to generate Stream.");
+            stream = resource.getInputStream();
+            logger.debug("Generated Stream  successfully.");
 
-		} catch (IOException e) {
-			logger.error("Failed to load file. ", e);
-			throw new IOException("Unable to Load File.");
-		}
-		return stream;
-	}
+        } catch (IOException e) {
+            logger.error("Failed to load file. ", e);
+            throw new IOException("Unable to Load File.");
+        }
+        return stream;
+    }
+
+    public InputStream getFileStream(String filePath, boolean fromExternal) throws IOException {
+        logger.debug("Loading : " + filePath);
+        File file = new File(filePath);
+        InputStream stream;
+        try {
+            logger.debug("Trying to generate Stream.");
+            stream = new FileInputStream(file);
+            logger.debug("Generated Stream  successfully.");
+
+        } catch (IOException e) {
+            logger.error("Failed to load file. ", e);
+            throw new IOException("Unable to Load File.");
+        }
+        return stream;
+    }
 
 }

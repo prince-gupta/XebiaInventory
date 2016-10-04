@@ -13,6 +13,7 @@ import com.xebia.exception.ApplicationException;
 import com.xebia.exception.ParsingException;
 import com.xebia.services.IPageRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -36,12 +37,15 @@ public class PageRoleServiceImpl implements IPageRoleService {
     @Autowired
     UserRoleDAO userRoleDAO;
 
+    @Autowired
+    Environment environment;
+
 
     @Override
     public void populatePageRoles() throws ApplicationException, ParsingException {
         Configurations configurations;
         try {
-            configurations = XMLParser.unMarshall(resouceHandler.getFileStream("config/pageRoleConfigurations.xml"), Configurations.class);
+            configurations = XMLParser.unMarshall(resouceHandler.getFileStream(environment.getProperty("app.pageRole.file.location"), true), Configurations.class);
             pageRoleDao.truncate();
             Map<String, PageRole> pageRoleMap = new HashMap<>();
             for (Config config : configurations.getConfig()) {

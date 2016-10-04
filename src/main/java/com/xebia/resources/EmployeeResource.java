@@ -9,7 +9,6 @@ import com.xebia.entities.Employee;
 import com.xebia.entities.User;
 import com.xebia.exception.ApplicationException;
 import com.xebia.services.IEmployeeService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;

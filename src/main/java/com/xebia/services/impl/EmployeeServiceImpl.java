@@ -1,5 +1,6 @@
 package com.xebia.services.impl;
 
+import com.xebia.common.Utility;
 import com.xebia.dao.*;
 import com.xebia.dto.EmployeeSearchDTO;
 import com.xebia.entities.*;
@@ -71,14 +72,14 @@ public class EmployeeServiceImpl implements IEmployeeService {
         BigInteger empId = emp.getId();
         employeeDAO.markDeleted(emp);
         jmsMailService.registerToMailQueue(
-                createEventMailObject(loggedInUser.getId(),
+                Utility.createEventMailObject(loggedInUser.getId(),
                         EventEnum.DELETE.toString(),
                         EventType.EMP.toString(),
                         empId));
     }
 
     public void create(Employee employee, String userName) throws ApplicationException {
-        if (employeeDAO.countEmployee(employee.getECode()) > 0) {
+        if (employeeDAO.countActiveEmployee(employee.getECode()) > 0) {
             throw new ApplicationException("INVALID_EMP_CODE");
         } else {
             if (StringUtils.equals("NA", employee.getApprovalsRequired()))
@@ -87,7 +88,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
             employeeDAO.create(employee);
             User user = userDAO.getUserByUName(userName);
             jmsMailService.registerToMailQueue(
-                    createEventMailObject(user.getId(),
+                    Utility.createEventMailObject(user.getId(),
                             EventEnum.ADD.toString(),
                             EventType.EMP.toString(),
                             employee.getId()));
@@ -96,7 +97,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     @Override
     public void update(Employee employee, String userName) {
-        if (employeeDAO.countEmployee(employee.getECode()) > 0) {
+        if (employeeDAO.countActiveEmployee(employee.getECode()) > 0) {
             throw new ApplicationException("DUPLICATE ECODE");
         } else {
             if (StringUtils.equals("NA", employee.getApprovalsRequired()))
@@ -118,19 +119,12 @@ public class EmployeeServiceImpl implements IEmployeeService {
             employeeDAO.update(dbEmployee);
             User user = userDAO.getUserByUName(userName);
             jmsMailService.registerToMailQueue(
-                    createEventMailObject(user.getId(),
+                    Utility.createEventMailObject(user.getId(),
                             EventEnum.UPDATE.toString(),
                             EventType.EMP.toString(),
                             employee.getId()));
         }
     }
 
-    private EventMail createEventMailObject(BigInteger userId, String event, String type, BigInteger empId) {
-        EventMail eventMail = new EventMail();
-        eventMail.setUser(userId);
-        eventMail.setEvent(event);
-        eventMail.setType(type);
-        eventMail.setRefId(empId);
-        return eventMail;
-    }
+
 }

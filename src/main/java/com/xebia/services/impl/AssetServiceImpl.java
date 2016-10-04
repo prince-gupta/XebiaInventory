@@ -2,13 +2,11 @@ package com.xebia.services.impl;
 
 import com.xebia.common.Constants;
 import com.xebia.dto.*;
-import com.xebia.enums.ApprovalStateEnum;
-import com.xebia.enums.AssetStatus;
+import com.xebia.enums.*;
 import com.xebia.common.Utility;
 import com.xebia.dao.*;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.*;
-import com.xebia.enums.MailStatus;
 import com.xebia.exception.ApplicationException;
 import com.xebia.exception.FileException;
 import com.xebia.messaging.JMSMailService;
@@ -141,17 +139,31 @@ public class AssetServiceImpl implements IAssetService {
     }
 
     @Override
-    public String deleteAssetType(String id) {
+    public String deleteAssetType(String id, String userName) {
         AssetType assetType = assetTypeDAO.getById(new BigInteger(id));
+        User user = userDAO.getUserByUName(userName);
         assetTypeDAO.delete(assetType);
+        jmsMailService.registerToMailQueue(
+                Utility.createEventMailObject(user.getId()
+                        , EventEnum.DELETE.toString()
+                        , EventType.ASSET.toString()
+                        , assetType.getId())
+        );
         return "OK";
     }
 
     @Override
-    public String updateAssetType(AssetType assetType) {
+    public String updateAssetType(AssetType assetType, String userName) {
         AssetType dbAssetType = assetTypeDAO.getById((assetType.getId()));
+        User user = userDAO.getUserByUName(userName);
         dbAssetType.setType(assetType.getType());
         assetTypeDAO.update(dbAssetType);
+        jmsMailService.registerToMailQueue(
+                Utility.createEventMailObject(user.getId()
+                        , EventEnum.UPDATE.toString()
+                        , EventType.ASSET.toString()
+                        , assetType.getId())
+        );
         return "OK";
     }
 

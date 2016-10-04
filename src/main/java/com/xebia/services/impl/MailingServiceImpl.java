@@ -5,11 +5,11 @@ import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.EventMail;
 import com.xebia.messaging.ResolverChain;
-import com.xebia.messaging.resolvers.EmployeeResolver;
 import com.xebia.services.IMailingService;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import javax.mail.MessagingException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,9 @@ public class MailingServiceImpl implements IMailingService {
 
     @Autowired
     ResolverChain chain;
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     private static final String CHARSET_UTF8 = "UTF-8";
 
@@ -155,12 +159,15 @@ public class MailingServiceImpl implements IMailingService {
     public boolean sendEventMails(EventMail eventMail) throws MailException {
         try {
             MimeMessagePreparator preparator = mimeMessage -> {
-                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+                String cid = "" + new Date().getTime();
+                MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);
                 message = addCCToMessage(message);
                 EventMailDTO eventMailDTO = chain.resolve(eventMail);
                 message.setTo(eventMailDTO.getToMail());
                 message.setText(eventMailDTO.getMessageBody(), true);
                 message.setSubject(eventMailDTO.getSubject());
+                message.addInline("<" + cid + ">", resourceLoader.getResource("classpath:images/logo.jpg"));
+
             };
             this.javaMailSender.send(preparator);
             return true;

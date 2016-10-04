@@ -47,8 +47,14 @@ public class EmployeeDAO {
         return;
     }
 
-    public long countEmployee(String eCode) {
+    public long countActiveEmployee(String eCode) {
         return (long) entityManager.createQuery("SELECT count(e) from Employee e where e_code = :eCode and deleted = 'N'")
+                .setParameter("eCode", eCode)
+                .getSingleResult();
+    }
+
+    public long countEmployee(String eCode) {
+        return (long) entityManager.createQuery("SELECT count(e) from Employee e where e_code = :eCode")
                 .setParameter("eCode", eCode)
                 .getSingleResult();
     }

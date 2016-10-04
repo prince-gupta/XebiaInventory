@@ -1,5 +1,6 @@
 package com.xebia.common;
 
+import com.xebia.entities.EventMail;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -92,5 +93,14 @@ public class Utility {
 
     public static void put(String key, Object value){
         appCache.put(key, value);
+    }
+
+    public static EventMail createEventMailObject(BigInteger userId, String event, String type, BigInteger empId) {
+        EventMail eventMail = new EventMail();
+        eventMail.setUser(userId);
+        eventMail.setEvent(event);
+        eventMail.setType(type);
+        eventMail.setRefId(empId);
+        return eventMail;
     }
 }
