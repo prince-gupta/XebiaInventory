@@ -1,7 +1,5 @@
 package com.xebia.services.print.impl;
 
-import com.itextpdf.tool.xml.html.HTML;
-import com.lowagie.text.DocumentException;
 import com.xebia.common.Constants;
 import com.xebia.common.Utility;
 import com.xebia.exception.ApplicationException;
@@ -10,7 +8,6 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.springframework.stereotype.Service;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -66,7 +63,7 @@ public class PrintServiceImpl implements IPrintService {
             throw new ApplicationException("Unable to Open Output Stream for PDF File.");
         }
 
-        ITextRenderer renderer = new ITextRenderer();
+       /* ITextRenderer renderer = new ITextRenderer();
         renderer.setDocument(htmlFilePath);
         renderer.layout();
         try {
@@ -80,7 +77,7 @@ public class PrintServiceImpl implements IPrintService {
             } catch (IOException e) {
                 throw new ApplicationException("Unable to close stream.");
             }
-        }
+        }*/
         return new File(Utility.getFullTempFilePath(Constants.PDF));
     }
 }
