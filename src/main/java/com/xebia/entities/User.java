@@ -112,4 +112,21 @@ public class User implements Serializable {
     public void setChangePassword(String changePassword) {
         this.changePassword = changePassword;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (!username.equals(user.username)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
 }

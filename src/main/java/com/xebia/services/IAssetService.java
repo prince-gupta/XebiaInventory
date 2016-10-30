@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public interface IAssetService {
 
-    public String createAssetType(AssetType assetType);
+    public String createAssetType(AssetType assetType, String userName);
 
     public Map<String,List<AssetTypeDto>> getAllAssetType();
 

@@ -1,6 +1,5 @@
 package com.xebia.services.print.impl;
 
-import com.itextpdf.tool.xml.html.HTML;
 import com.lowagie.text.DocumentException;
 import com.xebia.common.Constants;
 import com.xebia.common.Utility;

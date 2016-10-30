@@ -170,18 +170,18 @@
             <version>8.0.0</version>
         </dependency>
 
-        <!--<dependency>
-            <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>flying-saucer-core</artifactId>
-            <version>8.0.0</version>
-        </dependency>-->
-
-        <!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-core -->
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-core</artifactId>
-            <version>9.0.4</version>
+            <version>8.0.0</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-core -->
+        <!--<dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-core</artifactId>
+            <version>9.0.4</version>
+        </dependency>-->
 
         <dependency>
             <groupId>org.itext</groupId>

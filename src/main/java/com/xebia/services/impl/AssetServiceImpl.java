@@ -71,14 +71,33 @@ public class AssetServiceImpl implements IAssetService {
     AssetApprovalDAO assetApprovalDAO;
 
     @Override
-    public String createAssetType(AssetType assetType) {
-        assetTypeDAO.create(assetType);
+    public String createAssetType(AssetType assetType, String userName) {
+        List<AssetType> dbAssetTypeList = assetTypeDAO.getByTypeWithoutDeletionFilter(assetType.getType());
+        if (dbAssetTypeList == null || dbAssetTypeList.size() == 0) {
+            assetType.setDeleted("N");
+            assetTypeDAO.create(assetType);
+        } else if (dbAssetTypeList.size() == 1) {
+            AssetType dbAssetType = dbAssetTypeList.get(0);
+            dbAssetType.setDeleted("N");
+            assetTypeDAO.update(dbAssetType);
+        }
+        else{
+            //TODO Handle this case properly : throw an exception of malformed data in db, as two asset type can not be of same name.
+            return "FAIL";
+        }
+        User user = userDAO.getUserByUName(userName);
+        jmsMailService.registerToMailQueue(
+                Utility.createEventMailObject(user.getId()
+                        , EventEnum.ADD.toString()
+                        , EventType.ASSET_TYPE.toString()
+                        , assetType.getId())
+        );
         return "OK";
     }
 
     @Override
     public Map<String, List<AssetTypeDto>> getAllAssetType() {
-        List<AssetTypeDto> resutList = new ArrayList<>();
+        List<AssetTypeDto> resultList = new ArrayList<>();
         List<AssetType> assetTypes = assetTypeDAO.getAll();
 
         Map<BigInteger, Map<String, Map<String, Integer>>> map = new HashMap<>();
@@ -129,11 +148,11 @@ public class AssetServiceImpl implements IAssetService {
                     }
                 }
             }
-            resutList.add(assetTypeDto);
+            resultList.add(assetTypeDto);
 
         }
         Map result = new HashMap<>();
-        result.put("AssetDTOResult", resutList);
+        result.put("AssetDTOResult", resultList);
         result.put("ManufactureMap", map);
         return result;
     }
@@ -142,11 +161,12 @@ public class AssetServiceImpl implements IAssetService {
     public String deleteAssetType(String id, String userName) {
         AssetType assetType = assetTypeDAO.getById(new BigInteger(id));
         User user = userDAO.getUserByUName(userName);
-        assetTypeDAO.delete(assetType);
+        assetType.setDeleted("Y");
+        assetTypeDAO.update(assetType);
         jmsMailService.registerToMailQueue(
                 Utility.createEventMailObject(user.getId()
                         , EventEnum.DELETE.toString()
-                        , EventType.ASSET.toString()
+                        , EventType.ASSET_TYPE.toString()
                         , assetType.getId())
         );
         return "OK";
@@ -161,7 +181,7 @@ public class AssetServiceImpl implements IAssetService {
         jmsMailService.registerToMailQueue(
                 Utility.createEventMailObject(user.getId()
                         , EventEnum.UPDATE.toString()
-                        , EventType.ASSET.toString()
+                        , EventType.ASSET_TYPE.toString()
                         , assetType.getId())
         );
         return "OK";
@@ -519,7 +539,7 @@ public class AssetServiceImpl implements IAssetService {
         asset.setAssetManufacturer(assetManufacturer);
         asset.setAssetType(assetType);
         Map resultMap = assetDAO.getByAssetObject(asset, assetDto.getOffset(), assetDto.getLimit());
-        List<Asset> assetList = (List<Asset>)resultMap.get("result");
+        List<Asset> assetList = (List<Asset>) resultMap.get("result");
         for (Asset assetTemp : assetList) {
             if (assetTemp.getEmployee() == null) {
                 Employee dummyEmployee = new Employee();
@@ -594,11 +614,11 @@ public class AssetServiceImpl implements IAssetService {
         assetApprovalDAO.update(assetApproval);
     }
 
-    public List<AssetApprovalDTO> fetchPendingApprovals() throws ApplicationException{
+    public List<AssetApprovalDTO> fetchPendingApprovals() throws ApplicationException {
         return changeToAssetApprovalDTOs(assetApprovalDAO.getPendingApprovals());
     }
 
-    private List<AssetApprovalDTO> changeToAssetApprovalDTOs(List<AssetApproval> assetApprovals){
+    private List<AssetApprovalDTO> changeToAssetApprovalDTOs(List<AssetApproval> assetApprovals) {
         List<AssetApprovalDTO> assetApprovalDTOs = new ArrayList<>();
 
         for (AssetApproval assetApproval : assetApprovals) {
@@ -620,7 +640,7 @@ public class AssetServiceImpl implements IAssetService {
         return assetApprovalDTOs;
     }
 
-    public long getAssetsCount(){
+    public long getAssetsCount() {
         return assetDAO.getTotalCount();
     }
 }

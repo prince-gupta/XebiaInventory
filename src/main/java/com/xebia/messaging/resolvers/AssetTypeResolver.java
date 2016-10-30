@@ -1,11 +1,11 @@
 package com.xebia.messaging.resolvers;
 
 import com.xebia.dao.AssetDAO;
-import com.xebia.dao.EmployeeDAO;
+import com.xebia.dao.AssetTypeDAO;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.Asset;
-import com.xebia.entities.Employee;
+import com.xebia.entities.AssetType;
 import com.xebia.entities.EventMail;
 import com.xebia.entities.User;
 import com.xebia.enums.EventEnum;
@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class AssetResolver implements ResolverChain{
+public class AssetTypeResolver implements ResolverChain{
 
     @Autowired
-    AssetDAO assetDao;
+    AssetTypeDAO assetTypeDAO;
 
     @Autowired
     UserDAO userDAO;
@@ -31,20 +31,16 @@ public class AssetResolver implements ResolverChain{
     @Autowired
     VelocityEngine velocityEngine;
 
-    @Autowired
-    AssetTypeResolver assetTypeResolver;
-
     private ResolverChain resolverChain;
 
     @Override
     public void setNextResolver(ResolverChain nextResolver) {
-        this.resolverChain = assetTypeResolver;
+        this.resolverChain = nextResolver;
     }
 
     @Override
     public EventMailDTO resolve(EventMail eventMail) {
-        setNextResolver(null);
-        if (eventMail.getType().equals(EventType.ASSET.toString())) {
+        if (eventMail.getType().equals(EventType.ASSET_TYPE.toString())) {
             return prepareDto(eventMail);
         } else {
             return this.resolverChain.resolve(eventMail);
@@ -54,7 +50,7 @@ public class AssetResolver implements ResolverChain{
     private EventMailDTO prepareDto(EventMail eventMail) {
         EventMailDTO eventMailDTO = new EventMailDTO();
         eventMailDTO.setSubject(resolveSubject(eventMail.getEvent()));
-        eventMailDTO.setTemplateName("asset-events.vm");
+        eventMailDTO.setTemplateName("asset-type-events.vm");
         User user = userDAO.getById(eventMail.getUser());
         eventMailDTO.setToMail(user.getEmployee().getEmail());
         eventMailDTO.setMessageBody(prepareMessageBody(eventMail, user));
@@ -63,29 +59,29 @@ public class AssetResolver implements ResolverChain{
 
     private String prepareMessageBody(EventMail eventMail, User user) {
         Map model = new HashMap<>();
-        Asset asset = assetDao.getById(eventMail.getRefId());
+        AssetType assetType = assetTypeDAO.getById(eventMail.getRefId());
         model.put("fullName", user.getEmployee().getFullName());
         model.put("userName", user.getUsername());
-        model.put("asset", asset);
+        model.put("assetType", assetType);
         model.put("eventMessage", EventEnum.getEvent(eventMail.getEvent()).getMessage());
         return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine
-                , "asset-events.vm", CHARSET_UTF8, model);
+                , "asset-type-events.vm", CHARSET_UTF8, model);
     }
 
     private String resolveSubject(String event) {
         String subject;
         switch (EventEnum.getEvent(event)) {
             case ADD:
-                subject = "An Asset is registered to System.";
+                subject = "An Asset Type is registered to System.";
                 break;
             case DELETE:
-                subject = "An Asset is deleted from System.";
+                subject = "An Asset Type is deleted from System.";
                 break;
             case UPDATE:
-                subject = "Details for an Asset is modified.";
+                subject = "Details for an Asset Type is modified.";
                 break;
             default:
-                subject = "Details for an Asset is modified.";
+                subject = "Details for an Asset Type is modified.";
                 break;
         }
         return subject;

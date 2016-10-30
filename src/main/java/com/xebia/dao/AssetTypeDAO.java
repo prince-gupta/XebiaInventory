@@ -32,7 +32,7 @@ public class AssetTypeDAO {
     }
 
     public List<AssetType> getAll() {
-        return entityManager.createQuery("from AssetType").getResultList();
+        return entityManager.createQuery("from AssetType where deleted = 'N'").getResultList();
     }
 
     /**
@@ -51,6 +51,13 @@ public class AssetTypeDAO {
     }
 
     public List<AssetType> getByType(String type){
+        List<AssetType> resultList = entityManager.createQuery("from AssetType where type = :type and deleted = 'N'")
+                .setParameter("type", type)
+                .getResultList();
+        return resultList;
+    }
+
+    public List<AssetType> getByTypeWithoutDeletionFilter(String type){
         List<AssetType> resultList = entityManager.createQuery("from AssetType where type = :type")
                 .setParameter("type", type)
                 .getResultList();

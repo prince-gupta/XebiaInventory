@@ -1,0 +1,92 @@
+<div class="container">
+    <div><h1>User Activities</h1></div>
+    <div class="alert alert-danger fade in" ng-show=showDangerMessage>
+        <a href="" class="close" ng-click="closeDangerMsg()" aria-label="close">&times;</a>
+        <strong>Oh Snap!</strong> <span>{{dangerMessage}}</span>
+    </div>
+    <div class="alert alert-warning fade in" ng-show=showWarningMessage>
+        <a href="" class="close" ng-click="closeWarningMsg()" aria-label="close">&times;</a>
+        <strong>Oops !!</strong> <span>{{warningMessage}}</span>
+    </div>
+    <div class="alert alert-success fade in" ng-show=showSuccessMessage>
+        <a href="" class="close" ng-click="closeSuccessMsg()" aria-label="close">&times;</a>
+        <strong>Success!</strong> <span>{{successMessage}}</span>
+    </div>
+    <uib-tabset active="activeJustified" justified="true">
+        <uib-tab index="0" heading="">
+            <form class="form-horizontal" role="form">
+                <div class="col-sm-2">
+                    <select class="form-control" ng-model="search.user"
+                            ng-options="user.id as user.userName for user in userDisplayList">
+                    </select>
+                </div>
+
+                <div class="col-sm-2">
+                    <select class="form-control" ng-model="search.action"
+                            ng-options="action as action for action in actionDisplayList">
+                    </select>
+                </div>
+
+                <div class="col-sm-2">
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                               ng-model="search.from" is-open="calFromPopup.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                               placeholder="After Date"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="openCalFrom()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                              </span>
+                    </p>
+                </div>
+
+                <div class="col-sm-2">
+                    <p class="input-group">
+                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}"
+                               ng-model="search.to" is-open="calToPopup.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close" alt-input-formats="altInputFormats"
+                               placeholder="Before Date"/>
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="openCalTo()"><i
+                                            class="glyphicon glyphicon-calendar"></i></button>
+                             </span>
+                    </p>
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" class="btn btn-success" ng-click="searchActivities()">Search&nbsp;<i
+                            class="glyphicon glyphicon-search"></i></button>
+                </div>
+                <div class="col-sm-1">
+                    <button type="button" class="btn btn-warning" ng-click="resetSearch()">Reset&nbsp;<i
+                            class="glyphicon glyphicon-refresh"></i></button>
+                </div>
+            </form>
+            <table class="table table-hover" ng-show="showResultTable">
+                <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Full Name</th>
+                    <th>Action</th>
+                    <th>Action Item</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="activity in activities" ng-class="activity.action == 'DELETE' ? 'danger':'default'">
+                    <td>{{activity.userName}}</td>
+                    <td>{{activity.fullName}}</td>
+                    <td>{{activity.action}}</td>
+                    <td>{{activity.actionItem}}</td>
+                    <td>{{activity.eventDate}}</td>
+                </tr>
+                </tbody>
+            </table>
+            <ul style="margin-left: 38%" ng-show="showResultTable" uib-pagination
+                items-per-page="activityPage.itemsPerPage" total-items="activityPage.totalItems"
+                ng-model="activityPage.currentPage" max-size="activityPage.maxSize" class="pagination-sm"
+                boundary-links="true" rotate="false" ng-change="pageChanged()"></ul>
+        </uib-tab>
+    </uib-tabset>
+</div>

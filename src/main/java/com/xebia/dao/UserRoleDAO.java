@@ -38,11 +38,19 @@ public class UserRoleDAO {
         return entityManager.find(UserRole.class, id);
     }
 
-    public UserRole getByRoleName(String roleName) {
-        List<UserRole> roles = entityManager.createQuery("from UserRole where roleName =:role")
-                .setParameter("role", roleName).getResultList();
-        if(roles != null && roles.size() > 0)
-            return roles.get(0);
+    public List<UserRole> getByRoleName(String... roleNames) {
+        String query = "from UserRole where roleName in (<role-name>)";
+        StringBuffer roleBuffer = new StringBuffer();
+        for(int index = 0; index < roleNames.length ; index ++){
+            roleBuffer.append("'" + roleNames[index] + "'");
+            if(index !=  roleNames.length -1){
+                roleBuffer.append(", ");
+            }
+        }
+        query = query.replace("<role-name>", roleBuffer.toString());
+        List<UserRole> roles = entityManager.createQuery(query).getResultList();
+        if(roles != null)
+            return roles;
         return null;
     }
 

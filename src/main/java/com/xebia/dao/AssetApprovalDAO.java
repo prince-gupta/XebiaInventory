@@ -69,4 +69,8 @@ public class AssetApprovalDAO {
                 .setParameter("today", today)
                 .getResultList();
     }
+
+    public List getApprovalStateCounts(){
+        return entityManager.createQuery("select ap.status, count(ap) from AssetApproval as ap group by ap.status").getResultList();
+    }
 }

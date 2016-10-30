@@ -21,6 +21,8 @@ public class AssetType implements Serializable {
 
 	private String type;
 
+    private String deleted;
+
 	public AssetType() {
 	}
 
@@ -40,4 +42,11 @@ public class AssetType implements Serializable {
 		this.type = type;
 	}
 
+    public String getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(String deleted) {
+        this.deleted = deleted;
+    }
 }

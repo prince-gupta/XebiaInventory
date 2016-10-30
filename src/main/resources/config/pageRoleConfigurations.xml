@@ -523,4 +523,40 @@
         </roleName>
     </config>
 
+    <config>
+        <displayName>
+            ASSET_STATS
+        </displayName>
+        <url>
+            /assetStats
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            ACTIVITY_PAGE_OPTIONS
+        </displayName>
+        <url>
+            /getOptionsForActivityPage
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
+    <config>
+        <displayName>
+            ACTIVITIES
+        </displayName>
+        <url>
+            /activities
+        </url>
+        <roleName>
+            IT,ADMIN
+        </roleName>
+    </config>
+
 </configurations>

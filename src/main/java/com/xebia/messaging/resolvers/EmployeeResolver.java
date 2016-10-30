@@ -29,6 +29,9 @@ public class EmployeeResolver implements ResolverChain {
     @Autowired
     VelocityEngine velocityEngine;
 
+    @Autowired
+    AssetResolver assetResolver;
+
     private ResolverChain resolverChain;
     private static String EMP_ADD = "mail.event.employee.add";
     private static String EMP_DELETE = "mail.event.employee.delete";
@@ -36,11 +39,12 @@ public class EmployeeResolver implements ResolverChain {
 
     @Override
     public void setNextResolver(ResolverChain nextResolver) {
-        this.resolverChain = nextResolver;
+        this.resolverChain = assetResolver;
     }
 
     @Override
     public EventMailDTO resolve(EventMail eventMail) {
+        setNextResolver(null);
         if (eventMail.getType().equals(EventType.EMP.toString())) {
             return prepareDto(eventMail);
         } else {

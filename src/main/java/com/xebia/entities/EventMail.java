@@ -3,6 +3,7 @@ package com.xebia.entities;
 import java.io.Serializable;
 import javax.persistence.*;
 import java.math.BigInteger;
+import java.util.Date;
 
 
 /**
@@ -29,6 +30,10 @@ public class EventMail implements Serializable {
 	private BigInteger user;
 
     private String status;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name="event_date")
+    private Date eventDate;
 
 	public EventMail() {
 	}
@@ -79,5 +84,13 @@ public class EventMail implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Date getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(Date eventDate) {
+        this.eventDate = eventDate;
     }
 }

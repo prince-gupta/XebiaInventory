@@ -2,6 +2,7 @@ package com.xebia.dao;
 
 import com.xebia.entities.Employee;
 import com.xebia.entities.User;
+import com.xebia.entities.UserRole;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;

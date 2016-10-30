@@ -59,7 +59,7 @@ public class PageRoleServiceImpl implements IPageRoleService {
                 String[] roleNames = config.getRoleName().trim().split(",");
                 List<UserRole> userRoles = new ArrayList<>();
                 for (String roleName : roleNames) {
-                    UserRole dbRole = userRoleDAO.getByRoleName(roleName);
+                    UserRole dbRole = userRoleDAO.getByRoleName(roleName).get(0);
                     if (dbRole == null) {
                         throw new ParsingException("Undefined Role : Role Name configured in " + displayName + " does not present in DB.");
                     }

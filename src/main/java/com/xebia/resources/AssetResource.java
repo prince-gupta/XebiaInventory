@@ -50,7 +50,7 @@ public class AssetResource {
     @Produces("application/text")
     @Consumes("application/json")
     public String createAssetType(@RequestBody AssetType assetType){
-        return assetService.createAssetType(assetType);
+        return assetService.createAssetType(assetType, httpServletRequest.getHeader("UserName"));
     }
 
     @CrossOrigin(origins = "http://localhost:3000")

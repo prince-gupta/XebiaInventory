@@ -1,10 +1,8 @@
 package com.xebia.resources;
 
 import com.xebia.annotations.Secured;
-import com.xebia.dto.ActionResult;
-import com.xebia.dto.PageRoleDTO;
-import com.xebia.dto.UserDto;
-import com.xebia.dto.UserRoleDTO;
+import com.xebia.dto.*;
+import com.xebia.entities.EventMail;
 import com.xebia.entities.PageRole;
 import com.xebia.entities.User;
 import com.xebia.exception.ApplicationException;

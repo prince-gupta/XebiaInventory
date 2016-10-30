@@ -5,6 +5,7 @@ import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.EventMail;
 import com.xebia.messaging.ResolverChain;
+import com.xebia.messaging.resolvers.EmployeeResolver;
 import com.xebia.services.IMailingService;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class MailingServiceImpl implements IMailingService {
     Environment environment;
 
     @Autowired
-    ResolverChain chain;
+    EmployeeResolver chain;
 
     @Autowired
     ResourceLoader resourceLoader;

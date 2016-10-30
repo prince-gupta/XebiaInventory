@@ -73,6 +73,14 @@ angular
                 templateUrl: '../views/pageMapping.html',
                 controller: 'pageRoleController'
             })
+            .when('/stats', {
+                templateUrl: '../views/stats.html',
+                controller: 'statsController'
+            })
+            .when('/activity', {
+                templateUrl: '../views/activity.html',
+                controller: 'activityController'
+            })
             .otherwise({
                 templateUrl: '../views/404.html'
             });
