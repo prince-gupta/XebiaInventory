@@ -31,15 +31,19 @@ public class AssetTypeResolver implements ResolverChain{
     @Autowired
     VelocityEngine velocityEngine;
 
+    @Autowired
+    AssetManufacturerResolver assetManufacturerResolver;
+
     private ResolverChain resolverChain;
 
     @Override
     public void setNextResolver(ResolverChain nextResolver) {
-        this.resolverChain = nextResolver;
+        this.resolverChain = assetManufacturerResolver;
     }
 
     @Override
     public EventMailDTO resolve(EventMail eventMail) {
+        setNextResolver(null);
         if (eventMail.getType().equals(EventType.ASSET_TYPE.toString())) {
             return prepareDto(eventMail);
         } else {

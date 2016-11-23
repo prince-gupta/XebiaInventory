@@ -2,30 +2,24 @@ package com.xebia.messaging.impl;
 
 import com.xebia.dao.AssetHistoryDAO;
 import com.xebia.dao.AssignAssetMailDAO;
-import com.xebia.dao.EventMailDAO;
 import com.xebia.entities.AssetHistory;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.EventMail;
 import com.xebia.enums.AssetStatus;
-import com.xebia.enums.EventType;
 import com.xebia.enums.MailStatus;
 import com.xebia.messaging.JMSMailService;
+import com.xebia.services.IEventMailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,7 +41,8 @@ public class JMSMailServiceImpl implements JMSMailService {
     AssetHistoryDAO assetHistoryDAO;
 
     @Autowired
-    EventMailDAO eventMailDAO;
+    IEventMailService eventMailService;
+
 
     @Scheduled(fixedRate = 20000)
     @Override
@@ -93,8 +88,8 @@ public class JMSMailServiceImpl implements JMSMailService {
     @Scheduled(fixedRate = 40000)
     @Override
     public void processUnsentEventMails() {
-        List<EventMail> unsentEventMail = eventMailDAO.getMailObjectsByStatus(MailStatus.NOT_SENT.getValue(), MailStatus.PENDING.getValue());
-        if(unsentEventMail.size() >= 1)
+        List<EventMail> unsentEventMail = eventMailService.fetchMailObjectsNeedToSend();
+        if (unsentEventMail.size() >= 1)
             template.convertAndSend("unsentEventMailQueue", unsentEventMail);
     }
 

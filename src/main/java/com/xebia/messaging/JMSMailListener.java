@@ -7,16 +7,21 @@ import com.xebia.entities.AssetHistory;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.EventMail;
 import com.xebia.enums.AssetStatus;
+import com.xebia.enums.EventType;
 import com.xebia.enums.MailStatus;
 import com.xebia.exception.MailException;
+import com.xebia.services.IEventMailService;
 import com.xebia.services.IMailingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
+import org.springframework.mail.MailAuthenticationException;
+import org.springframework.mail.MailSendException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -39,7 +44,7 @@ public class JMSMailListener {
     AssignAssetMailDAO assignAssetMailDAO;
 
     @Autowired
-    EventMailDAO eventMailDAO;
+    IEventMailService eventMailService;
 
     @JmsListener(destination = "assignAssetMailQueue")
     public void sendAssignAssetMails(List<AssignAssetMail> mailDtos) {
@@ -195,16 +200,36 @@ public class JMSMailListener {
     @JmsListener(destination = "mailQueue")
     public void registerMail(EventMail eventMail) {
         eventMail.setStatus(MailStatus.NOT_SENT.getValue());
-        eventMailDAO.create(eventMail);
+        eventMailService.create(eventMail);
     }
 
     @JmsListener(destination = "unsentEventMailQueue")
     public void sendEventMail(List<EventMail> eventMails) {
         for (EventMail eventMail : eventMails) {
-            mailingService.sendEventMails(eventMail);
-            EventMail dbEventMail = eventMailDAO.getById(eventMail.getId());
-            dbEventMail.setStatus(MailStatus.SENT.getValue());
-            eventMailDAO.update(dbEventMail);
+            BigInteger retries = eventMailService.getRetires(eventMail);
+            if (eventMailService.isSoftErrorPresent(eventMail)) {
+                try {
+                    mailingService.sendEventMails(eventMail);
+                    eventMail.setStatus(MailStatus.SENT.getValue());
+                    eventMailService.update(eventMail);
+                } catch (org.springframework.mail.MailException e) {
+                    if (((e instanceof MailSendException) || (e instanceof MailAuthenticationException))) {
+                        if (retries.intValue() >= 3) {
+                            eventMail.setErrorMessage("Unable to send mail . Reason : " + e.getMessage());
+                            eventMail.setStatus(MailStatus.RETRYING_FAILED.getValue());
+                            eventMail.setIsSoftError("Y");
+                        } else {
+                            eventMailService.registerRetry(eventMail);
+                            eventMail.setStatus(MailStatus.PENDING.getValue());
+                        }
+                    } else {
+                        eventMail.setErrorMessage("Unable to send mail . Reason : " + e.getMessage());
+                        eventMail.setStatus(MailStatus.FAILED.getValue());
+                        eventMail.setIsSoftError("N");
+                    }
+                    eventMailService.update(eventMail);
+                }
+            }
         }
     }
 }

@@ -62,6 +62,9 @@
                     <button type="button" class="btn btn-warning" ng-click="resetSearch()">Reset&nbsp;<i
                             class="glyphicon glyphicon-refresh"></i></button>
                 </div>
+                <div class="col-sm-1">
+                    <img src="../images/squares.gif" ng-show="isLoading" style="width: 32px;">
+                </div>
             </form>
             <table class="table table-hover" ng-show="showResultTable">
                 <thead>
@@ -69,7 +72,8 @@
                     <th>User Name</th>
                     <th>Full Name</th>
                     <th>Action</th>
-                    <th>Action Item</th>
+                    <th>Type</th>
+                    <th>Item Desc.</th>
                     <th>Date</th>
                 </tr>
                 </thead>
@@ -78,6 +82,7 @@
                     <td>{{activity.userName}}</td>
                     <td>{{activity.fullName}}</td>
                     <td>{{activity.action}}</td>
+                    <td>{{activity.actionItemType}}</td>
                     <td>{{activity.actionItem}}</td>
                     <td>{{activity.eventDate}}</td>
                 </tr>

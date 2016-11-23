@@ -1,18 +1,17 @@
 package com.xebia.services.impl;
 
-import com.xebia.dao.EventMailDAO;
-import com.xebia.dao.UserDAO;
-import com.xebia.dao.UserRoleDAO;
+import com.xebia.dao.*;
 import com.xebia.dto.ActivityDTO;
 import com.xebia.dto.UserDto;
-import com.xebia.entities.EventMail;
-import com.xebia.entities.User;
-import com.xebia.entities.UserRole;
+import com.xebia.entities.*;
+import com.xebia.enums.EventType;
 import com.xebia.enums.UserRoleEnum;
 import com.xebia.services.IActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +29,57 @@ public class ActivityServiceImpl implements IActivityService {
 
     @Autowired
     EventMailDAO eventMailDAO;
+
+    @Autowired
+    AssetDAO assetDAO;
+
+    @Autowired
+    EmployeeDAO employeeDAO;
+
+    @Autowired
+    AssetTypeDAO assetTypeDAO;
+
+    @Autowired
+    ManufacturerDAO manufacturerDAO;
+
+    Map<EventType, RefrenceResolver> commandMap = new HashMap<>();
+
+    @PostConstruct
+    public void prepareCommands(){
+
+        commandMap.put(EventType.ASSET, (refId, eventType) -> {
+            Asset asset = assetDAO.getById(refId);
+            return asset.getName() +"-"+ asset.getSerialNumber();
+
+        });
+
+        commandMap.put(EventType.EMP, (refId, eventType) -> {
+            Employee employee = employeeDAO.getById(refId);
+            return employee.getFullName() + "("+employee.getECode()+")";
+
+        });
+
+        commandMap.put(EventType.ASSET_TYPE, (refId, eventType) -> {
+            AssetType assetType = assetTypeDAO.getById(refId);
+            return assetType.getType();
+
+        });
+
+        commandMap.put(EventType.ASSET_MANUFACTURER, (refId, eventType) -> {
+            AssetManufacturer assetManufacturer = manufacturerDAO.getById(refId);
+            return assetManufacturer.getName();
+        });
+
+        commandMap.put(EventType.USER, (refId, eventType) -> {
+            User user = userDAO.getById(refId);
+            return user.getUsername();
+        });
+
+        commandMap.put(EventType.ROLE, (refId, eventType) -> {
+            UserRole userRole = userRoleDAO.getById(refId);
+            return userRole.getRoleName();
+        });
+    }
 
     @Override
     public List<UserDto> getITAndAdminUsers() {
@@ -63,7 +113,9 @@ public class ActivityServiceImpl implements IActivityService {
             tempDto.setUserName(user.getUsername());
             tempDto.setFullName(user.getEmployee().getFullName());
             tempDto.setAction(eventMail.getEvent());
-            tempDto.setActionItem(eventMail.getType());
+            tempDto.setActionItemType(eventMail.getType());
+            EventType eventType = EventType.getEventType(eventMail.getType());
+            tempDto.setActionItem(commandMap.get(eventType).resolve(eventMail.getRefId(),eventType));
             tempDto.setEventDate(eventMail.getEventDate());
             activityDTOs.add(tempDto);
         }
@@ -71,5 +123,9 @@ public class ActivityServiceImpl implements IActivityService {
         resultMap.put("result",activityDTOs);
         resultMap.put("count", dbResultMap.get("count"));
         return resultMap;
+    }
+
+    private interface RefrenceResolver {
+        public String resolve(BigInteger refId, EventType eventType);
     }
 }

@@ -9,6 +9,11 @@ angular.module('app')
         $scope.manuNameMap = [];
         $scope.assetExpirationReport = [];
         $scope.pendingApprovals = [];
+        $scope.autoRefreshEnabled = {
+            checked : true
+        };
+
+        $scope.isAssetAvailablityAlarming = false;
 
         init();
 
@@ -21,6 +26,8 @@ angular.module('app')
                 }
             });
         }
+
+
 
         function fetchPendingApprovals() {
             AssetFactory.fetchPendingApprovals().success(function (data) {
@@ -60,6 +67,17 @@ angular.module('app')
                         window.location = ""
                     }
                 });
+        }
+
+        $scope.toggleAutoRefresh = function(){
+            if($scope.autoRefreshEnabled.checked == true){
+                $scope.reportInterval = $interval(fetchAssetExpirationReport, 10000);
+                $scope.availabilityInterval = $interval(fetchAssetAvailability, 10000);
+            }
+            else{
+                $interval.cancel($scope.availabilityInterval);
+                $interval.cancel($scope.reportInterval);
+            }
         }
 
         $scope.availabilityInterval;

@@ -16,6 +16,7 @@ public class ActivityDTO {
     private int limit;
     private String userName;
     private String fullName;
+    private String actionItemType;
     private String actionItem;
     private Date eventDate;
 
@@ -97,5 +98,13 @@ public class ActivityDTO {
 
     public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
+    }
+
+    public String getActionItemType() {
+        return actionItemType;
+    }
+
+    public void setActionItemType(String actionItemType) {
+        this.actionItemType = actionItemType;
     }
 }

@@ -3,7 +3,8 @@ angular
         'ngRoute',
         'ngAnimate',
         'ui.bootstrap',
-        'ngCookies'
+        'ngCookies',
+        'toggle-switch'
     ])
 
    /* .config(['$httpProvider', function ($httpProvider) {

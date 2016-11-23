@@ -4,8 +4,10 @@ import com.xebia.common.Constants;
 import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.AssignAssetMail;
 import com.xebia.entities.EventMail;
+import com.xebia.exception.ApplicationException;
 import com.xebia.messaging.ResolverChain;
 import com.xebia.messaging.resolvers.EmployeeResolver;
+import com.xebia.services.IEventMailService;
 import com.xebia.services.IMailingService;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class MailingServiceImpl implements IMailingService {
 
     @Autowired
     ResourceLoader resourceLoader;
+
+    @Autowired
+    IEventMailService eventMailService;
 
     private static final String CHARSET_UTF8 = "UTF-8";
 
@@ -158,7 +163,6 @@ public class MailingServiceImpl implements IMailingService {
 
     @Override
     public boolean sendEventMails(EventMail eventMail) throws MailException {
-        try {
             MimeMessagePreparator preparator = mimeMessage -> {
                 String cid = "" + new Date().getTime();
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);
@@ -172,9 +176,6 @@ public class MailingServiceImpl implements IMailingService {
             };
             this.javaMailSender.send(preparator);
             return true;
-        } catch (MailException e) {
-            throw new com.xebia.exception.MailException(e.getMessage());
-        }
     }
 
     private MimeMessageHelper addCCToMessage(MimeMessageHelper messageHelper) throws MessagingException {

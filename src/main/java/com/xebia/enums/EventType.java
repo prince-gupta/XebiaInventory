@@ -9,5 +9,13 @@ public enum EventType {
     ASSET_TYPE,
     ASSET_MANUFACTURER,
     USER,
-    ROLE
+    ROLE;
+
+    public static EventType getEventType(String value){
+        for(EventType eventType : EventType.values()){
+            if(eventType.name().equals(value))
+                return eventType;
+        }
+        return null;
+    }
 }

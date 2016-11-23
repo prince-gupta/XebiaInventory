@@ -22,6 +22,7 @@ angular.module('app')
         $scope.activityPage.itemsPerPage = 20;
 
         $scope.showResultTable = false;
+        $scope.isLoading = false;
         $scope.calFromPopup = {
             opened: false
         };
@@ -127,6 +128,7 @@ angular.module('app')
             fetch();
         }
         function fetch(){
+            $scope.isLoading = true;
             $scope.search.offset = getOffset();
             $scope.search.limit = getLimit();
             ActivityFactory.fetchActivities($scope.search).success(function(data){
@@ -140,6 +142,7 @@ angular.module('app')
                     showMessage("It seems no activity yet registered in system with selected search criteria","WARNING");
                     $scope.showResultTable  = false;
                 }
+                $scope.isLoading = false;
             });
         }
 

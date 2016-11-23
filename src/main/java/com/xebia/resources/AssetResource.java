@@ -186,7 +186,7 @@ public class AssetResource {
     @Produces("application/text")
     @Consumes("application/json")
     public String createAssetManufacturer(@RequestBody AssetManufacturer assetManufacturer){
-        return assetService.createAssetManufacturer(assetManufacturer);
+        return assetService.createAssetManufacturer(assetManufacturer, httpServletRequest.getHeader("Username"));
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -204,7 +204,7 @@ public class AssetResource {
     public ActionResult deleteAssetManufacturer(@RequestBody String id){
         ActionResult result = new ActionResult();
         try{
-            assetService.deleteAssetManufacturer(id);
+            assetService.deleteAssetManufacturer(id, httpServletRequest.getHeader("Username"));
             result.setStatus(ActionResult.Status.SUCCESS);
             return result;
 
@@ -223,7 +223,7 @@ public class AssetResource {
     @Path("updateAssetManufacturer")
     @Produces("application/text")
     public String updateAssetManufacturer(@RequestBody AssetManufacturer assetManufacturer){
-        return assetService.updateAssetManufacturer(assetManufacturer);
+        return assetService.updateAssetManufacturer(assetManufacturer, httpServletRequest.getHeader("Username"));
     }
 
     @CrossOrigin(origins = "http://localhost:3000")

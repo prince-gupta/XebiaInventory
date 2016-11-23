@@ -25,7 +25,7 @@ public class ManufacturerDAO {
     }
 
     public List<AssetManufacturer> getAll() {
-        List<AssetManufacturer> assetManufacturers = entityManager.createQuery("from AssetManufacturer").getResultList();
+        List<AssetManufacturer> assetManufacturers = entityManager.createQuery("from AssetManufacturer where deleted = 'N'").getResultList();
         return assetManufacturers;
     }
 
@@ -50,7 +50,9 @@ public class ManufacturerDAO {
         return;
     }
 
-
-
+    public void markedDeleted(AssetManufacturer assetManufacturer){
+        assetManufacturer.setDeleted("Y");
+        update(assetManufacturer);
+    }
 }
 

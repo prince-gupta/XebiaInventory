@@ -27,6 +27,8 @@ public class AssetManufacturer implements Serializable {
 
 	private String name;
 
+    private String deleted;
+
 	public AssetManufacturer() {
 	}
 
@@ -70,4 +72,11 @@ public class AssetManufacturer implements Serializable {
 		this.name = name;
 	}
 
+    public String getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(String deleted) {
+        this.deleted = deleted;
+    }
 }

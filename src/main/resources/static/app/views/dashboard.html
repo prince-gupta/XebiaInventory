@@ -1,26 +1,35 @@
 <div class="container">
-    <div class="dashboardheader" id="dashBoardHeading"><span class="glyphicon glyphicon-home" style="margin-right: 10px;"></span>Dashboard
+    <div class="dashboardheader" id="dashBoardHeading"><span class="glyphicon glyphicon-home"
+                                                             style="margin-right: 10px;"></span>Dashboard
+        <span style="float: right;font-size: small">Auto Refresh <toggle-switch class="switch-mini" ng-model="autoRefreshEnabled.checked" ng-change="toggleAutoRefresh()"></toggle-switch></span>
     </div>
     <div class="row">
         <div class="col-md-5">
             <div class="box-inner">
                 <div class="box-header well">Asset Availability</div>
-
-                <div class="scroll-card">
+                <div class="scroll-card-long">
                     <uib-accordion close-others="true">
                         <div uib-accordion-group class="panel-default" is-open="status.open"
                              ng-repeat="type in typeList">
                             <uib-accordion-heading>
-                                {{type.type}} <i class="pull-right glyphicon"
+                                {{type.type}}-{{type.availableWidth}} <i class="pull-right glyphicon"
                                                  ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
 
                                 <div class="progress" style="margin-top: 5px">
                                     <div class="progress-bar progress-bar-success" role="progressbar"
-                                         ng-style="{width: type.availableWidth + '%'}">
+                                         ng-style="{width: type.availableWidth + '%'}" ng-hide="type.availableWidth <= 20">
+                                   `wd3646     {{type.availableAssets}} Available
+                                    </div>
+                                    <div class="progress-bar progress-bar-warning" role="progressbar"
+                                         ng-style="{width: type.availableWidth + '%'}" ng-show="type.availableWidth == 20">
+                                        {{type.availableAssets}} Available
+                                    </div>
+                                    <div class="progress-bar progress-bar-danger" role="progressbar"
+                                         ng-style="{width: type.availableWidth + '%'}" ng-show="type.totalWidth == 0">
                                         {{type.availableAssets}} Available
                                     </div>
                                     <div class="progress-bar" role="progressbar"
-                                         ng-style="{width: type.totalWidth + '%'}">
+                                         ng-style="{width: type.totalWidth + '%'}" ng-hide="type.totalWidth > 0">
                                         Total {{type.numberOfAsset}}
                                     </div>
                                 </div>
@@ -63,6 +72,28 @@
                     </table>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-md-5" style="margin-top: 5px;margin-bottom: 5px;"></div>
+            </div>
+            <div class="row">
+                <div class="box-inner">
+                    <div class="box-header well">Pending Approvals</div>
+
+                    <div class="scroll-card">
+                        <table class="table table-hover">
+                            <tr ng-repeat="approval in pendingApprovals"
+                                ng-class="warning">
+                                <td>{{approval.incidentId}}</td>
+                                <td>{{approval.raisedBy}}<br>
+                                    <small>{{approval.employeeCode}}</small>
+                                </td>
+                                <td>{{approval.submittedDate}}</td>
+                                <td>{{approval.assetType}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -70,23 +101,7 @@
     </div>
     <div class="row">
         <div class="col-md-5">
-            <div class="box-inner">
-                <div class="box-header well">Pending Approvals</div>
 
-                <div class="scroll-card">
-                    <table class="table table-hover">
-                        <tr ng-repeat="approval in pendingApprovals"
-                            ng-class="warning">
-                            <td>{{approval.incidentId}}</td>
-                            <td>{{approval.raisedBy}}<br>
-                                <small>{{approval.employeeCode}}</small>
-                            </td>
-                            <td>{{approval.submittedDate}}</td>
-                            <td>{{approval.assetType}}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Created by Pgupta on 13-08-2016.
@@ -79,7 +80,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
     }
 
     public void create(Employee employee, String userName) throws ApplicationException {
-        if (employeeDAO.countActiveEmployee(employee.getECode()) > 0) {
+        if (isEmployeeAlreadyPresent.test(employee.getECode())) {
             throw new ApplicationException("INVALID_EMP_CODE");
         } else {
             if (StringUtils.equals("NA", employee.getApprovalsRequired()))
@@ -97,7 +98,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
 
     @Override
     public void update(Employee employee, String userName) {
-        if (employeeDAO.countActiveEmployee(employee.getECode()) > 0) {
+        if (isEmployeeAlreadyPresent.test(employee.getECode())) {
             throw new ApplicationException("DUPLICATE ECODE");
         } else {
             if (StringUtils.equals("NA", employee.getApprovalsRequired()))
@@ -125,6 +126,5 @@ public class EmployeeServiceImpl implements IEmployeeService {
                             employee.getId()));
         }
     }
-
-
+    Predicate<String> isEmployeeAlreadyPresent = eCode -> employeeDAO.countActiveEmployee(eCode) > 0;
 }

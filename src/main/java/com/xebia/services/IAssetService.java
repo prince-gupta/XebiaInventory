@@ -41,13 +41,13 @@ public interface IAssetService {
 
     public List<AssetDto> getEmployeeAsset(BigInteger employeeID);
 
-    public String createAssetManufacturer(AssetManufacturer assetManufacturer);
+    public String createAssetManufacturer(AssetManufacturer assetManufacturer, String userName);
 
     public List<AssetManufacturer> getAllAssetManufacturer();
 
-    public void deleteAssetManufacturer(String id) throws ApplicationException;
+    public void deleteAssetManufacturer(String id, String userName) throws ApplicationException;
 
-    public String updateAssetManufacturer(AssetManufacturer assetManufacturer);
+    public String updateAssetManufacturer(AssetManufacturer assetManufacturer, String userName);
 
     public List<HardwareConfiguration> getHardwareConfigurations();
 

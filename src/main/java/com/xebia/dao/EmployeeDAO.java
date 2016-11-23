@@ -75,7 +75,7 @@ public class EmployeeDAO {
      */
     @SuppressWarnings("unchecked")
     public List<Employee> getAll(int offset, int limit) {
-        return entityManager.createQuery("from Employee where deleted = 'N'").setFirstResult(offset).setMaxResults(limit).getResultList();
+        return entityManager.createQuery("from Employee where deleted = 'N' order by dateOfJoining").setFirstResult(offset).setMaxResults(limit).getResultList();
     }
 
     public long getCount() {
@@ -170,12 +170,12 @@ public class EmployeeDAO {
         }
 
         if (conditions.length() > 0) {
-            queryString += "where " + conditions.toString() + " and deleted = 'N'";
-            countQueryString += "where " + conditions.toString() + " and deleted = 'N'";
+            queryString += "where " + conditions.toString() + " and deleted = 'N' order by dateOfJoining";
+            countQueryString += "where " + conditions.toString() + " and deleted = 'N' order by dateOfJoining";
         }
         else{
-            queryString += "where deleted = 'N'";
-            countQueryString += "where deleted = 'N'";
+            queryString += "where deleted = 'N' order by dateOfJoining";
+            countQueryString += "where deleted = 'N' order by dateOfJoining";
         }
         Query query = entityManager.createQuery(queryString);
         Query countQuery = entityManager.createQuery(countQueryString);

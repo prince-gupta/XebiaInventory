@@ -35,6 +35,14 @@ public class EventMail implements Serializable {
     @Column(name="event_date")
     private Date eventDate;
 
+    private BigInteger retries;
+
+    @Column(name="error_message")
+    private String errorMessage;
+
+    @Column(name = "is_soft_error")
+    private String isSoftError;
+
 	public EventMail() {
 	}
 
@@ -92,5 +100,29 @@ public class EventMail implements Serializable {
 
     public void setEventDate(Date eventDate) {
         this.eventDate = eventDate;
+    }
+
+    public BigInteger getRetries() {
+        return retries;
+    }
+
+    public void setRetries(BigInteger retries) {
+        this.retries = retries;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getIsSoftError() {
+        return isSoftError;
+    }
+
+    public void setIsSoftError(String isSoftError) {
+        this.isSoftError = isSoftError;
     }
 }

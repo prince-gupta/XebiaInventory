@@ -354,8 +354,17 @@ public class AssetServiceImpl implements IAssetService {
 
 
     @Override
-    public String createAssetManufacturer(AssetManufacturer assetManufacturer) {
+    public String createAssetManufacturer(AssetManufacturer assetManufacturer, String userName) {
+        assetManufacturer.setDeleted("N");
         manufacturerDAO.create(assetManufacturer);
+        AssetManufacturer createdAssetManu = manufacturerDAO.getByName(assetManufacturer.getName()).get(0);
+        User user = userDAO.getUserByUName(userName);
+        jmsMailService.registerToMailQueue(
+                Utility.createEventMailObject(user.getId()
+                        , EventEnum.ADD.toString()
+                        , EventType.ASSET_MANUFACTURER.toString()
+                        , createdAssetManu.getId())
+        );
         return "OK";
     }
 
@@ -365,17 +374,24 @@ public class AssetServiceImpl implements IAssetService {
     }
 
     @Override
-    public void deleteAssetManufacturer(String id) throws ApplicationException {
+    public void deleteAssetManufacturer(String id, String userName) throws ApplicationException {
         try {
             AssetManufacturer assetManufacturer = manufacturerDAO.getById(new BigInteger(id));
-            manufacturerDAO.delete(assetManufacturer);
+            manufacturerDAO.markedDeleted(assetManufacturer);
+            User user = userDAO.getUserByUName(userName);
+            jmsMailService.registerToMailQueue(
+                    Utility.createEventMailObject(user.getId()
+                            , EventEnum.DELETE.toString()
+                            , EventType.ASSET_MANUFACTURER.toString()
+                            , assetManufacturer.getId())
+            );
         } catch (Exception e) {
             throw new ApplicationException("");
         }
     }
 
     @Override
-    public String updateAssetManufacturer(AssetManufacturer assetManufacturer) {
+    public String updateAssetManufacturer(AssetManufacturer assetManufacturer, String userName) {
         AssetManufacturer dbAssetType = manufacturerDAO.getById((assetManufacturer.getId()));
         if (StringUtils.isNotBlank(assetManufacturer.getName()))
             dbAssetType.setName(assetManufacturer.getName());
@@ -386,6 +402,13 @@ public class AssetServiceImpl implements IAssetService {
         if (StringUtils.isNotBlank(assetManufacturer.getMobile()))
             dbAssetType.setMobile(assetManufacturer.getMobile());
         manufacturerDAO.update(dbAssetType);
+        User user = userDAO.getUserByUName(userName);
+        jmsMailService.registerToMailQueue(
+                Utility.createEventMailObject(user.getId()
+                        , EventEnum.UPDATE.toString()
+                        , EventType.ASSET_MANUFACTURER.toString()
+                        , assetManufacturer.getId())
+        );
         return "OK";
     }
 

@@ -33,6 +33,12 @@ h3 {
     margin-bottom: 4px;
 }
 
+.scroll-card-long{
+
+    overflow: auto;
+    margin-bottom: 4px;
+}
+
 .monitor-card{
     max-height: 300px;
     margin-bottom: 10px;

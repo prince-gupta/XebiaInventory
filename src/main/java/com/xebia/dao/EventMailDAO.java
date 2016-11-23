@@ -70,7 +70,7 @@ public class EventMailDAO {
 
     public Map getByActivityObject(ActivityDTO activityDTO) {
         StringBuffer conditions = new StringBuffer();
-        String queryString = "from EventMail ";
+        String queryString = "from EventMail e";
         String countQueryString = "select count(e) from EventMail e ";
         boolean isU = false, isA = false, isFrom = false, isTo = false;
         if (activityDTO.getUser() != null && activityDTO.getUser().intValue() != -1) {
@@ -97,8 +97,11 @@ public class EventMailDAO {
         }
 
         if (conditions.length() > 0) {
-            queryString += "where " + conditions.toString();
-            countQueryString += "where " + conditions.toString();
+            queryString += " where " + conditions.toString() + " order by e.eventDate desc";
+            countQueryString += " where " + conditions.toString();
+        }
+        else{
+            queryString += " order by e.eventDate desc";
         }
 
         Query query = entityManager.createQuery(queryString);
@@ -125,5 +128,15 @@ public class EventMailDAO {
         resultMap.put("result", query.setFirstResult(activityDTO.getOffset()).setMaxResults(activityDTO.getLimit()).getResultList());
         resultMap.put("count", (long)countQuery.getResultList().get(0));
         return resultMap;
+    }
+
+    public BigInteger getRetries(EventMail eventMail){
+        Query query = entityManager.createQuery("select retries from EventMail where id = :id").setParameter("id", eventMail.getId());
+        return (BigInteger)query.getResultList().get(0);
+    }
+
+    public String isSoftError(EventMail eventMail){
+        Query query = entityManager.createQuery("select isSoftError from EventMail where id = :id").setParameter("id", eventMail.getId());
+        return (String)query.getResultList().get(0);
     }
 }
