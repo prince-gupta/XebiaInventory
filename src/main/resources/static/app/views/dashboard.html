@@ -1,7 +1,9 @@
 <div class="container">
     <div class="dashboardheader" id="dashBoardHeading"><span class="glyphicon glyphicon-home"
                                                              style="margin-right: 10px;"></span>Dashboard
-        <span style="float: right;font-size: small">Auto Refresh <toggle-switch class="switch-mini" ng-model="autoRefreshEnabled.checked" ng-change="toggleAutoRefresh()"></toggle-switch></span>
+        <span style="float: right;font-size: small">Auto Refresh <toggle-switch class="switch-mini"
+                                                                                ng-model="autoRefreshEnabled.checked"
+                                                                                ng-change="toggleAutoRefresh()"></toggle-switch></span>
     </div>
     <div class="row">
         <div class="col-md-5">
@@ -12,25 +14,27 @@
                         <div uib-accordion-group class="panel-default" is-open="status.open"
                              ng-repeat="type in typeList">
                             <uib-accordion-heading>
-                                {{type.type}}-{{type.availableWidth}} <i class="pull-right glyphicon"
-                                                 ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                                {{type.type}}
+                                <small>(Total - {{type.numberOfAsset}})</small>
+                                <i class="pull-right glyphicon"
+                                   ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
 
                                 <div class="progress" style="margin-top: 5px">
                                     <div class="progress-bar progress-bar-success" role="progressbar"
-                                         ng-style="{width: type.availableWidth + '%'}" ng-hide="type.availableWidth <= 20">
-                                   `wd3646     {{type.availableAssets}} Available
-                                    </div>
-                                    <div class="progress-bar progress-bar-warning" role="progressbar"
-                                         ng-style="{width: type.availableWidth + '%'}" ng-show="type.availableWidth == 20">
-                                        {{type.availableAssets}} Available
-                                    </div>
-                                    <div class="progress-bar progress-bar-danger" role="progressbar"
-                                         ng-style="{width: type.availableWidth + '%'}" ng-show="type.totalWidth == 0">
+                                         ng-style="{width: type.availableWidth + '%'}">
                                         {{type.availableAssets}} Available
                                     </div>
                                     <div class="progress-bar" role="progressbar"
-                                         ng-style="{width: type.totalWidth + '%'}" ng-hide="type.totalWidth > 0">
-                                        Total {{type.numberOfAsset}}
+                                         ng-style="{width: type.totalWidth + '%'}" ng-hide="type.totalWidth >= 80">
+                                        Assigned {{type.numberOfAsset - type.availableAssets}}
+                                    </div>
+                                    <div class="progress-bar progress-bar-warning" role="progressbar"
+                                         ng-style="{width: type.totalWidth + '%'}" ng-show="type.totalWidth >= 80 && type.totalWidth != 100">
+                                        Assigned {{type.numberOfAsset - type.availableAssets}}
+                                    </div>
+                                    <div class="progress-bar progress-bar-danger" role="progressbar"
+                                         ng-style="{width: type.totalWidth + '%'}" ng-show="type.totalWidth == 100">
+                                        Assigned {{type.numberOfAsset - type.availableAssets}}
                                     </div>
                                 </div>
                             </uib-accordion-heading>

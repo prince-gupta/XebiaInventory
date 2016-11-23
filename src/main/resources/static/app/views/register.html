@@ -43,7 +43,7 @@
             </div>
 
             <div class="form-group" ng-show="assetFetched">
-                <div ng-hide="assetsFound">No Asses found. Please try with other selection.</div>
+                <div ng-hide="assetsFound">No Assets found. Please try with other selection.</div>
                 <select class="form-control" ng-model="assignAsset.assetId"
                         ng-options="asset.assetId as asset.name for asset in assetDisplayList" ng-show="assetsFound">
                 </select>

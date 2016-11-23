@@ -112,35 +112,44 @@ angular.module('app')
                 for (var index = 0; index < $scope.actions.length; index++) {
                     $scope.actionDisplayList.push($scope.actions[index]);
                 }
-            });
+            })
+                .error(function (data, status, headers, config) {
+                    if (status == 401) {
+                        window.location = ""
+                    }
+                    else {
+                        showMessage(resolveError(status), "DANGER");
+                    }
+                });
+            ;
             fetch();
         }
 
-        $scope.searchActivities = function(){
+        $scope.searchActivities = function () {
             fetch();
         }
 
-        $scope.resetSearch = function(){
+        $scope.resetSearch = function () {
             $scope.search.user = $scope.dummyUser.id;
             $scope.search.action = ($scope.dummyAction);
             $scope.search.from = null;
             $scope.search.to = null;
             fetch();
         }
-        function fetch(){
+        function fetch() {
             $scope.isLoading = true;
             $scope.search.offset = getOffset();
             $scope.search.limit = getLimit();
-            ActivityFactory.fetchActivities($scope.search).success(function(data){
+            ActivityFactory.fetchActivities($scope.search).success(function (data) {
                 $scope.activityPage.totalItems = angular.copy(data.data.count);
                 $scope.activities = angular.copy(data.data.result);
-                if($scope.activities.length > 0){
-                    $scope.showResultTable  = true;
-                    showMessage($scope.activityPage.totalItems + " activities has been found.","SUCCESS");
+                if ($scope.activities.length > 0) {
+                    $scope.showResultTable = true;
+                    showMessage($scope.activityPage.totalItems + " activities has been found.", "SUCCESS");
                 }
-                else{
-                    showMessage("It seems no activity yet registered in system with selected search criteria","WARNING");
-                    $scope.showResultTable  = false;
+                else {
+                    showMessage("It seems no activity yet registered in system with selected search criteria", "WARNING");
+                    $scope.showResultTable = false;
                 }
                 $scope.isLoading = false;
             });
