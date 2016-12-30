@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="defaultResolver" class="com.xebia.messaging.resolvers.DefaultResolver"></bean>
+    <bean id="assetManufacturerResolver" class="com.xebia.messaging.resolvers.AssetManufacturerResolver">
+        <property name="resolverChain" ref="defaultResolver"></property>
+    </bean>
+    <bean id="assetTypeResolver" class="com.xebia.messaging.resolvers.AssetTypeResolver">
+        <property name="resolverChain" ref="assetManufacturerResolver"></property>
+    </bean>
+    <bean id="assetResolver" class="com.xebia.messaging.resolvers.AssetResolver">
+        <property name="resolverChain" ref="assetTypeResolver"></property>
+    </bean>
+    <bean id="employeeResolver" class="com.xebia.messaging.resolvers.EmployeeResolver">
+        <property name="resolverChain" ref="assetResolver"></property>
+    </bean>
+
+    <bean id="mailService" class="com.xebia.services.impl.MailingServiceImpl">
+        <property name="chain" ref="employeeResolver"></property>
+    </bean>
+
+</beans>

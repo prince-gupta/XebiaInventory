@@ -13,6 +13,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.cors.CorsConfiguration;
@@ -29,9 +30,10 @@ import java.io.File;
 @SpringBootApplication
 @EnableJms
 @EnableScheduling
+@ImportResource("classpath:bean-context.xml")
 public class InventoryApplication {
 
-    private static final String JMS_BROKER_URL = "vm://embedded?broker.persistent=false,useShutdownHook=false";
+    private static final String JMS_BROKER_URL = "vm://embedded?broker.persistent=true,useShutdownHook=false";
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = new SpringApplicationBuilder(InventoryApplication.class)

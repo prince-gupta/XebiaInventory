@@ -29,7 +29,6 @@ import java.util.Map;
 /**
  * Created by Pgupta on 29-07-2016.
  */
-@Service
 public class MailingServiceImpl implements IMailingService {
 
     @Autowired
@@ -42,15 +41,18 @@ public class MailingServiceImpl implements IMailingService {
     Environment environment;
 
     @Autowired
-    EmployeeResolver chain;
-
-    @Autowired
     ResourceLoader resourceLoader;
 
     @Autowired
     IEventMailService eventMailService;
 
     private static final String CHARSET_UTF8 = "UTF-8";
+
+    public void setChain(ResolverChain chain) {
+        this.chain = chain;
+    }
+
+    ResolverChain chain;
 
     @Override
     public boolean sendAssetAssignmentMail(AssignAssetMail dto) {
@@ -163,7 +165,7 @@ public class MailingServiceImpl implements IMailingService {
 
     @Override
     public boolean sendEventMails(EventMail eventMail) throws MailException {
-            MimeMessagePreparator preparator = mimeMessage -> {
+            MimeMessagePreparator preprator = mimeMessage -> {
                 String cid = "" + new Date().getTime();
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true);
                 message = addCCToMessage(message);
@@ -174,7 +176,7 @@ public class MailingServiceImpl implements IMailingService {
                 message.addInline("<" + cid + ">", resourceLoader.getResource("classpath:images/logo.jpg"));
 
             };
-            this.javaMailSender.send(preparator);
+            this.javaMailSender.send(preprator);
             return true;
     }
 

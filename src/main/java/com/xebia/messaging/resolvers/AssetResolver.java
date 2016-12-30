@@ -1,11 +1,9 @@
 package com.xebia.messaging.resolvers;
 
 import com.xebia.dao.AssetDAO;
-import com.xebia.dao.EmployeeDAO;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.Asset;
-import com.xebia.entities.Employee;
 import com.xebia.entities.EventMail;
 import com.xebia.entities.User;
 import com.xebia.enums.EventEnum;
@@ -31,19 +29,14 @@ public class AssetResolver implements ResolverChain{
     @Autowired
     VelocityEngine velocityEngine;
 
-    @Autowired
-    AssetTypeResolver assetTypeResolver;
+    ResolverChain resolverChain;
 
-    private ResolverChain resolverChain;
-
-    @Override
-    public void setNextResolver(ResolverChain nextResolver) {
-        this.resolverChain = assetTypeResolver;
+    public void setResolverChain(ResolverChain resolverChain) {
+        this.resolverChain = resolverChain;
     }
 
     @Override
     public EventMailDTO resolve(EventMail eventMail) {
-        setNextResolver(null);
         if (eventMail.getType().equals(EventType.ASSET.toString())) {
             return prepareDto(eventMail);
         } else {

@@ -1,5 +1,6 @@
 package com.xebia.services.impl;
 
+import com.xebia.common.StringUtils;
 import com.xebia.common.Utility;
 import com.xebia.dao.*;
 import com.xebia.dto.EmployeeSearchDTO;
@@ -8,7 +9,6 @@ import com.xebia.enums.*;
 import com.xebia.exception.ApplicationException;
 import com.xebia.messaging.JMSMailService;
 import com.xebia.services.IEmployeeService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +50,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         }
         User loggedInUser = userDAO.getUserByUName(username);
 
-        if (loggedInUser.getEmployee().getECode().equals(employeeList.get(0).getECode())) {
+        if (StringUtils.areBothNotBlankAndEqual.test(loggedInUser.getEmployee().getECode(),eCode)) {
             throw new ApplicationException("LOGGEDIN_USER_ERROR");
         }
         List<Asset> employeeAssets = assetDAO.getByEmployeeId(employeeList.get(0).getId());
@@ -83,7 +83,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         if (isEmployeeAlreadyPresent.test(employee.getECode())) {
             throw new ApplicationException("INVALID_EMP_CODE");
         } else {
-            if (StringUtils.equals("NA", employee.getApprovalsRequired()))
+            if (StringUtils.areBothNotBlankAndEqual.test("NA", employee.getApprovalsRequired()))
                 employee.setApprovalsRequired("Y");
             employee.setDeleted("N");
             employeeDAO.create(employee);
@@ -101,7 +101,7 @@ public class EmployeeServiceImpl implements IEmployeeService {
         if (isEmployeeAlreadyPresent.test(employee.getECode())) {
             throw new ApplicationException("DUPLICATE ECODE");
         } else {
-            if (StringUtils.equals("NA", employee.getApprovalsRequired()))
+            if (StringUtils.areBothNotBlankAndEqual.test("NA", employee.getApprovalsRequired()))
                 employee.setApprovalsRequired("Y");
             Employee dbEmployee = employeeDAO.getById(employee.getId());
             if (employee.getApprovalsRequired() != null) {

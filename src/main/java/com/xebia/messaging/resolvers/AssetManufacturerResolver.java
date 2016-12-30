@@ -1,11 +1,9 @@
 package com.xebia.messaging.resolvers;
 
-import com.xebia.dao.AssetTypeDAO;
 import com.xebia.dao.ManufacturerDAO;
 import com.xebia.dao.UserDAO;
 import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.AssetManufacturer;
-import com.xebia.entities.AssetType;
 import com.xebia.entities.EventMail;
 import com.xebia.entities.User;
 import com.xebia.enums.EventEnum;
@@ -31,19 +29,14 @@ public class AssetManufacturerResolver implements ResolverChain{
     @Autowired
     VelocityEngine velocityEngine;
 
-    @Autowired
-    DefaultResolver defaultResolver;
+    ResolverChain resolverChain;
 
-    private ResolverChain resolverChain;
-
-    @Override
-    public void setNextResolver(ResolverChain nextResolver) {
-        this.resolverChain = defaultResolver;
+    public void setResolverChain(ResolverChain resolverChain) {
+        this.resolverChain = resolverChain;
     }
 
     @Override
     public EventMailDTO resolve(EventMail eventMail) {
-        setNextResolver(null);
         if (eventMail.getType().equals(EventType.ASSET_MANUFACTURER.toString())) {
             return prepareDto(eventMail);
         } else {

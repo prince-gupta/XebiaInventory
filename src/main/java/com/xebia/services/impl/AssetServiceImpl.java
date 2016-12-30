@@ -80,8 +80,7 @@ public class AssetServiceImpl implements IAssetService {
             AssetType dbAssetType = dbAssetTypeList.get(0);
             dbAssetType.setDeleted("N");
             assetTypeDAO.update(dbAssetType);
-        }
-        else{
+        } else {
             //TODO Handle this case properly : throw an exception of malformed data in db, as two asset type can not be of same name.
             return "FAIL";
         }
@@ -112,7 +111,7 @@ public class AssetServiceImpl implements IAssetService {
             assetTypeDto.setType(assetType.getType());
             assetTypeDto.setId(assetType.getId());
             assetTypeDto.setAvailableAssets((int) availableCount);
-            for (Asset asset : assetList) {
+            assetList.stream().forEach(asset -> {
                 if (map.get(assetType.getId()) == null) {
                     Map<String, Map<String, Integer>> manuMap = new HashMap<>();
                     Map<String, Integer> statsMap = new HashMap<>();
@@ -147,7 +146,7 @@ public class AssetServiceImpl implements IAssetService {
                         map.put(assetType.getId(), manuMap);
                     }
                 }
-            }
+            });
             resultList.add(assetTypeDto);
 
         }

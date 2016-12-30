@@ -5,7 +5,6 @@ import com.xebia.dto.EventMailDTO;
 import com.xebia.entities.EventMail;
 import com.xebia.entities.User;
 import com.xebia.enums.EventEnum;
-import com.xebia.enums.EventType;
 import com.xebia.messaging.ResolverChain;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +22,6 @@ public class DefaultResolver implements ResolverChain {
 
     @Autowired
     VelocityEngine velocityEngine;
-
-    private ResolverChain resolverChain;
-
-    @Override
-    public void setNextResolver(ResolverChain nextResolver) {
-        this.resolverChain = nextResolver;
-    }
 
     @Override
     public EventMailDTO resolve(EventMail eventMail) {

@@ -739,8 +739,6 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
                 $scope.assignAsset.approvedBy = $scope.dummyEmployee.id;
             });
         }
-        console.log($scope.assetTypeDisplayList);
-        console.log($scope.approversDisplayList);
     }
 
     $scope.assetFetched = false;
@@ -836,7 +834,7 @@ angular.module('app').controller('ModalInstanceCtrl', function ($scope, AssetFac
             $("#assignAssetModalMessage").css("color", "darkorange");
             $scope.isFormValid = false;
         }
-        if ($scope.showApprovers == true &&  $scope.assignAsset.approvedBy == -1 ||  $scope.assignAsset.approvedBy === undefined) {
+        if ($scope.showApprovers == true &&  ($scope.assignAsset.approvedBy == -1 ||  $scope.assignAsset.approvedBy === undefined)) {
             $scope.showMessage = true;
             $scope.message = "Please select an Approver."
             $("#assignAssetModalMessage").css("color", "darkorange");
